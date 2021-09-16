@@ -1,4 +1,4 @@
-package codedriver.tagent.auth.label;
+package codedriver.framework.tagent.auth.label;
 
 import codedriver.framework.auth.core.AuthBase;
 

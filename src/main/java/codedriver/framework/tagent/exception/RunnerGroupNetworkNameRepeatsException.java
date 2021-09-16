@@ -1,4 +1,4 @@
-package codedriver.tagent.exception;
+package codedriver.framework.tagent.exception;
 
 import codedriver.framework.exception.core.ApiRuntimeException;
 

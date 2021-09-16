@@ -1,4 +1,4 @@
-package codedriver.tagent.enums;
+package codedriver.framework.tagent.enums;
 
 import codedriver.framework.common.constvalue.IEnum;
 import com.alibaba.fastjson.JSONArray;

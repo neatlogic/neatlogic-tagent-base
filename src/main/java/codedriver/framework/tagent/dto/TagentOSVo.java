@@ -1,4 +1,4 @@
-package codedriver.tagent.dto;
+package codedriver.framework.tagent.dto;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
