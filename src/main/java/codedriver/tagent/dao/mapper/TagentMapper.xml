@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="codedriver.framework.tagent.dao.mapper.TagentMapper">
+
+    <select id="searchTagent" resultType="codedriver.framework.tagent.dto.TagentVo">
+        SELECT t.`id`,
+        t.`ip`,
+        t.`port`,
+        t.`name`,
+        t.`version`,
+        t.`os_id` as osId,
+        t.`os_type` as osType,
+        t.`os_version` as osVersion,
+        t.`osbit`,
+        t.`account_id`,
+        t.`runner_id` as runnerId,
+        ar.`name` as runnerName,
+        t.`runner_group_id` as runnerGroupId,
+        t.`runner_ip` as runnerIp,
+        t.`runner_port` as runnerPort,
+        t.`user`,
+        t.`pcpu`,
+        t.`mem`,
+        t.`status`,
+        t.`fcd`,
+        t.`lcd`,
+        tos.`name` as osName,
+        apg.`name` as runnerGroupName
+        FROM (
+        SELECT DISTINCT t.*
+        FROM tagent t
+        LEFT JOIN runner ar ON t.`runner_id` = ar.`id`
+        LEFT JOIN runnergroup apg ON t.`runner_group_id` = apg.`id`
+        LEFT JOIN `tagent_ip` ti ON t.`id` = ti.`tagent_id`
+        <where>
+            <if test="osId !=null and osId !='' ">
+                AND t.`os_id` = #{osId}
+            </if>
+            <if test="version !=null and version !='' ">
+                AND t.`version` = #{version}
+            </if>
+            <if test="status !=null and status !='' ">
+                AND t.`status` = #{status}
+            </if>
+            <if test="runnerGroupId !=null and runnerGroupId !='' ">
+                AND t.`runner_group_id` = #{runnerGroupId}
+            </if>
+            <if test="keyword !=null and keyword !='' ">
+                AND (t.`ip` LIKE CONCAT('%',#{keyword},'%')
+                OR t.`name` LIKE CONCAT('%',#{keyword},'%')
+                OR t.`os_version` LIKE CONCAT('%',#{keyword},'%'))
+            </if>
+        </where>
+        ORDER BY t.`id` DESC
+        <if test="needPage == true">
+            LIMIT #{startNum}, #{pageSize}
+        </if>) t LEFT JOIN runner ar ON t.`runner_id` = ar.`id`
+        LEFT JOIN runnergroup apg ON t.`runner_group_id` = apg.`id`
+        LEFT JOIN `tagent_ip` ti ON t.`id` = ti.`tagent_id`
+        LEFT JOIN `tagent_os` tos ON t.`os_id` = tos.`id`
+        ORDER BY t.`id` DESC
+    </select>
+
+    <select id="searchTagentVersion" resultType="java.lang.String">
+        select DISTINCT(`version`)
+        from tagent
+    </select>
+
+    <select id="searchTagentOSType" resultType="codedriver.framework.tagent.dto.TagentOSVo">
+        select `id`   as id,
+               `name` as name
+        from tagent_os
+    </select>
+
+    <select id="searchTagentRunnerGroup" resultType="codedriver.framework.dto.runner.RunnerGroupVo">
+        select `id`, `name`
+        from runnergroup
+    </select>
+
+    <resultMap id="runnerGroupMap" type="codedriver.framework.dto.runner.RunnerGroupVo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <collection property="groupNetworkList" ofType="codedriver.framework.dto.runner.GroupNetworkVo">
+            <id column="networkId" property="id"/>
+            <result column="groupId" property="groupId"/>
+            <result column="networkIp" property="networkIp"/>
+            <result column="mask" property="mask"/>
+        </collection>
+        <collection property="runnerList" ofType="codedriver.framework.dto.runner.RunnerVo">
+            <id column="runnerId" property="id"/>
+            <result column="runnerName" property="name"/>
+            <result column="url" property="url"/>
+            <result column="accessKey" property="accessKey"/>
+            <result column="accessSecret" property="accessSecret"/>
+            <result column="authType" property="authType"/>
+            <result column="nettyIp" property="nettyIp"/>
+            <result column="nettyPort" property="nettyPort"/>
+        </collection>
+    </resultMap>
+
+    <select id="searchRunnerGroupInformation" parameterType="java.lang.String" resultMap="runnerGroupMap">
+        SELECT
+        g.`id` as id,
+        g.`name` as name,
+        g.`description`,
+        nk.`id` as networkId,
+        nk.`group_id` as groupId,
+        nk.`network_ip` as networkIp,
+        nk.`mask` as mask,
+        r.`id` as runnerId,
+        r.`name` as runnerName,
+        r.`url` as url,
+        r.`host` as host,
+        r.`port`,
+        r.`netty_ip` as nettyIp,
+        r.`netty_port` as nettyPort,
+        r.`access_key` as accessKey,
+        r.`access_secret` as accessSecret,
+        r.`auth_type` as authType
+        FROM
+        (SELECT DISTINCT
+        rg.`id`,
+        rg.`name`,
+        rg.`description`
+        FROM
+        runnergroup rg
+        LEFT JOIN runner r ON rg.`id` = r.`group_id`
+        LEFT JOIN runnergroup_network c ON rg.`id` = c.`group_id`
+        WHERE 1 = 1
+        <if test="keyword != null and keyword != ''">
+            AND (
+            rg.`name` LIKE CONCAT('%', #{keyword}, '%')
+            OR r.`name` LIKE CONCAT('%', #{keyword}, '%')
+            OR c.`network_ip` LIKE CONCAT('%', #{keyword}, '%')
+            OR r.`url` LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="authType != null and authType != ''">
+            AND r.`auth_type` = #{authType}
+        </if>
+        ORDER BY rg.`id` DESC
+        <if test="needPage == true">
+            LIMIT #{startNum},#{pageSize}
+        </if>
+        ) g
+        LEFT JOIN runnergroup_network nk ON g.`id` = nk.`group_id`
+        LEFT JOIN runner r ON g.`id` = r.`group_id`
+        ORDER BY g.`id` DESC, nk.`id` DESC
+    </select>
+
+    <select id="searchTagentCount" resultType="int">
+        select count(distinct t.`id`)
+        from tagent t;
+    </select>
+
+    <select id="searchTagentRunnerCount" resultType="int">
+        select count(distinct g.id)
+        from runnergroup g;
+    </select>
+
+    <select id="getTagentById" resultType="codedriver.framework.tagent.dto.TagentVo">
+        select t.`ip`,
+               t.`port`,
+               t.`name`,
+               t.`version`,
+               t.`os_id`      as osId,
+               t.`os_type`    as osType,
+               t.`os_version` as osVersion
+        from tagent t
+        where id = #{value}
+    </select>
+
+    <select id="searchRunnerGroupCount" resultType="int">
+        select count(1)
+        from runnergroup
+    </select>
+
+    <select id="selectTagentById" resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
+        SELECT ft.`id`,
+               ft.`ip`,
+               ft.`port`,
+               ft.`name`                                  AS name,
+               ft.`version`                               AS version,
+               ft.`os_type`                               AS osType,
+               ft.`os_id`                                 AS osId,
+               ft.`os_version`                            AS osVersion,
+               ft.`osbit`                                 AS osbit,
+               ft.`account_id`,
+               ft.`status`,
+               ft.`pcpu`,
+               ft.`mem`,
+               ft.`user`                                  AS user,
+               ft.`runner_id`                             AS runnerId,
+               ft.`runner_ip`                             AS runnerIp,
+               ft.`runner_port`                           AS runnerPort,
+               ft.`runner_group_id`                       AS runnerGroupId,
+               DATE_FORMAT(ft.`fcd`, '%Y-%m-%d %H:%i:%s') AS fcd,
+               DATE_FORMAT(ft.`lcd`, '%Y-%m-%d %H:%i:%s') AS lcd,
+               fpg.`name`                                 AS runnerGroupName
+        FROM tagent ft
+                 LEFT JOIN runnergroup fpg
+                           ON ft.`runner_group_id` = fpg.`id`
+        WHERE ft.id = #{value}
+    </select>
+
+    <delete id="deleteTagentById">
+        DELETE
+        FROM tagent
+        WHERE `id` = #{id}
+    </delete>
+
+    <select id="getVersionList" resultType="codedriver.framework.tagent.dto.TagentVersionVo" useCache="false">
+        SELECT tv.os_type     AS osType,
+               tv.version,
+               tv.ignore_file AS ignoreFile
+        FROM tagent_version tv
+    </select>
+
+    <update id="updateTagentById" parameterType="codedriver.framework.tagent.dto.TagentVo">
+        UPDATE
+        tagent
+        SET
+        <if test="ip !=null and ip !='' ">
+            `ip` = #{ip},
+        </if>
+        <if test="port !=null and port !='' ">
+            `port` = #{port},
+        </if>
+        <if test="name !=null and name !='' ">
+            `name` = #{name},
+        </if>
+        <if test="version !=null and version !='' ">
+            `version` = #{version},
+        </if>
+        <if test="osType !=null and osType !='' ">
+            `os_type` = #{osType},
+        </if>
+        <if test="osId !=null">
+            `os_id` = #{osId},
+        </if>
+        <if test="osVersion !=null and osVersion !='' ">
+            `os_version` = #{osVersion},
+        </if>
+        <if test="osbit !=null and osbit !='' ">
+            `osbit` = #{osbit},
+        </if>
+        <if test="proxyId !=null and proxyId !='' ">
+            `runner_id` = #{runnerId},
+        </if>
+        <if test="proxyIp !=null and proxyIp !='' ">
+            `runner_ip` = #{runnerIp},
+        </if>
+        <if test="proxyPort !=null and proxyPort !='' ">
+            `runner_port` = #{runnerPort},
+        </if>
+        <if test="user !=null and user !='' ">
+            `user` = #{user},
+        </if>
+        <if test="accountId !=null and accountId !='' ">
+            `account_id` = #{accountId},
+        </if>
+        <if test="status !=null and status !='' ">
+            `status` = #{status},
+        </if>
+        <if test="pcpu !=null and pcpu !='' ">
+            `pcpu` = #{pcpu},
+        </if>
+        <if test="mem !=null and mem !='' ">
+            `mem` = #{mem},
+        </if>
+        `lcd` = NOW()
+        WHERE
+        `id` = #{id}
+    </update>
+
+    <select id="getOsByName" resultType="codedriver.framework.tagent.dto.TagentOSVo">
+        SELECT
+            `id`,
+            `name`
+        FROM `tagent_os`
+        WHERE name = #{value}
+    </select>
+
+    <insert id="insertOs" parameterType="codedriver.framework.tagent.dto.TagentOSVo">
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT INTO `tagent_os` (`name`,  `description`, `fcu`, `fcd`)VALUES (#{name}, #{description}, #{editor}, NOW())
+    </insert>
+
+    <select id="getAccountIdById" resultType="long">
+        select `account_id`
+        from tagent
+        where id = #{id}
+    </select>
+</mapper>
+
