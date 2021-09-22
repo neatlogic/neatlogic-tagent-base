@@ -1,9 +1,11 @@
 package codedriver.framework.tagent.dao.mapper;
 
+import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -39,4 +41,16 @@ public interface TagentMapper {
     void insertOs(TagentOSVo newOS);
 
     Long getAccountIdById(Long id);
+
+    List<GroupNetworkVo> getAllNetworkMask();
+
+    TagentVo selectTagentByIpAndPort(TagentVo tagent);
+
+    int insertTagent(TagentVo tagent);
+
+    int updateTagentByIpAndPort(TagentVo tagent);
+
+    int deleteAllIpByTagentId(Long id);
+
+    void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
 }

@@ -245,13 +245,13 @@
         <if test="osbit !=null and osbit !='' ">
             `osbit` = #{osbit},
         </if>
-        <if test="proxyId !=null and proxyId !='' ">
+        <if test="runnerId !=null and runnerId !='' ">
             `runner_id` = #{runnerId},
         </if>
-        <if test="proxyIp !=null and proxyIp !='' ">
+        <if test="runnerIp !=null and runnerIp !='' ">
             `runner_ip` = #{runnerIp},
         </if>
-        <if test="proxyPort !=null and proxyPort !='' ">
+        <if test="runnerPort !=null and runnerPort !='' ">
             `runner_port` = #{runnerPort},
         </if>
         <if test="user !=null and user !='' ">
@@ -277,7 +277,8 @@
     <select id="getOsByName" resultType="codedriver.framework.tagent.dto.TagentOSVo">
         SELECT
             `id`,
-            `name`
+            `name`,
+            `description`
         FROM `tagent_os`
         WHERE name = #{value}
     </select>
@@ -294,5 +295,159 @@
         from tagent
         where id = #{id}
     </select>
+
+    <select id="getAllNetworkMask" resultType="codedriver.framework.dto.runner.GroupNetworkVo" useCache="false">
+        SELECT id,
+               group_id   as groupId,
+               network_ip as networkIp,
+               mask
+        FROM runnergroup_network
+    </select>
+
+    <select id="selectTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo"
+            resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
+        SELECT t.id,
+               t.ip,
+               t.port,
+               t.name                                  AS name,
+               t.version                               AS version,
+               t.os_type                               AS osType,
+               t.os_version                            AS osVersion,
+               t.osbit                                 AS osbit,
+               t.account_id,
+               t.status,
+               t.pcpu,
+               t.mem,
+               t.user                                  AS user,
+               t.runner_id                             AS runnerId,
+               t.runner_ip                             AS runnerIp,
+               t.runner_port                           AS runnerPort,
+               t.runner_group_id                       AS runnerGroupId,
+               DATE_FORMAT(t.fcd, '%Y-%m-%d %H:%i:%s') AS fcd,
+               DATE_FORMAT(t.lcd, '%Y-%m-%d %H:%i:%s') AS lcd,
+               rg.`name`                               AS runnerGroupName
+        FROM tagent t
+                 LEFT JOIN runnergroup rg
+                           ON t.`runner_group_id` = rg.`id`
+        WHERE t.ip = #{ip}
+          AND t.port = #{port}
+    </select>
+
+    <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+        REPLACE INTO tagent (`ip`,
+                             `port`,
+                             `name`,
+                             `version`,
+                             `os_id`,
+                             `os_type`,
+                             `os_version`,
+                             `osbit`,
+                             `account_id`,
+                             `runner_id`,
+                             `runner_ip`,
+                             `runner_port`,
+                             `runner_group_id`,
+                             `user`,
+                             `status`,
+                             `pcpu`,
+                             `mem`,
+                             `fcd`,
+                             `lcd`)
+        VALUES (#{ip},
+                #{port},
+                #{name},
+                #{version},
+                #{osId},
+                #{osType},
+                #{osVersion},
+                #{osbit},
+                #{accountId},
+                #{runnerId},
+                #{runnerIp},
+                #{runnerPort},
+                #{runnerGroupId},
+                #{user},
+                #{status},
+                #{pcpu},
+                #{mem},
+                NOW(),
+                NOW())
+    </insert>
+
+    <update id="updateTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo">
+        UPDATE
+        tagent
+        SET
+        <if test="ip !=null and ip !='' ">
+            `ip` = #{ip},
+        </if>
+        <if test="port !=null and port !='' ">
+            `port` = #{port},
+        </if>
+        <if test="name !=null and name !='' ">
+            `name` = #{name},
+        </if>
+        <if test="version !=null and version !='' ">
+            `version` = #{version},
+        </if>
+        <if test="osType !=null and osType !='' ">
+            `os_type` = #{osType},
+        </if>
+        <if test="osId !=null">
+            `os_id` = #{osId},
+        </if>
+        <if test="osVersion !=null and osVersion !='' ">
+            `os_version` = #{osVersion},
+        </if>
+        <if test="osbit !=null and osbit !='' ">
+            `osbit` = #{osbit},
+        </if>
+        <if test="runnerId !=null and runnerId !='' ">
+            `runner_id` = #{runnerId},
+        </if>
+        <if test="runnerIp !=null and runnerIp !='' ">
+            `runner_ip` = #{runnerIp},
+        </if>
+        <if test="runnerPort !=null and runnerPort !='' ">
+            `runner_port` = #{runnerPort},
+        </if>
+        <if test="runnerGroupId !=null and runnerGroupId !='' ">
+            `runner_group_id` = #{runnerGroupId},
+        </if>
+        <if test="user !=null and user !='' ">
+            `user` = #{user},
+        </if>
+        <if test="credential !=null and credential !='' ">
+            `account_id` = #{accountId},
+        </if>
+        <if test="status !=null and status !='' ">
+            `status` = #{status},
+        </if>
+        <if test="pcpu !=null and pcpu !='' ">
+            `pcpu` = #{pcpu},
+        </if>
+        <if test="mem !=null and mem !='' ">
+            `mem` = #{mem},
+        </if>
+        `lcd` = NOW()
+        WHERE
+        `ip` = #{ip}
+        AND `port` = #{port}
+    </update>
+
+    <delete id="deleteAllIpByTagentId">
+        DELETE
+        FROM tagent_ip
+        WHERE tagent_id = #{value}
+    </delete>
+
+    <insert id="insertTagentIp">
+        INSERT INTO tagent_ip (`tagent_id`,`ip`)
+        VALUES
+        <foreach collection="ipList" item="ip" separator=",">
+            (#{tagentId},#{ip})
+        </foreach>
+    </insert>
 </mapper>
 
