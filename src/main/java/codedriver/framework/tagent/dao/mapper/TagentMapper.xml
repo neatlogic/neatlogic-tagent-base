@@ -12,7 +12,7 @@
         t.`os_type` as osType,
         t.`os_version` as osVersion,
         t.`osbit`,
-        t.`account_id`,
+        t.`account_id` as accountId,
         t.`runner_id` as runnerId,
         ar.`name` as runnerName,
         t.`runner_group_id` as runnerGroupId,
