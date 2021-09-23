@@ -74,7 +74,7 @@ public class TagentServiceImpl implements TagentService {
         account.setName(accountName);
         account.setAccount(tagent.getUser());
         account.setFcu(UserContext.get().getUserUuid());
-        account.setPasswordCipher(tagent.getCredential());//可否更简单
+        account.setPasswordPlain(tagent.getCredential());
         AccountVo oldAccount = resourceCenterMapper.searchAccountByName(accountName);
         if (oldAccount == null) {  //账号信息操作
             resourceCenterMapper.insertAccount(account);
