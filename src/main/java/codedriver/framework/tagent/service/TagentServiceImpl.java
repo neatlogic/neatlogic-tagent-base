@@ -25,7 +25,6 @@ import java.util.List;
  * @author lvzk
  * @since 2021/8/23 17:39
  **/
-@Transactional
 @Service
 public class TagentServiceImpl implements TagentService {
 
