@@ -89,6 +89,7 @@
         </collection>
         <collection property="runnerList" ofType="codedriver.framework.dto.runner.RunnerVo">
             <id column="runnerId" property="id"/>
+            <result column="groupId" property="groupId"/>
             <result column="runnerName" property="name"/>
             <result column="url" property="url"/>
             <result column="accessKey" property="accessKey"/>
@@ -176,7 +177,7 @@
         from runnergroup
     </select>
 
-    <select id="selectTagentById" resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
+    <select id="searchTagentById" resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
         SELECT ft.`id`,
                ft.`ip`,
                ft.`port`,
@@ -304,7 +305,7 @@
         FROM runnergroup_network
     </select>
 
-    <select id="selectTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo"
+    <select id="searchTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo"
             resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
         SELECT t.id,
                t.ip,
@@ -371,8 +372,8 @@
                 #{status},
                 #{pcpu},
                 #{mem},
-                NOW(),
-                NOW())
+                NOW(3),
+                NOW(3))
     </insert>
 
     <update id="updateTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo">
@@ -382,7 +383,7 @@
         <if test="ip !=null and ip !='' ">
             `ip` = #{ip},
         </if>
-        <if test="port !=null and port !='' ">
+        <if test="port != null and port != 0">
             `port` = #{port},
         </if>
         <if test="name !=null and name !='' ">

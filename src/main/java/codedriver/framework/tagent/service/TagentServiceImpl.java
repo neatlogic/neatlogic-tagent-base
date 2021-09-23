@@ -16,7 +16,6 @@ import codedriver.framework.tagent.exception.TagentIpNotFoundException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -36,12 +35,12 @@ public class TagentServiceImpl implements TagentService {
 
     @Override
     public TagentVo getTagentById(Long id) {
-        return tagentMapper.selectTagentById(id);
+        return tagentMapper.searchTagentById(id);
     }
 
     @Override
     public int updateTagentById(TagentVo tagent) {
-        TagentVo tagentVo = tagentMapper.selectTagentById(tagent.getId());
+        TagentVo tagentVo = tagentMapper.searchTagentById(tagent.getId());
         if (tagentVo != null && tagentVo.getOsId() == null) {
             if (StringUtils.isNotBlank(tagentVo.getOsType())) {
                 TagentOSVo os = tagentMapper.getOsByName(tagentVo.getOsType().toLowerCase());
@@ -63,7 +62,7 @@ public class TagentServiceImpl implements TagentService {
         if (StringUtils.isBlank(tagent.getIp())) {
             throw new TagentIpNotFoundException(tagent);
         }
-        TagentVo oldTagent = tagentMapper.selectTagentByIpAndPort(tagent);
+        TagentVo oldTagent = tagentMapper.searchTagentByIpAndPort(tagent);
         AccountVo account = new AccountVo();
         AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         if (protocolVo.getId() == null) {
