@@ -225,7 +225,7 @@
         <if test="ip !=null and ip !='' ">
             `ip` = #{ip},
         </if>
-        <if test="port !=null and port !='' ">
+        <if test="port !=null and port !=0 ">
             `port` = #{port},
         </if>
         <if test="name !=null and name !='' ">
