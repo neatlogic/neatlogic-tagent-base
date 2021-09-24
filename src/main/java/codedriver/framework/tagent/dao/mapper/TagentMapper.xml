@@ -89,7 +89,7 @@
         </collection>
         <collection property="runnerList" ofType="codedriver.framework.dto.runner.RunnerVo">
             <id column="runnerId" property="id"/>
-            <result column="groupId" property="groupId"/>
+            <result column="runnerGroupId" property="groupId"/>
             <result column="runnerName" property="name"/>
             <result column="url" property="url"/>
             <result column="accessKey" property="accessKey"/>
@@ -110,6 +110,7 @@
         nk.`network_ip` as networkIp,
         nk.`mask` as mask,
         r.`id` as runnerId,
+        r.`group_id` as runnerGroupId,
         r.`name` as runnerName,
         r.`url` as url,
         r.`host` as host,
@@ -175,7 +176,7 @@
                ft.`os_id`                                 AS osId,
                ft.`os_version`                            AS osVersion,
                ft.`osbit`                                 AS osbit,
-               ft.`account_id`,
+               ft.`account_id`                            AS accountId,
                ft.`status`,
                ft.`pcpu`,
                ft.`mem`,
