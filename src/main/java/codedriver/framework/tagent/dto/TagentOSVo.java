@@ -10,6 +10,8 @@ public class TagentOSVo extends BasePageVo {
     private Long id;
     @EntityField(name = "OS name", type = ApiParamType.STRING)
     private String name;
+    @EntityField(name = "描述", type = ApiParamType.STRING)
+    private String description;
 
     public Long getId() {
         return id;
@@ -25,5 +27,13 @@ public class TagentOSVo extends BasePageVo {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

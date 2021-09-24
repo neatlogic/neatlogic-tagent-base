@@ -12,6 +12,7 @@ import codedriver.framework.util.SnowflakeUtil;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author lvzk
@@ -23,6 +24,8 @@ public class TagentVo extends BasePageVo {
     private Long id;
     @EntityField(name = "tagentIP", type = ApiParamType.STRING)
     private String ip;
+    @EntityField(name = "ipList", type = ApiParamType.JSONARRAY)
+    private List<String> ipList;
     @EntityField(name = "tagent注册端口", type = ApiParamType.INTEGER)
     private Integer port;
     @EntityField(name = "tagent名称", type = ApiParamType.STRING)
@@ -87,6 +90,14 @@ public class TagentVo extends BasePageVo {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public List<String> getIpList() {
+        return ipList;
+    }
+
+    public void setIpList(List<String> ipList) {
+        this.ipList = ipList;
     }
 
     public Integer getPort() {

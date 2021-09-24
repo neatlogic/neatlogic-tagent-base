@@ -5,9 +5,17 @@
 
 package codedriver.framework.tagent.service;
 
+import codedriver.framework.tagent.dto.TagentVo;
+
 /**
  * @author lvzk
  * @since 2021/8/23 17:40
  **/
 public interface TagentService {
+
+    TagentVo getTagentById(Long tagentId);
+
+    int updateTagentById(TagentVo tagent);
+
+    Long saveTagent(TagentVo tagentVo);
 }
