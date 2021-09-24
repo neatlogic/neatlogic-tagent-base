@@ -33,7 +33,7 @@
         LEFT JOIN runnergroup apg ON t.`runner_group_id` = apg.`id`
         LEFT JOIN `tagent_ip` ti ON t.`id` = ti.`tagent_id`
         <where>
-            <if test="osId !=null and osId !='' ">
+            <if test="osId !=null">
                 AND t.`os_id` = #{osId}
             </if>
             <if test="version !=null and version !='' ">
@@ -42,7 +42,7 @@
             <if test="status !=null and status !='' ">
                 AND t.`status` = #{status}
             </if>
-            <if test="runnerGroupId !=null and runnerGroupId !='' ">
+            <if test="runnerGroupId !=null ">
                 AND t.`runner_group_id` = #{runnerGroupId}
             </if>
             <if test="keyword !=null and keyword !='' ">
@@ -160,24 +160,12 @@
         from runnergroup g;
     </select>
 
-    <select id="getTagentById" resultType="codedriver.framework.tagent.dto.TagentVo">
-        select t.`ip`,
-               t.`port`,
-               t.`name`,
-               t.`version`,
-               t.`os_id`      as osId,
-               t.`os_type`    as osType,
-               t.`os_version` as osVersion
-        from tagent t
-        where id = #{value}
-    </select>
-
     <select id="searchRunnerGroupCount" resultType="int">
         select count(1)
         from runnergroup
     </select>
 
-    <select id="searchTagentById" resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
+    <select id="getTagentById" resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
         SELECT ft.`id`,
                ft.`ip`,
                ft.`port`,
@@ -225,7 +213,7 @@
         <if test="ip !=null and ip !='' ">
             `ip` = #{ip},
         </if>
-        <if test="port !=null and port !=0 ">
+        <if test="port !=null">
             `port` = #{port},
         </if>
         <if test="name !=null and name !='' ">
@@ -246,7 +234,7 @@
         <if test="osbit !=null and osbit !='' ">
             `osbit` = #{osbit},
         </if>
-        <if test="runnerId !=null and runnerId !='' ">
+        <if test="runnerId !=null ">
             `runner_id` = #{runnerId},
         </if>
         <if test="runnerIp !=null and runnerIp !='' ">
@@ -258,7 +246,7 @@
         <if test="user !=null and user !='' ">
             `user` = #{user},
         </if>
-        <if test="accountId !=null and accountId !='' ">
+        <if test="accountId !=null ">
             `account_id` = #{accountId},
         </if>
         <if test="status !=null and status !='' ">
@@ -270,7 +258,7 @@
         <if test="mem !=null and mem !='' ">
             `mem` = #{mem},
         </if>
-        `lcd` = NOW()
+        `lcd` = NOW(3)
         WHERE
         `id` = #{id}
     </update>
@@ -288,7 +276,7 @@
         <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
             select LAST_INSERT_ID() as id
         </selectKey>
-        INSERT INTO `tagent_os` (`name`,  `description`, `fcu`, `fcd`)VALUES (#{name}, #{description}, #{editor}, NOW())
+        INSERT INTO `tagent_os` (`name`,  `description`, `fcu`, `fcd`)VALUES (#{name}, #{description}, #{editor}, NOW(3))
     </insert>
 
     <select id="getAccountIdById" resultType="long">
@@ -297,7 +285,7 @@
         where id = #{id}
     </select>
 
-    <select id="getAllNetworkMask" resultType="codedriver.framework.dto.runner.GroupNetworkVo" useCache="false">
+    <select id="getGroupNetworkList" resultType="codedriver.framework.dto.runner.GroupNetworkVo" useCache="false">
         SELECT id,
                group_id   as groupId,
                network_ip as networkIp,
@@ -305,7 +293,7 @@
         FROM runnergroup_network
     </select>
 
-    <select id="searchTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo"
+    <select id="getTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo"
             resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
         SELECT t.id,
                t.ip,
@@ -315,7 +303,7 @@
                t.os_type                               AS osType,
                t.os_version                            AS osVersion,
                t.osbit                                 AS osbit,
-               t.account_id,
+               t.account_id                            AS accountId,
                t.status,
                t.pcpu,
                t.mem,
@@ -334,7 +322,7 @@
           AND t.port = #{port}
     </select>
 
-    <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
+    <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
         REPLACE INTO tagent (`ip`,
                              `port`,
@@ -376,14 +364,14 @@
                 NOW(3))
     </insert>
 
-    <update id="updateTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo">
+    <update id="updateTagent" parameterType="codedriver.framework.tagent.dto.TagentVo">
         UPDATE
         tagent
         SET
         <if test="ip !=null and ip !='' ">
             `ip` = #{ip},
         </if>
-        <if test="port != null and port != 0">
+        <if test="port != null">
             `port` = #{port},
         </if>
         <if test="name !=null and name !='' ">
@@ -404,7 +392,7 @@
         <if test="osbit !=null and osbit !='' ">
             `osbit` = #{osbit},
         </if>
-        <if test="runnerId !=null and runnerId !='' ">
+        <if test="runnerId !=null ">
             `runner_id` = #{runnerId},
         </if>
         <if test="runnerIp !=null and runnerIp !='' ">
@@ -419,7 +407,7 @@
         <if test="user !=null and user !='' ">
             `user` = #{user},
         </if>
-        <if test="credential !=null and credential !='' ">
+        <if test="accountId !=null and accountId !='' ">
             `account_id` = #{accountId},
         </if>
         <if test="status !=null and status !='' ">
@@ -431,7 +419,7 @@
         <if test="mem !=null and mem !='' ">
             `mem` = #{mem},
         </if>
-        `lcd` = NOW()
+        `lcd` = NOW(3)
         WHERE
         `ip` = #{ip}
         AND `port` = #{port}

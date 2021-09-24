@@ -35,12 +35,12 @@ public class TagentServiceImpl implements TagentService {
 
     @Override
     public TagentVo getTagentById(Long id) {
-        return tagentMapper.searchTagentById(id);
+        return tagentMapper.getTagentById(id);
     }
 
     @Override
     public int updateTagentById(TagentVo tagent) {
-        TagentVo tagentVo = tagentMapper.searchTagentById(tagent.getId());
+        TagentVo tagentVo = tagentMapper.getTagentById(tagent.getId());
         if (tagentVo != null && tagentVo.getOsId() == null) {
             if (StringUtils.isNotBlank(tagentVo.getOsType())) {
                 TagentOSVo os = tagentMapper.getOsByName(tagentVo.getOsType().toLowerCase());
@@ -62,7 +62,6 @@ public class TagentServiceImpl implements TagentService {
         if (StringUtils.isBlank(tagent.getIp())) {
             throw new TagentIpNotFoundException(tagent);
         }
-        TagentVo oldTagent = tagentMapper.searchTagentByIpAndPort(tagent);
         AccountVo account = new AccountVo();
         AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         if (protocolVo.getId() == null) {
@@ -75,21 +74,15 @@ public class TagentServiceImpl implements TagentService {
         account.setAccount(tagent.getUser());
         account.setFcu(UserContext.get().getUserUuid());
         account.setPasswordPlain(tagent.getCredential());
-        AccountVo oldAccount = resourceCenterMapper.searchAccountByName(accountName);
-        if (oldAccount == null) {  //账号信息操作
-            resourceCenterMapper.insertAccount(account);
-        } else {
-            account.setId(oldAccount.getId());
-            resourceCenterMapper.updateAccount(account);
+        if (resourceCenterMapper.getAccountByName(accountName) != null) {
+            account.setId(resourceCenterMapper.getAccountByName(accountName).getId());
         }
-        if (oldTagent == null) {  //tagent信息操作
-            tagent.setAccountId(resourceCenterMapper.getAccountByName(accountName).getId());
-            tagentMapper.insertTagent(tagent);
-        } else {
-            tagent.setId(oldTagent.getId());
-            tagent.setAccountId(resourceCenterMapper.getAccountByName(accountName).getId());
-            tagentMapper.updateTagentByIpAndPort(tagent);
+        resourceCenterMapper.replaceAccount(account);
+        if (tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort()) != null) {
+            tagent.setId(tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort()).getId());
+            tagent.setAccountId(account.getId());
         }
+        tagentMapper.replaceTagent(tagent);
         List<String> ipList = tagent.getIpList();
         if (CollectionUtils.isNotEmpty(ipList)) {
             tagentMapper.deleteAllIpByTagentId(tagent.getId());

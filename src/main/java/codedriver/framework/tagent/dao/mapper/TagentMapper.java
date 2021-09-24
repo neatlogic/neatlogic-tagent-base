@@ -24,11 +24,9 @@ public interface TagentMapper {
 
     int searchTagentRunnerCount();
 
-    TagentVo getTagentById(Long tagentId);
-
     int searchRunnerGroupCount();
 
-    TagentVo searchTagentById(Long id);
+    TagentVo getTagentById(Long id);
 
     void deleteTagentById(Long id);
 
@@ -42,13 +40,13 @@ public interface TagentMapper {
 
     Long getAccountIdById(Long id);
 
-    List<GroupNetworkVo> getAllNetworkMask();
+    List<GroupNetworkVo> getGroupNetworkList();
 
-    TagentVo searchTagentByIpAndPort(TagentVo tagent);
+    TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
-    int insertTagent(TagentVo tagent);
+    int replaceTagent(TagentVo tagent);
 
-    int updateTagentByIpAndPort(TagentVo tagent);
+    int updateTagent(TagentVo tagentVo);
 
     int deleteAllIpByTagentId(Long id);
 
