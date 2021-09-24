@@ -68,18 +68,20 @@ public class TagentServiceImpl implements TagentService {
             resourceCenterMapper.insertAccountProtocol(new AccountProtocolVo("tagent"));
             protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         }
-        String accountName = tagent.getIp() + "_tagent";
+        String accountName = tagent.getIp() + "_" + tagent.getPort() + "_tagent";
         account.setProtocolId(protocolVo.getId());
         account.setName(accountName);
         account.setAccount(tagent.getUser());
         account.setFcu(UserContext.get().getUserUuid());
         account.setPasswordPlain(tagent.getCredential());
-        if (resourceCenterMapper.getAccountByName(accountName) != null) {
-            account.setId(resourceCenterMapper.getAccountByName(accountName).getId());
+        AccountVo oldAccount = resourceCenterMapper.getAccountByName(accountName);
+        if (oldAccount != null) {
+            account.setId(oldAccount.getId());
         }
         resourceCenterMapper.replaceAccount(account);
-        if (tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort()) != null) {
-            tagent.setId(tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort()).getId());
+        TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
+        if (oldTagent != null) {
+            tagent.setId(oldTagent.getId());
         }
         tagent.setAccountId(account.getId());
         tagentMapper.replaceTagent(tagent);
