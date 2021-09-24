@@ -324,7 +324,8 @@
 
     <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
-        REPLACE INTO tagent (`ip`,
+        REPLACE INTO tagent (`id`,
+                             `ip`,
                              `port`,
                              `name`,
                              `version`,
@@ -343,7 +344,8 @@
                              `mem`,
                              `fcd`,
                              `lcd`)
-        VALUES (#{ip},
+        VALUES (#{id},
+                #{ip},
                 #{port},
                 #{name},
                 #{version},
