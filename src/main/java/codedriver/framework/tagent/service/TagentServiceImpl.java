@@ -80,8 +80,8 @@ public class TagentServiceImpl implements TagentService {
         resourceCenterMapper.replaceAccount(account);
         if (tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort()) != null) {
             tagent.setId(tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort()).getId());
-            tagent.setAccountId(account.getId());
         }
+        tagent.setAccountId(account.getId());
         tagentMapper.replaceTagent(tagent);
         List<String> ipList = tagent.getIpList();
         if (CollectionUtils.isNotEmpty(ipList)) {
