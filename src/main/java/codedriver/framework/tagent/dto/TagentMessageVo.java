@@ -15,7 +15,7 @@ public class TagentMessageVo {
     private Integer port;
     @EntityField(name = "user", type = ApiParamType.STRING)
     private String user;
-    @EntityField(name = "    private String path;\n", type = ApiParamType.STRING)
+    @EntityField(name = "path", type = ApiParamType.STRING)
     private String path;
     @EntityField(name = "runner组id", type = ApiParamType.LONG)
     private Long groupId;
@@ -34,12 +34,12 @@ public class TagentMessageVo {
         this.tagentId = tagentId;
     }
 
-    public String getType() {
+    public String getName() {
         return name;
     }
 
-    public void setType(String type) {
-        this.name = type;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getData() {

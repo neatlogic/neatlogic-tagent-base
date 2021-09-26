@@ -34,11 +34,6 @@ public class TagentServiceImpl implements TagentService {
     TagentMapper tagentMapper;
 
     @Override
-    public TagentVo getTagentById(Long id) {
-        return tagentMapper.getTagentById(id);
-    }
-
-    @Override
     public int updateTagentById(TagentVo tagent) {
         TagentVo tagentVo = tagentMapper.getTagentById(tagent.getId());
         if (tagentVo != null && tagentVo.getOsId() == null) {

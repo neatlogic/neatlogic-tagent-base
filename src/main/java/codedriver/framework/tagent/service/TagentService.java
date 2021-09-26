@@ -13,8 +13,6 @@ import codedriver.framework.tagent.dto.TagentVo;
  **/
 public interface TagentService {
 
-    TagentVo getTagentById(Long tagentId);
-
     int updateTagentById(TagentVo tagent);
 
     Long saveTagent(TagentVo tagentVo);
