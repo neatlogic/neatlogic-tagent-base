@@ -15,5 +15,5 @@ public interface ITagentHandler {
 
     public String getName();
 
-    public void execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    public String execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo, HttpServletRequest request, HttpServletResponse response) throws Exception;
 }

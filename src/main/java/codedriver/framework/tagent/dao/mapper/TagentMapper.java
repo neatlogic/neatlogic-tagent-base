@@ -20,7 +20,7 @@ public interface TagentMapper {
 
     List<RunnerGroupVo> searchRunnerGroupInformation(RunnerGroupVo groupVo);
 
-    int searchTagentCount();
+    int searchTagentCount(TagentVo tagentVo );
 
     int searchTagentRunnerCount();
 
