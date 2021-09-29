@@ -315,7 +315,7 @@ public class TagentHttpUtil {
 				httpPost.setEntity(uefEntity);
 			} else {
 				httpPost.setHeader("Content-Type", "application/json;charset=UTF-8");
-				StringEntity entity = new StringEntity(JSONObject.toJSONString(params), StandardCharsets.UTF_8);
+				StringEntity entity = new StringEntity(JSONObject.toJSONString(JSONObject.toJSON(params)), StandardCharsets.UTF_8);
 				httpPost.setEntity(entity);
 			}
 			response = httpclient.execute(httpPost);
@@ -333,3 +333,4 @@ public class TagentHttpUtil {
 		return content;
 	}
 }
+

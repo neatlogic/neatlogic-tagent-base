@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="codedriver.framework.tagent.dao.mapper.TagentMapper">
 
-    <select id="searchTagent" resultType="codedriver.framework.tagent.dto.TagentVo">
+    <select id="searchTagent" resultType="codedriver.framework.tagent.dto.TagentVo" resultMap="TagentMap">
         SELECT t.`id`,
         t.`ip`,
         t.`port`,
@@ -18,6 +18,7 @@
         t.`runner_group_id` as runnerGroupId,
         t.`runner_ip` as runnerIp,
         t.`runner_port` as runnerPort,
+        ti.ip as tagentIp,
         t.`user`,
         t.`pcpu`,
         t.`mem`,
@@ -151,9 +152,28 @@
         ORDER BY g.`id` DESC, nk.`id` DESC
     </select>
 
-    <select id="searchTagentCount" resultType="int">
+    <select id="searchTagentCount" resultType="int" parameterType="codedriver.framework.tagent.dto.TagentVo">
         select count(distinct t.`id`)
-        from tagent t;
+        from tagent t
+        <where>
+            <if test="osId !=null">
+                AND t.`os_id` = #{osId}
+            </if>
+            <if test="version !=null and version !='' ">
+                AND t.`version` = #{version}
+            </if>
+            <if test="status !=null and status !='' ">
+                AND t.`status` = #{status}
+            </if>
+            <if test="runnerGroupId !=null ">
+                AND t.`runner_group_id` = #{runnerGroupId}
+            </if>
+            <if test="keyword !=null and keyword !='' ">
+                AND (t.`ip` LIKE CONCAT('%',#{keyword},'%')
+                OR t.`name` LIKE CONCAT('%',#{keyword},'%')
+                OR t.`os_version` LIKE CONCAT('%',#{keyword},'%'))
+            </if>
+        </where>
     </select>
 
     <select id="searchTagentRunnerCount" resultType="int">
@@ -441,5 +461,32 @@
             (#{tagentId},#{ip})
         </foreach>
     </insert>
+
+    <resultMap id="TagentMap" type="codedriver.framework.tagent.dto.TagentVo">
+        <id column="id" property="id"/>
+        <result column="ip" property="ip"/>
+        <result column="port" property="port"/>
+        <result column="name" property="name"/>
+        <result column="version" property="version"/>
+        <result column="osId" property="osId"/>
+        <result column="osType" property="osType"/>
+        <result column="osVersion" property="osVersion"/>
+        <result column="osbit" property="osbit"/>
+        <result column="accountId" property="accountId"/>
+        <result column="runnerId" property="runnerId"/>
+        <result column="runnerName" property="runnerName"/>
+        <result column="runnerGroupId" property="runnerGroupId"/>
+        <result column="runnerIp" property="runnerIp"/>
+        <result column="runnerPort" property="runnerPort"/>
+        <result column="user" property="user"/>
+        <result column="osName" property="osName"/>
+        <result column="runnerGroupName" property="runnerGroupName"/>
+        <result column="pcpu" property="pcpu"/>
+        <result column="mem" property="mem"/>
+        <result column="status" property="status"/>
+        <collection property="ipList" ofType="string" javaType="list">
+            <result column="tagentIp"/>
+        </collection>
+    </resultMap>
 </mapper>
 
