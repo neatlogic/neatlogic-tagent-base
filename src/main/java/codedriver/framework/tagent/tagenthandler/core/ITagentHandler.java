@@ -5,9 +5,6 @@ import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import com.alibaba.fastjson.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 public interface ITagentHandler {
 
     public String getHandler();
@@ -16,5 +13,5 @@ public interface ITagentHandler {
 
     public String getName();
 
-    public JSONObject execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    public JSONObject execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception;
 }
