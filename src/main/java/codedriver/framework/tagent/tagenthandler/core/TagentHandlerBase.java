@@ -5,6 +5,7 @@ import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import codedriver.framework.tagent.exception.RunnerNotFoundException;
 import codedriver.framework.tagent.exception.RunnerUnableToAccessEcxeption;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,7 +15,7 @@ public abstract class TagentHandlerBase implements ITagentHandler {
 
 
     @Override
-    public String execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    public JSONObject execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo, HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (runnerVo == null) {
             throw new RunnerNotFoundException(tagentVo.getRunnerId());
         }
@@ -30,5 +31,5 @@ public abstract class TagentHandlerBase implements ITagentHandler {
         return myExecTagentCmd(message, tagentVo, url, request, response);
     }
 
-    public abstract String myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    public abstract JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url, HttpServletRequest request, HttpServletResponse response) throws Exception;
 }
