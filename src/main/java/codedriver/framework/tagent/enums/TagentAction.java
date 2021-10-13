@@ -10,7 +10,7 @@ public enum TagentAction implements IEnum {
     GETLOGS("getlogs", "获取日志"),
     GETCONFIG("getConfig", "获取配置"),
     SAVECONFIG("saveConfig", "保存日志"),
-    RELOAD("reload", "重启");
+    RESTART("restart", "重启");
     private final String value;
     private final String text;
 
