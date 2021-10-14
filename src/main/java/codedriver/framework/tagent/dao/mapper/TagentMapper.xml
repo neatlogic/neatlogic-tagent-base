@@ -92,6 +92,8 @@
             <id column="runnerId" property="id"/>
             <result column="runnerGroupId" property="groupId"/>
             <result column="runnerName" property="name"/>
+            <result column="protocol" property="protocol"/>
+            <result column="port" property="port"/>
             <result column="url" property="url"/>
             <result column="accessKey" property="accessKey"/>
             <result column="accessSecret" property="accessSecret"/>
