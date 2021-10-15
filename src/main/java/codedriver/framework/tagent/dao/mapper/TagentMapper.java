@@ -26,29 +26,29 @@ public interface TagentMapper {
 
     int searchRunnerGroupCount();
 
-    TagentVo getTagentById(Long id);
-
-    void deleteTagentById(Long id);
-
     List<TagentVersionVo> getVersionList();
-
-    int updateTagentById(TagentVo tagent);
-
-    TagentOSVo getOsByName(String toLowerCase);
-
-    void insertOs(TagentOSVo newOS);
-
-    Long getAccountIdById(Long id);
 
     List<GroupNetworkVo> getGroupNetworkList();
 
+    Long getAccountIdById(Long id);
+
+    TagentOSVo getOsByName(String toLowerCase);
+
     TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    TagentVo getTagentById(Long id);
+
+    void insertOs(TagentOSVo newOS);
+
+    void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
 
     int replaceTagent(TagentVo tagent);
 
     int updateTagent(TagentVo tagentVo);
 
-    int deleteAllIpByTagentId(Long id);
+    int updateTagentById(TagentVo tagent);
 
-    void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
+    void deleteTagentById(Long id);
+
+    int deleteAllIpByTagentId(Long id);
 }
