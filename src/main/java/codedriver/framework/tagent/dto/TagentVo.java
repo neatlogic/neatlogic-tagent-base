@@ -9,6 +9,7 @@ import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.framework.util.SnowflakeUtil;
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
 import java.util.Date;
@@ -72,6 +73,24 @@ public class TagentVo extends BasePageVo {
     private Date fcd;
     @EntityField(name = "修改时间", type = ApiParamType.LONG)
     private Date lcd;
+
+    public TagentVo() {
+    }
+
+    public TagentVo(JSONObject object) {
+        this.id = object.getLong("agentId");
+        this.ip =  object.getString("ip");
+        this.port =  object.getInteger("port");
+        this.name =  object.getString("name");
+        this.version =  object.getString("version");
+        this.runnerId =  object.getLong("proxyId");
+        this.runnerGroupId =  object.getLong("proxyGroupId");
+        this.runnerIp =  object.getString("proxyIp");
+        this.runnerPort =  object.getString("proxyPort");
+        this.pcpu =  object.getString("pcpu");
+        this.mem =  object.getString("mem");
+        this.status =  object.getString("status");
+    }
 
     public Long getId() {
         if (id == null) {
