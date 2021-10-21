@@ -1,7 +1,10 @@
 package codedriver.framework.tagent.exception;
 
-public class TagentRunnerConnectRefusedException extends RuntimeException {
-    public TagentRunnerConnectRefusedException(String s) {
-        super("Runner url： '" + s + "' connect failed");
+import codedriver.framework.exception.core.ApiRuntimeException;
+
+public class TagentRunnerConnectRefusedException extends ApiRuntimeException {
+
+    public TagentRunnerConnectRefusedException(String url, String message) {
+        super("Runner url： '" + url + "' connect failed,runner报错信息：" + message);
     }
 }
