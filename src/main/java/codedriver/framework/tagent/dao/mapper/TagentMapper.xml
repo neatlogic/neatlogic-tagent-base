@@ -287,10 +287,9 @@
     </update>
 
     <select id="getOsByName" resultType="codedriver.framework.tagent.dto.TagentOSVo">
-        SELECT
-            `id`,
-            `name`,
-            `description`
+        SELECT `id`,
+               `name`,
+               `description`
         FROM `tagent_os`
         WHERE name = #{value}
     </select>
@@ -299,8 +298,8 @@
         <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
             select LAST_INSERT_ID() as id
         </selectKey>
-        INSERT INTO `tagent_os` (`name`, `description`, `fcu`, `fcd`,`lcu`,`lcd`)VALUES (#{name}, #{description},
-        #{fcu}, NOW(3),#{fcu},NOW(3))
+        INSERT INTO `tagent_os` (`name`, `description`, `fcu`, `fcd`,`lcd`,`lcu`)VALUES (#{name}, #{description},
+        #{fcu}, NOW(3), NOW(3),#{fcu})
     </insert>
 
     <select id="getAccountIdById" resultType="long">
