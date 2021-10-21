@@ -7,9 +7,11 @@ package codedriver.framework.tagent.dto;
 
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.util.RC4Util;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.framework.util.SnowflakeUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.Date;
@@ -20,6 +22,7 @@ import java.util.List;
  * @since 2021/8/23 15:20
  */
 public class TagentVo extends BasePageVo {
+    public static final String encryptKey = "#ts=9^0$1";
     private static final long serialVersionUID = -6983563143057900024L;
     @EntityField(name = "主键id", type = ApiParamType.LONG)
     private Long id;
@@ -192,6 +195,9 @@ public class TagentVo extends BasePageVo {
     }
 
     public void setCredential(String credential) {
+        if(StringUtils.isNotBlank(credential)&&credential.startsWith("{ENCRYPTED}")){
+            credential = RC4Util.decrypt(encryptKey, credential.substring(11));
+        }
         this.credential = credential;
     }
 
