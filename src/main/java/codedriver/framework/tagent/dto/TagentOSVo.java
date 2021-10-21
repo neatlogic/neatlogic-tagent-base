@@ -1,10 +1,10 @@
 package codedriver.framework.tagent.dto;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.dto.BaseEditorVo;
 import codedriver.framework.restful.annotation.EntityField;
 
-public class TagentOSVo extends BasePageVo {
+public class TagentOSVo extends BaseEditorVo {
     private static final long serialVersionUID = -6989056143057900024L;
     @EntityField(name = "OS id", type = ApiParamType.LONG)
     private Long id;
