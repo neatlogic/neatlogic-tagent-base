@@ -3,6 +3,7 @@ package codedriver.framework.tagent.dto;
 import codedriver.framework.common.constvalue.ApiParamType;
 import codedriver.framework.common.dto.BaseEditorVo;
 import codedriver.framework.restful.annotation.EntityField;
+import codedriver.framework.util.SnowflakeUtil;
 
 public class TagentOSVo extends BaseEditorVo {
     private static final long serialVersionUID = -6989056143057900024L;
@@ -14,6 +15,9 @@ public class TagentOSVo extends BaseEditorVo {
     private String description;
 
     public Long getId() {
+        if(id == null){
+            SnowflakeUtil.uniqueLong();
+        }
         return id;
     }
 

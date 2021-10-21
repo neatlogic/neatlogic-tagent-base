@@ -295,11 +295,9 @@
     </select>
 
     <insert id="insertOs" parameterType="codedriver.framework.tagent.dto.TagentOSVo">
-        <selectKey keyProperty="id" resultType="java.lang.Long" order="AFTER">
-            select LAST_INSERT_ID() as id
-        </selectKey>
-        INSERT INTO `tagent_os` (`name`, `description`, `fcu`, `fcd`,`lcd`,`lcu`)VALUES (#{name}, #{description},
-        #{fcu}, NOW(3), NOW(3),#{fcu})
+        INSERT ignore INTO `tagent_os` (`id`, `name`, `description`, `fcu`, `fcd`,`lcd`,`lcu`)VALUES (#{id}, #{name},
+                                 #{description},
+                                 #{fcu}, NOW(3), NOW(3), #{fcu})
     </insert>
 
     <select id="getAccountIdById" resultType="long">
