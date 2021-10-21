@@ -59,7 +59,7 @@ public class TagentServiceImpl implements TagentService {
         }
         AccountVo account = new AccountVo();
         AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
-        if (protocolVo.getId() == null) {
+        if (protocolVo== null) {
             resourceCenterMapper.insertAccountProtocol(new AccountProtocolVo("tagent"));
             protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         }
