@@ -366,7 +366,7 @@
         `mem`,
         <if test="isFirstCreate !=null and isFirstCreate == 1 ">
             `fcd`,
-        </if>>
+        </if>
         `lcd`)
         VALUES (#{id},
         #{ip},
