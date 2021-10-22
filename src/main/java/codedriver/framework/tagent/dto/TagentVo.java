@@ -6,23 +6,23 @@
 package codedriver.framework.tagent.dto;
 
 import codedriver.framework.common.constvalue.ApiParamType;
-import codedriver.framework.common.dto.BasePageVo;
+import codedriver.framework.common.dto.BaseEditorVo;
 import codedriver.framework.common.util.RC4Util;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.framework.util.SnowflakeUtil;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
  * @author lvzk
  * @since 2021/8/23 15:20
  */
-public class TagentVo extends BasePageVo {
+public class TagentVo extends BaseEditorVo {
     public static final String encryptKey = "#ts=9^0$1";
     private static final long serialVersionUID = -6983563143057900024L;
     @EntityField(name = "主键id", type = ApiParamType.LONG)
@@ -75,27 +75,24 @@ public class TagentVo extends BasePageVo {
     private String mem;
     @EntityField(name = "tagent状态", type = ApiParamType.STRING)
     private String status;
-    @EntityField(name = "创建时间", type = ApiParamType.LONG)
-    private Date fcd;
-    @EntityField(name = "修改时间", type = ApiParamType.LONG)
-    private Date lcd;
+    private Integer isFirstCreate;
 
     public TagentVo() {
     }
 
     public TagentVo(JSONObject object) {
         this.id = object.getLong("agentId");
-        this.ip =  object.getString("ip");
-        this.port =  object.getInteger("port");
-        this.name =  object.getString("name");
-        this.version =  object.getString("version");
-        this.runnerId =  object.getLong("proxyId");
-        this.runnerGroupId =  object.getLong("proxyGroupId");
-        this.runnerIp =  object.getString("proxyIp");
-        this.runnerPort =  object.getString("proxyPort");
-        this.pcpu =  object.getString("pcpu");
-        this.mem =  object.getString("mem");
-        this.status =  object.getString("status");
+        this.ip = object.getString("ip");
+        this.port = object.getInteger("port");
+        this.name = object.getString("name");
+        this.version = object.getString("version");
+        this.runnerId = object.getLong("proxyId");
+        this.runnerGroupId = object.getLong("proxyGroupId");
+        this.runnerIp = object.getString("proxyIp");
+        this.runnerPort = object.getString("proxyPort");
+        this.pcpu = object.getString("pcpu");
+        this.mem = object.getString("mem");
+        this.status = object.getString("status");
     }
 
     public Long getId() {
@@ -126,7 +123,7 @@ public class TagentVo extends BasePageVo {
     }
 
     public List<String> getIpList() {
-        if(StringUtils.isNotBlank(ipString)){
+        if (CollectionUtils.isEmpty(ipList) && StringUtils.isNotBlank(ipString)) {
             String[] ipStringArray = ipString.split(",");
             ipList = Arrays.asList(ipStringArray);
         }
@@ -210,7 +207,7 @@ public class TagentVo extends BasePageVo {
     }
 
     public void setCredential(String credential) {
-        if(StringUtils.isNotBlank(credential)&&credential.startsWith("{ENCRYPTED}")){
+        if (StringUtils.isNotBlank(credential) && credential.startsWith("{ENCRYPTED}")) {
             credential = RC4Util.decrypt(encryptKey, credential.substring(11));
         }
         this.credential = credential;
@@ -304,19 +301,11 @@ public class TagentVo extends BasePageVo {
         this.status = status;
     }
 
-    public Date getFcd() {
-        return fcd;
+    public Integer getIsFirstCreate() {
+        return isFirstCreate;
     }
 
-    public void setFcd(Date fcd) {
-        this.fcd = fcd;
-    }
-
-    public Date getLcd() {
-        return lcd;
-    }
-
-    public void setLcd(Date lcd) {
-        this.lcd = lcd;
+    public void setIsFirstCreate(Integer isFirstCreate) {
+        this.isFirstCreate = isFirstCreate;
     }
 }

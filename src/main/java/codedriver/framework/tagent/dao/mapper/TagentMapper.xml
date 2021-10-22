@@ -295,9 +295,10 @@
     </select>
 
     <insert id="insertOs" parameterType="codedriver.framework.tagent.dto.TagentOSVo">
-        INSERT ignore INTO `tagent_os` (`id`, `name`, `description`, `fcu`, `fcd`,`lcd`,`lcu`)VALUES (#{id}, #{name},
-                                 #{description},
-                                 #{fcu}, NOW(3), NOW(3), #{fcu})
+        INSERT ignore INTO `tagent_os` (`id`, `name`, `description`, `fcu`, `fcd`, `lcd`, `lcu`)
+        VALUES (#{id}, #{name},
+                #{description},
+                #{fcu}, NOW(3), NOW(3), #{fcu})
     </insert>
 
     <select id="getAccountIdById" resultType="long">
@@ -346,45 +347,49 @@
     <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
         REPLACE INTO tagent (`id`,
-                             `ip`,
-                             `port`,
-                             `name`,
-                             `version`,
-                             `os_id`,
-                             `os_type`,
-                             `os_version`,
-                             `osbit`,
-                             `account_id`,
-                             `runner_id`,
-                             `runner_ip`,
-                             `runner_port`,
-                             `runner_group_id`,
-                             `user`,
-                             `status`,
-                             `pcpu`,
-                             `mem`,
-                             `fcd`,
-                             `lcd`)
+        `ip`,
+        `port`,
+        `name`,
+        `version`,
+        `os_id`,
+        `os_type`,
+        `os_version`,
+        `osbit`,
+        `account_id`,
+        `runner_id`,
+        `runner_ip`,
+        `runner_port`,
+        `runner_group_id`,
+        `user`,
+        `status`,
+        `pcpu`,
+        `mem`,
+        <if test="isFirstCreate !=null and isFirstCreate == 1 ">
+            `fcd`,
+        </if>>
+        `lcd`)
         VALUES (#{id},
-                #{ip},
-                #{port},
-                #{name},
-                #{version},
-                #{osId},
-                #{osType},
-                #{osVersion},
-                #{osbit},
-                #{accountId},
-                #{runnerId},
-                #{runnerIp},
-                #{runnerPort},
-                #{runnerGroupId},
-                #{user},
-                #{status},
-                #{pcpu},
-                #{mem},
-                NOW(3),
-                NOW(3))
+        #{ip},
+        #{port},
+        #{name},
+        #{version},
+        #{osId},
+        #{osType},
+        #{osVersion},
+        #{osbit},
+        #{accountId},
+        #{runnerId},
+        #{runnerIp},
+        #{runnerPort},
+        #{runnerGroupId},
+        #{user},
+        #{status},
+        #{pcpu},
+        #{mem},
+        <if test="isFirstCreate !=null and isFirstCreate == 1 ">
+            NOW(3),
+        </if>
+        NOW(3))
     </insert>
 
     <update id="updateTagent" parameterType="codedriver.framework.tagent.dto.TagentVo">
@@ -484,6 +489,8 @@
         <result column="pcpu" property="pcpu"/>
         <result column="mem" property="mem"/>
         <result column="status" property="status"/>
+        <result column="fcd" property="fcd"/>
+        <result column="lcd" property="lcd"/>
         <collection property="ipList" ofType="string" javaType="list">
             <result column="tagentIp"/>
         </collection>
