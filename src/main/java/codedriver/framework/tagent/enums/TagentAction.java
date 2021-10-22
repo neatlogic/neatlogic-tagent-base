@@ -7,11 +7,12 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.List;
 
 public enum TagentAction implements IEnum {
-    GETLOGS("getlogs", "获取日志"),
-    GETCONFIG("getConfig", "获取配置"),
-    SAVECONFIG("saveConfig", "保存日志"),
+    GET_LOGS("getlogs", "获取日志列表"),
+    DOWNLOAD_LOG("downloadLog", "下载日志"),
+    GET_CONFIG("getConfig", "获取配置"),
+    SAVE_CONFIG("saveConfig", "保存日志"),
     RESTART("restart", "重启"),
-    RESETPASSWORD("resetPassword", "重置密码");
+    RESET_PASSWORD("resetPassword", "重置密码");
     private final String value;
     private final String text;
 
