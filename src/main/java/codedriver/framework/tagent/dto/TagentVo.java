@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +29,8 @@ public class TagentVo extends BasePageVo {
     private Long id;
     @EntityField(name = "tagentIP", type = ApiParamType.STRING)
     private String ip;
+    @EntityField(name = "ipString", type = ApiParamType.STRING)
+    private String ipString;
     @EntityField(name = "ipList", type = ApiParamType.JSONARRAY)
     private List<String> ipList;
     @EntityField(name = "tagent注册端口", type = ApiParamType.INTEGER)
@@ -114,7 +117,19 @@ public class TagentVo extends BasePageVo {
         this.ip = ip;
     }
 
+    public String getIpString() {
+        return ipString;
+    }
+
+    public void setIpString(String ipString) {
+        this.ipString = ipString;
+    }
+
     public List<String> getIpList() {
+        if(StringUtils.isNotBlank(ipString)){
+            String[] ipStringArray = ipString.split(",");
+            ipList = Arrays.asList(ipStringArray);
+        }
         return ipList;
     }
 
