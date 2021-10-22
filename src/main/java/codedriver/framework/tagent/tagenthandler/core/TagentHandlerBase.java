@@ -16,17 +16,25 @@ public abstract class TagentHandlerBase implements ITagentHandler {
         if (runnerVo == null) {
             throw new RunnerNotFoundException(tagentVo.getRunnerId());
         }
-        String url = runnerVo.getUrl();
+        String runnerUrl = runnerVo.getUrl();
 
-        if (StringUtils.isNotBlank(url)) {
-            if (!url.endsWith("/")) {
-                url = url + "/";
+        if (StringUtils.isNotBlank(runnerUrl)) {
+            if (!runnerUrl.endsWith("/")) {
+                runnerUrl = runnerUrl + "/";
             }
         } else {
             throw new RunnerUnableToAccessEcxeption(runnerVo.getId());
         }
-        return myExecTagentCmd(message, tagentVo, url);
+        return myExecTagentCmd(message, tagentVo, runnerUrl);
     }
 
-    public abstract JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String url) throws Exception;
+    /**
+     * 执行tagent命令
+     * @param message 入参
+     * @param tagentVo tagent
+     * @param runnerUrl runner url
+     * @return 返回信息
+     * @throws Exception 异常
+     */
+    public abstract JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String runnerUrl) throws Exception;
 }
