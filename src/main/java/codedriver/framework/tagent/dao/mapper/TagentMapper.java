@@ -44,7 +44,7 @@ public interface TagentMapper {
 
     TagentVersionVo getTagentVersionByFileId(Long id);
 
-    int checkTagentVersion(TagentVersionVo versionVo);
+    int checkTagentVersion(String version);
 
     void insertOs(TagentOSVo newOS);
 
