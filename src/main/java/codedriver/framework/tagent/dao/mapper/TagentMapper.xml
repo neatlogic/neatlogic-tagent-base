@@ -219,8 +219,7 @@
     <select id="checkTagentVersion" parameterType="codedriver.framework.tagent.dto.TagentVersionVo" resultType="int">
         select count(1)
         from tagent_version
-        where `id` != #{id}
-          and `version` = #{version}
+        where `version` = #{version}
     </select>
 
     <delete id="deleteTagentById">
@@ -333,11 +332,9 @@
         f.`name` as fileName,
         f.`size`,
         f.`user_uuid` as fcu,
-        f.`upload_time` as fcd,
-        u.user_name as fcuName
+        f.`upload_time` as fcd
         from tagent_version tv
         join file f on tv.`file_id` = f.`id`
-        join user u on f.user_uuid = u.uuid
         order by `id` desc
         <if test="needPage == true">
             LIMIT #{startNum}, #{pageSize}
