@@ -20,15 +20,19 @@ public interface TagentMapper {
 
     List<RunnerGroupVo> searchRunnerGroupInformation(RunnerGroupVo groupVo);
 
-    int searchTagentCount(TagentVo tagentVo );
+    int searchTagentCount(TagentVo tagentVo);
 
     int searchTagentRunnerCount();
 
     int searchRunnerGroupCount();
 
-    List<TagentVersionVo> getVersionList();
+    int searchTagentVersionCount();
+
+    List<TagentVersionVo> searchVersionList();
 
     List<GroupNetworkVo> getGroupNetworkList();
+
+    List<TagentVersionVo> searchTagentPkgList();
 
     Long getAccountIdById(Long id);
 
@@ -38,9 +42,15 @@ public interface TagentMapper {
 
     TagentVo getTagentById(Long id);
 
+    TagentVersionVo getTagentVersionByFileId(Long id);
+
+    int checkTagentVersion(TagentVersionVo versionVo);
+
     void insertOs(TagentOSVo newOS);
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
+
+    void insertTagentPkgFile(TagentVersionVo versionVo);
 
     int replaceTagent(TagentVo tagent);
 
@@ -51,4 +61,6 @@ public interface TagentMapper {
     void deleteTagentById(Long id);
 
     int deleteAllIpByTagentId(Long id);
+
+    void deleteTagentVersionByFileId(Long id);
 }
