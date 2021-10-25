@@ -216,16 +216,25 @@
         WHERE ft.id = #{value}
     </select>
 
+    <select id="checkTagentVersion" parameterType="codedriver.framework.tagent.dto.TagentVersionVo" resultType="int">
+        select count(1)
+        from tagent_version
+        where `id` != #{id}
+          and `version` = #{version}
+    </select>
+
     <delete id="deleteTagentById">
         DELETE
         FROM tagent
         WHERE `id` = #{id}
     </delete>
 
-    <select id="getVersionList" resultType="codedriver.framework.tagent.dto.TagentVersionVo" useCache="false">
-        SELECT tv.os_type     AS osType,
-               tv.version,
-               tv.ignore_file AS ignoreFile
+    <select id="searchVersionList" resultType="codedriver.framework.tagent.dto.TagentVersionVo" useCache="false">
+        SELECT tv.`os_type`     AS osType,
+               tv.`version`,
+               tv.osbit,
+               tv.`ignore_file` AS ignoreFile,
+               tv.`file_id`     AS fileId
         FROM tagent_version tv
     </select>
 
@@ -315,6 +324,26 @@
         FROM runnergroup_network
     </select>
 
+    <select id="searchTagentPkgList" resultType="codedriver.framework.tagent.dto.TagentVersionVo">
+        select tv.`id`,
+        tv.`version`,
+        tv.`os_type` as osType,
+        tv.`osbit`,
+        f.`id` as fileId,
+        f.`name` as fileName,
+        f.`size`,
+        f.`user_uuid` as fcu,
+        f.`upload_time` as fcd,
+        u.user_name as fcuName
+        from tagent_version tv
+        join file f on tv.`file_id` = f.`id`
+        join user u on f.user_uuid = u.uuid
+        order by `id` desc
+        <if test="needPage == true">
+            LIMIT #{startNum}, #{pageSize}
+        </if>
+    </select>
+
     <select id="getTagentByIpAndPort" parameterType="codedriver.framework.tagent.dto.TagentVo"
             resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
         SELECT t.id,
@@ -342,6 +371,20 @@
                            ON t.`runner_group_id` = rg.`id`
         WHERE t.ip = #{ip}
           AND t.port = #{port}
+    </select>
+
+    <select id="getTagentVersionByFileId" resultType="codedriver.framework.tagent.dto.TagentVersionVo">
+        SELECT tv.`os_type`     AS osType,
+               tv.`version`,
+               tv.`osbit`,
+               tv.`ignore_file` AS ignoreFile,
+               tv.`file_id`     AS fileId
+        FROM tagent_version tv
+        WHERE `file_id` = #{value}
+    </select>
+    <select id="searchTagentVersionCount" resultType="java.lang.Integer">
+        select count(`id`)
+        from tagent_version
     </select>
 
     <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
@@ -458,6 +501,11 @@
         FROM tagent_ip
         WHERE tagent_id = #{value}
     </delete>
+    <delete id="deleteTagentVersionByFileId">
+        delete
+        from tagent_version
+        where `file_id` = #{value}
+    </delete>
 
     <insert id="insertTagentIp">
         INSERT INTO tagent_ip (`tagent_id`,`ip`)
@@ -465,6 +513,11 @@
         <foreach collection="ipList" item="ip" separator=",">
             (#{tagentId},#{ip})
         </foreach>
+    </insert>
+
+    <insert id="insertTagentPkgFile" parameterType="codedriver.framework.tagent.dto.TagentVersionVo">
+        INSERT INTO `tagent_version` (`id`, `os_type`, `osbit`, `version`, `file_id`)
+        VALUES (#{id}, #{osType}, #{osbit}, #{version}, #{fileId})
     </insert>
 
     <resultMap id="TagentMap" type="codedriver.framework.tagent.dto.TagentVo">
