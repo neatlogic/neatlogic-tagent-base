@@ -7,11 +7,11 @@ import com.alibaba.fastjson.JSONObject;
 
 public interface ITagentHandler {
 
-    public String getHandler();
+    String getHandler();
 
-    public String getHandlerName();
+    String getHandlerName();
 
-    public String getName();
+    String getName();
 
-    public JSONObject execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception;
+    JSONObject execTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception;
 }

@@ -9,10 +9,20 @@ import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
+import codedriver.framework.dao.mapper.runner.RunnerMapper;
+import codedriver.framework.dto.runner.RunnerVo;
+import codedriver.framework.exception.runner.RunnerNotFoundException;
+import codedriver.framework.exception.runner.RunnerUrlIllegalException;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
+import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.exception.TagentActionNotFoundEcexption;
+import codedriver.framework.tagent.exception.TagentIdNotFoundException;
 import codedriver.framework.tagent.exception.TagentIpNotFoundException;
+import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
+import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -32,6 +42,9 @@ public class TagentServiceImpl implements TagentService {
 
     @Resource
     TagentMapper tagentMapper;
+
+    @Resource
+    RunnerMapper runnerMapper;
 
     @Override
     public int updateTagentById(TagentVo tagent) {
@@ -66,7 +79,7 @@ public class TagentServiceImpl implements TagentService {
         String accountName = tagent.getIp() + "_" + tagent.getPort() + "_tagent";
         account.setProtocolId(protocolVo.getId());
         account.setName(accountName);
-        account.setAccount(tagent.getUser());
+        //account.setAccount(tagent.getUser()); 这是安装用户不是 账号名，tagent 账号为null
         account.setFcu(UserContext.get().getUserUuid());
         account.setPasswordPlain(tagent.getCredential());
         AccountVo oldAccount = resourceCenterMapper.getAccountByName(accountName);
@@ -86,5 +99,25 @@ public class TagentServiceImpl implements TagentService {
             tagentMapper.insertTagentIp(tagent.getId(), ipList);
         }
         return tagent.getId();
+    }
+
+    @Override
+    public JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception{
+        ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(action);
+        if (tagentHandler == null) {
+            throw new TagentActionNotFoundEcexption(action);
+        }
+        TagentVo tagentVo = tagentMapper.getTagentById(message.getTagentId());
+        if (tagentVo == null) {
+            throw new TagentIdNotFoundException(message.getTagentId());
+        }
+        RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
+        if (runnerVo == null) {
+            throw new RunnerNotFoundException(tagentVo.getRunnerId());
+        }
+        if(StringUtils.isBlank(runnerVo.getUrl())){
+            throw new RunnerUrlIllegalException(runnerVo.getId());
+        }
+        return tagentHandler.execTagentCmd(message,tagentVo,runnerVo);
     }
 }

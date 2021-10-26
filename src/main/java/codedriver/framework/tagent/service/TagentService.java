@@ -5,7 +5,9 @@
 
 package codedriver.framework.tagent.service;
 
+import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVo;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * @author lvzk
@@ -16,4 +18,11 @@ public interface TagentService {
     int updateTagentById(TagentVo tagent);
 
     Long saveTagent(TagentVo tagentVo);
+
+    /**
+     * 执行tagent action
+     * @param message 入参
+     * @param action 执行动作
+     */
+    JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception;
 }

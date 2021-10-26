@@ -103,57 +103,6 @@
         </collection>
     </resultMap>
 
-    <select id="searchRunnerGroupInformation" parameterType="java.lang.String" resultMap="runnerGroupMap">
-        SELECT
-        g.`id` as id,
-        g.`name` as name,
-        g.`description`,
-        nk.`id` as networkId,
-        nk.`group_id` as groupId,
-        nk.`network_ip` as networkIp,
-        nk.`mask` as mask,
-        r.`id` as runnerId,
-        r.`group_id` as runnerGroupId,
-        r.`name` as runnerName,
-        r.`url` as url,
-        r.`host` as host,
-        r.`port`,
-        r.`netty_ip` as nettyIp,
-        r.`netty_port` as nettyPort,
-        r.`access_key` as accessKey,
-        r.`access_secret` as accessSecret,
-        r.`auth_type` as authType
-        FROM
-        (SELECT DISTINCT
-        rg.`id`,
-        rg.`name`,
-        rg.`description`
-        FROM
-        runnergroup rg
-        LEFT JOIN runner r ON rg.`id` = r.`group_id`
-        LEFT JOIN runnergroup_network c ON rg.`id` = c.`group_id`
-        WHERE 1 = 1
-        <if test="keyword != null and keyword != ''">
-            AND (
-            rg.`name` LIKE CONCAT('%', #{keyword}, '%')
-            OR r.`name` LIKE CONCAT('%', #{keyword}, '%')
-            OR c.`network_ip` LIKE CONCAT('%', #{keyword}, '%')
-            OR r.`url` LIKE CONCAT('%', #{keyword}, '%')
-            )
-        </if>
-        <if test="authType != null and authType != ''">
-            AND r.`auth_type` = #{authType}
-        </if>
-        ORDER BY rg.`id` DESC
-        <if test="needPage == true">
-            LIMIT #{startNum},#{pageSize}
-        </if>
-        ) g
-        LEFT JOIN runnergroup_network nk ON g.`id` = nk.`group_id`
-        LEFT JOIN runner r ON g.`id` = r.`group_id`
-        ORDER BY g.`id` DESC, nk.`id` DESC
-    </select>
-
     <select id="searchTagentCount" resultType="int" parameterType="codedriver.framework.tagent.dto.TagentVo">
         select count(distinct t.`id`)
         from tagent t
@@ -181,11 +130,6 @@
     <select id="searchTagentRunnerCount" resultType="int">
         select count(distinct g.id)
         from runnergroup g;
-    </select>
-
-    <select id="searchRunnerGroupCount" resultType="int">
-        select count(1)
-        from runnergroup
     </select>
 
     <select id="getTagentById" resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
