@@ -9,6 +9,7 @@ import codedriver.framework.applicationlistener.core.ModuleInitializedListenerBa
 import codedriver.framework.bootstrap.CodedriverWebApplicationContext;
 import codedriver.framework.common.RootComponent;
 import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.transaction.core.AfterTransactionJob;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +29,12 @@ public class AfterRegisterJobManager extends ModuleInitializedListenerBase {
      * @param tagentVo tagent对象
      */
     public static void executeAll(TagentVo tagentVo) {
-        for (IAfterRegister register : afterRegisterList) {
-            register.execute(tagentVo);
-        }
+        AfterTransactionJob<TagentVo> job = new AfterTransactionJob<>();
+        job.execute(tagentVo, tagentVo1 -> {
+            for (IAfterRegister register : afterRegisterList) {
+                register.execute(tagentVo1);
+            }
+        });
     }
 
     @Override

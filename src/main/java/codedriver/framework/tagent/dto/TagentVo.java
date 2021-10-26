@@ -1,5 +1,5 @@
 /*
- * Copyright (c)  2021 TechSure Co.,Ltd.  All Rights Reserved.
+ * Copyright(c) 2021 TechSure Co., Ltd. All Rights Reserved.
  * 本内容仅限于深圳市赞悦科技有限公司内部传阅，禁止外泄以及用于其他的商业项目。
  */
 
@@ -11,6 +11,7 @@ import codedriver.framework.common.util.RC4Util;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.framework.util.SnowflakeUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,6 +24,7 @@ import java.util.List;
  * @since 2021/8/23 15:20
  */
 public class TagentVo extends BaseEditorVo {
+    //不能改，tagent也使用了这个key
     public static final String encryptKey = "#ts=9^0$1";
     private static final long serialVersionUID = -6983563143057900024L;
     @EntityField(name = "主键id", type = ApiParamType.LONG)
@@ -76,6 +78,8 @@ public class TagentVo extends BaseEditorVo {
     @EntityField(name = "tagent状态", type = ApiParamType.STRING)
     private String status;
     private Integer isFirstCreate;
+    @JSONField(serialize = false)
+    private Long resourceId;//用于注册是提前生成配置项id，以便将来关联账号和资源
 
     public TagentVo() {
     }
@@ -104,6 +108,17 @@ public class TagentVo extends BaseEditorVo {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getResourceId() {
+        if (resourceId == null) {
+            resourceId = SnowflakeUtil.uniqueLong();
+        }
+        return resourceId;
+    }
+
+    private void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
     }
 
     public String getIp() {
