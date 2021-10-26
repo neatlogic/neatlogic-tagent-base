@@ -73,31 +73,6 @@
         from tagent_os
     </select>
 
-    <resultMap id="runnerGroupMap" type="codedriver.framework.dto.runner.RunnerGroupVo">
-        <id column="id" property="id"/>
-        <result column="name" property="name"/>
-        <result column="description" property="description"/>
-        <collection property="groupNetworkList" ofType="codedriver.framework.dto.runner.GroupNetworkVo">
-            <id column="networkId" property="id"/>
-            <result column="groupId" property="groupId"/>
-            <result column="networkIp" property="networkIp"/>
-            <result column="mask" property="mask"/>
-        </collection>
-        <collection property="runnerList" ofType="codedriver.framework.dto.runner.RunnerVo">
-            <id column="runnerId" property="id"/>
-            <result column="runnerGroupId" property="groupId"/>
-            <result column="runnerName" property="name"/>
-            <result column="protocol" property="protocol"/>
-            <result column="port" property="port"/>
-            <result column="url" property="url"/>
-            <result column="accessKey" property="accessKey"/>
-            <result column="accessSecret" property="accessSecret"/>
-            <result column="authType" property="authType"/>
-            <result column="nettyIp" property="nettyIp"/>
-            <result column="nettyPort" property="nettyPort"/>
-        </collection>
-    </resultMap>
-
     <select id="searchTagentCount" resultType="int" parameterType="codedriver.framework.tagent.dto.TagentVo">
         select count(distinct t.`id`)
         from tagent t
