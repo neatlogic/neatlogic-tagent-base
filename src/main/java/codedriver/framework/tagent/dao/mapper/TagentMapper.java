@@ -1,7 +1,6 @@
 package codedriver.framework.tagent.dao.mapper;
 
 import codedriver.framework.dto.runner.GroupNetworkVo;
-import codedriver.framework.dto.runner.RunnerGroupVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
@@ -16,11 +15,7 @@ public interface TagentMapper {
 
     List<TagentOSVo> searchTagentOSType();
 
-    List<RunnerGroupVo> searchTagentRunnerGroup();
-
     int searchTagentCount(TagentVo tagentVo);
-
-    int searchTagentRunnerCount();
 
     int searchTagentVersionCount();
 

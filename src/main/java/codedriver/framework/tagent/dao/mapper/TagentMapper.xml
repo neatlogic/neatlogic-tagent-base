@@ -73,11 +73,6 @@
         from tagent_os
     </select>
 
-    <select id="searchTagentRunnerGroup" resultType="codedriver.framework.dto.runner.RunnerGroupVo">
-        select `id`, `name`
-        from runnergroup
-    </select>
-
     <resultMap id="runnerGroupMap" type="codedriver.framework.dto.runner.RunnerGroupVo">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
@@ -125,11 +120,6 @@
                 OR t.`os_version` LIKE CONCAT('%',#{keyword},'%'))
             </if>
         </where>
-    </select>
-
-    <select id="searchTagentRunnerCount" resultType="int">
-        select count(distinct g.id)
-        from runnergroup g;
     </select>
 
     <select id="getTagentById" resultType="codedriver.framework.tagent.dto.TagentVo" useCache="false">
