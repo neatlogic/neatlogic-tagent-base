@@ -6,13 +6,14 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
-public enum TagentCPUtype implements IEnum {
+public enum TagentCPUType implements IEnum {
     X86_64("X86_64", "X86_64"),
-    X86("X86", "X86");
+    X86("X86", "X86"),
+    DEFAULT("default", "default");
     private final String value;
     private final String text;
 
-    TagentCPUtype(String value, String text) {
+    TagentCPUType(String value, String text) {
         this.value = value;
         this.text = text;
     }
@@ -28,7 +29,7 @@ public enum TagentCPUtype implements IEnum {
     @Override
     public List getValueTextList() {
         JSONArray array = new JSONArray();
-        for (TagentCPUtype type : values()) {
+        for (TagentCPUType type : values()) {
             array.add(new JSONObject() {
                 {
                     this.put("value", type.getValue());
