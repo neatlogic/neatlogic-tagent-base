@@ -1,6 +1,8 @@
 package codedriver.framework.tagent.exception;
 
-public class TagentNotFoundException extends RuntimeException{
+import codedriver.framework.exception.core.ApiRuntimeException;
+
+public class TagentNotFoundException extends ApiRuntimeException {
     public TagentNotFoundException(){
         super("tagent");
     }
