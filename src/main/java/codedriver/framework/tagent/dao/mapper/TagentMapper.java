@@ -24,8 +24,6 @@ public interface TagentMapper {
 
     int searchTagentUpgradeAuditCountByAuditIdAndStatusAndIp(TagentUpgradeAuditVo auditVo);
 
-//    List<TagentVersionVo> searchVersionList();
-
     List<GroupNetworkVo> getGroupNetworkList();
 
     List<TagentVersionVo> searchTagentPkgList(TagentVersionVo tagentVersion);

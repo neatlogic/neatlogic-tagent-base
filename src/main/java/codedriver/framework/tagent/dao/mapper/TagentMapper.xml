@@ -143,15 +143,6 @@
         WHERE `id` = #{id}
     </delete>
 
-    <!--    <select id="searchVersionList" resultType="codedriver.framework.tagent.dto.TagentVersionVo" useCache="false">-->
-    <!--        SELECT tv.`os_type`     AS osType,-->
-    <!--               tv.`version`,-->
-    <!--               tv.osbit,-->
-    <!--               tv.`ignore_file` AS ignoreFile,-->
-    <!--               tv.`file_id`     AS fileId-->
-    <!--        FROM tagent_version tv-->
-    <!--    </select>-->
-
     <update id="updateTagentById" parameterType="codedriver.framework.tagent.dto.TagentVo">
         UPDATE
         tagent
