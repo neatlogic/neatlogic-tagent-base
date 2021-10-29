@@ -25,6 +25,8 @@ public class TagentMessageVo {
     private String runnerIp;
     @EntityField(name = "ip", type = ApiParamType.STRING)
     private String ip;
+    @EntityField(name = "安装包版本", type = ApiParamType.STRING)
+    private String pkgVersion;
 
     public Long getTagentId() {
         return tagentId;
@@ -104,5 +106,13 @@ public class TagentMessageVo {
 
     public void setIp(String ip) {
         this.ip = ip;
+    }
+
+    public String getPkgVersion() {
+        return pkgVersion;
+    }
+
+    public void setPkgVersion(String pkgVersion) {
+        this.pkgVersion = pkgVersion;
     }
 }

@@ -2,6 +2,7 @@ package codedriver.framework.tagent.dao.mapper;
 
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
+import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import org.apache.ibatis.annotations.Param;
@@ -19,11 +20,19 @@ public interface TagentMapper {
 
     int searchTagentVersionCount();
 
-    List<TagentVersionVo> searchVersionList();
+    int searchTagentUpgradeAuditCountByUser(TagentUpgradeAuditVo auditVo);
+
+    int searchTagentUpgradeAuditCountByAuditIdAndStatusAndIp(TagentUpgradeAuditVo auditVo);
+
+//    List<TagentVersionVo> searchVersionList();
 
     List<GroupNetworkVo> getGroupNetworkList();
 
-    List<TagentVersionVo> searchTagentPkgList();
+    List<TagentVersionVo> searchTagentPkgList(TagentVersionVo tagentVersion);
+
+    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditListByUser(TagentUpgradeAuditVo auditVo);
+
+    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditListByAuditIdAndStatusAndIp(TagentUpgradeAuditVo auditVo);
 
     Long getAccountIdById(Long id);
 
@@ -33,9 +42,13 @@ public interface TagentMapper {
 
     TagentVo getTagentById(Long id);
 
-    TagentVersionVo getTagentVersionByFileId(Long id);
+    TagentVersionVo getTagentVersionById(Long id);
+
+    TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);
 
     int checkTagentVersion(String version);
+
+    int checkTagentPkgFileIdUsedCount(Long fileId);
 
     void insertOs(TagentOSVo newOS);
 
@@ -53,5 +66,5 @@ public interface TagentMapper {
 
     int deleteAllIpByTagentId(Long id);
 
-    void deleteTagentVersionByFileId(Long id);
+    void deleteTagentVersionById(Long id);
 }

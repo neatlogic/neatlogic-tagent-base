@@ -131,20 +131,26 @@
         where `version` = #{version}
     </select>
 
+    <select id="checkTagentPkgFileIdUsedCount" resultType="int">
+        select count(1)
+        from tagent_version
+        where `file_id` = #{fileId}
+    </select>
+
     <delete id="deleteTagentById">
         DELETE
         FROM tagent
         WHERE `id` = #{id}
     </delete>
 
-    <select id="searchVersionList" resultType="codedriver.framework.tagent.dto.TagentVersionVo" useCache="false">
-        SELECT tv.`os_type`     AS osType,
-               tv.`version`,
-               tv.osbit,
-               tv.`ignore_file` AS ignoreFile,
-               tv.`file_id`     AS fileId
-        FROM tagent_version tv
-    </select>
+    <!--    <select id="searchVersionList" resultType="codedriver.framework.tagent.dto.TagentVersionVo" useCache="false">-->
+    <!--        SELECT tv.`os_type`     AS osType,-->
+    <!--               tv.`version`,-->
+    <!--               tv.osbit,-->
+    <!--               tv.`ignore_file` AS ignoreFile,-->
+    <!--               tv.`file_id`     AS fileId-->
+    <!--        FROM tagent_version tv-->
+    <!--    </select>-->
 
     <update id="updateTagentById" parameterType="codedriver.framework.tagent.dto.TagentVo">
         UPDATE
@@ -232,7 +238,8 @@
         FROM runnergroup_network
     </select>
 
-    <select id="searchTagentPkgList" resultType="codedriver.framework.tagent.dto.TagentVersionVo">
+    <select id="searchTagentPkgList" resultType="codedriver.framework.tagent.dto.TagentVersionVo"
+            parameterType="codedriver.framework.tagent.dto.TagentVersionVo">
         select tv.`id`,
         tv.`version`,
         tv.`os_type` as osType,
@@ -243,7 +250,13 @@
         f.`user_uuid` as fcu,
         f.`upload_time` as fcd
         from tagent_version tv
-        join file f on tv.`file_id` = f.`id`
+        left join file f on tv.`file_id` = f.`id`
+        <if test="osType != null and osType != ''">
+            where tv.`os_type` = #{osType}
+        </if>
+        <if test="osbit != null and osbit != ''">
+            and tv.`osbit` = #{osbit}
+        </if>
         order by `id` desc
         <if test="needPage == true">
             LIMIT #{startNum}, #{pageSize}
@@ -279,18 +292,97 @@
           AND t.port = #{port}
     </select>
 
-    <select id="getTagentVersionByFileId" resultType="codedriver.framework.tagent.dto.TagentVersionVo">
+    <select id="getTagentVersionById" resultType="codedriver.framework.tagent.dto.TagentVersionVo">
         SELECT tv.`os_type`     AS osType,
                tv.`version`,
                tv.`osbit`,
                tv.`ignore_file` AS ignoreFile,
                tv.`file_id`     AS fileId
         FROM tagent_version tv
-        WHERE `file_id` = #{value}
+        WHERE `id` = #{value}
     </select>
     <select id="searchTagentVersionCount" resultType="java.lang.Integer">
         select count(`id`)
         from tagent_version
+    </select>
+
+    <select id="searchTagentUpgradeAuditCountByUser" resultType="java.lang.Integer"
+            parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
+        select count(a.`id`)
+        from tagent_upgrade_audit a
+        left join user u on a.`uuid` = u.`uuid`
+        <if test="fcuName != null and fcuName != ''">
+            where u.`user_name` = #{fcuName}
+        </if>
+    </select>
+
+    <select id="searchTagenUpgradeAuditListByUser"
+            resultType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo"
+            parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
+        select a.`id`,
+        a.`count`,
+        a.`fcd`,
+        a.`network`,
+        a.`uuid`
+        from tagent_upgrade_audit a
+        left join user u on a.`uuid` = u.`uuid`
+        <if test="fcuName != null and fcuName != ''">
+            where u.`user_name` = #{fcuName}
+        </if>
+        order by a.`id` desc
+        <if test="needPage == true">
+            LIMIT #{startNum}, #{pageSize}
+        </if>
+    </select>
+    <select id="searchTagentUpgradeAuditCountByAuditIdAndStatusAndIp" resultType="java.lang.Integer"
+            parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
+        select count(`id`)
+        from tagent_upgrade_detail
+        where `audit_id` = #{auditId}
+        <if test=" status != null and status != '' ">
+            and `status` =#{status}
+        </if>
+        <if test=" ip != null and ip != '' ">
+            and `ip` =#{ip}
+        </if>
+    </select>
+    <select id="searchTagenUpgradeAuditListByAuditIdAndStatusAndIp"
+            resultType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo"
+            parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
+        select `id`,
+        `audit_id`,
+        `ip`,
+        `port`,
+        `source_version` as sourceVersion,
+        `target_version` as targetVersion,
+        `result`,
+        `error`,
+        `status`
+        from tagent_upgrade_detail
+        where `audit_id` = #{auditId}
+        <if test=" status != null and status != '' ">
+            and `status` =#{status}
+        </if>
+        <if test=" ip != null and ip != '' ">
+            and `ip` =#{ip}
+        </if>
+        order by `id` desc
+        <if test="needPage == true">
+            LIMIT #{startNum}, #{pageSize}
+        </if>
+    </select>
+    <select id="getTagentVersionVoByPkgVersionAndOSTypeAndOSBit"
+            resultType="codedriver.framework.tagent.dto.TagentVersionVo">
+        select `id`,
+               `os_type`     as osType,
+               `version`,
+               `osbit`,
+               `ignore_file` as ignoreFile,
+               `file_id`     as fileId
+        from tagent_version
+        where `version` = #{version}
+          and `os_type` = #{osType}
+          and `osbit` = #{osbit}
     </select>
 
     <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
@@ -407,7 +499,7 @@
         FROM tagent_ip
         WHERE tagent_id = #{value}
     </delete>
-    <delete id="deleteTagentVersionByFileId">
+    <delete id="deleteTagentVersionById">
         delete
         from tagent_version
         where `file_id` = #{value}

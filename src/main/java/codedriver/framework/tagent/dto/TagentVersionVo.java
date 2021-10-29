@@ -23,6 +23,8 @@ public class TagentVersionVo extends BaseEditorVo {
     private String fileName;
     @EntityField(name = "附件大小（字节）", type = ApiParamType.INTEGER)
     private Long size;
+    @EntityField(name = "tagentId", type = ApiParamType.LONG)
+    private Long tagentId;
 
     public TagentVersionVo() {
 
@@ -99,6 +101,14 @@ public class TagentVersionVo extends BaseEditorVo {
 
     public void setSize(Long size) {
         this.size = size;
+    }
+
+    public Long getTagentId() {
+        return tagentId;
+    }
+
+    public void setTagentId(Long tagentId) {
+        this.tagentId = tagentId;
     }
 
     public enum TagentOsType {

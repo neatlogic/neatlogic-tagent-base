@@ -1,5 +1,10 @@
 package codedriver.framework.tagent.util;
 
+import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
+import codedriver.framework.file.core.FileStorageMediumFactory;
+import codedriver.framework.file.core.IFileStorageHandler;
+import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.tagent.exception.TagentRunnerConnectRefusedException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -32,7 +37,7 @@ import java.util.Set;
 public class TagentHttpUtil {
 	protected static Logger logger = LoggerFactory.getLogger(TagentHttpUtil.class);
 
-	public static byte[] postFileWithParam(String urlStr, Map<String, String> params, List<File> fileList) throws Exception {
+	public static byte[] postFileWithParam(String urlStr, Map<String, String> params, List<FileVo> fileVoList) throws Exception {
 		String BOUNDARY = "----MyFormBoundarySMFEtUYQG6r5B920";
 		HttpURLConnection hc = null;
 		ByteArrayOutputStream bos = null;
@@ -65,15 +70,20 @@ public class TagentHttpUtil {
 			outStream.write(("--" + BOUNDARY + boundaryMessage).getBytes(StandardCharsets.UTF_8));
 
 			resSB = new StringBuffer();
-			if (fileList != null) {
-				for (int i = 0, num = fileList.size(); i < num; i++) {
-					File file = fileList.get(i);
-					String fileName = file.getName();
+			if (fileVoList != null) {
+				for (int i = 0, num = fileVoList.size(); i < num; i++) {
+					FileVo fileVo = fileVoList.get(i);
+					String prefix = fileVo.getPath().split(":")[0];
+					IFileStorageHandler handler = FileStorageMediumFactory.getHandler(prefix.toUpperCase());
+					if (handler == null) {
+						throw new FileStorageMediumHandlerNotFoundException(prefix);
+					}
+					String fileName = fileVo.getName();
 					resSB.append("Content-Disposition: form-data; name=").append(fileName).append("; filename=").append(fileName).append("\r\n").append("Content-Type:multipart/form-data ").append("\r\n\r\n");
 
 					outStream.write(resSB.toString().getBytes(StandardCharsets.UTF_8));
 					// 开始写文件
-					DataInputStream in = new DataInputStream(new FileInputStream(file));
+					DataInputStream in = new DataInputStream(handler.getData(fileVo.getPath()));
 					int bytes = 0;
 					byte[] bufferOut = new byte[1024 * 5];
 					while ((bytes = in.read(bufferOut)) != -1) {
@@ -103,7 +113,7 @@ public class TagentHttpUtil {
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			throw new RuntimeException("发送请求到：" + urlStr + "失败");
+			throw new TagentRunnerConnectRefusedException(urlStr, e.getMessage());
 		} finally {
 			try {
 				if (bos != null)
