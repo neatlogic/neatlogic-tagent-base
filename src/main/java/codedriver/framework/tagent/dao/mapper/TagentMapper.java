@@ -20,17 +20,19 @@ public interface TagentMapper {
 
     int searchTagentVersionCount();
 
-    int searchTagentUpgradeAuditCountByUser(TagentUpgradeAuditVo auditVo);
+    int searchTagentUpgradeAuditCountByUser(String user);
 
-    int searchTagentUpgradeAuditCountByAuditIdAndStatusAndIp(TagentUpgradeAuditVo auditVo);
+    int searchTagentUpgradeAuditDetailCountByAuditIdAndStatusAndIp(@Param("auditId") Long auditId, @Param("status") String status, @Param("ip") String ip);
 
     List<GroupNetworkVo> getGroupNetworkList();
 
     List<TagentVersionVo> searchTagentPkgList(TagentVersionVo tagentVersion);
 
-    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditListByUser(TagentUpgradeAuditVo auditVo);
+    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditList(TagentUpgradeAuditVo auditVo);
 
-    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditListByAuditIdAndStatusAndIp(TagentUpgradeAuditVo auditVo);
+    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditDetailList(TagentUpgradeAuditVo auditVo);
+
+    List<Long> searchTagentIdListByIpListAndPort(@Param("ipList") List<String> ipList, @Param("portList") List<String> portList);
 
     Long getAccountIdById(Long id);
 
@@ -46,7 +48,7 @@ public interface TagentMapper {
 
     int checkTagentVersion(String version);
 
-    int checkTagentPkgFileIdUsedCount(Long fileId);
+    int getTagentPkgFileIdUsedCount(Long fileId);
 
     void insertOs(TagentOSVo newOS);
 
