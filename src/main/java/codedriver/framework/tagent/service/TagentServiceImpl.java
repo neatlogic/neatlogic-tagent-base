@@ -79,6 +79,7 @@ public class TagentServiceImpl implements TagentService {
         String accountName = tagent.getIp() + "_" + tagent.getPort() + "_tagent";
         account.setProtocolId(protocolVo.getId());
         account.setName(accountName);
+        account.setIp(tagent.getIp());
         //account.setAccount(tagent.getUser()); 这是安装用户不是 账号名，tagent 账号为null
         account.setFcu(UserContext.get().getUserUuid());
         account.setPasswordPlain(tagent.getCredential());
