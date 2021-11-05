@@ -5,10 +5,7 @@
 
 package codedriver.framework.tagent.register.core;
 
-import codedriver.framework.asynchronization.threadlocal.InputFromContext;
-import codedriver.framework.common.constvalue.InputFrom;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.transaction.core.AfterTransactionJob;
 
 /**
  * tagent注册成功后需要执行的操作
@@ -16,9 +13,7 @@ import codedriver.framework.transaction.core.AfterTransactionJob;
 public abstract class AfterRegisterBase implements IAfterRegister {
     @Override
     public final void execute(TagentVo pTagentVo) {
-        InputFromContext.init(InputFrom.AUTOEXEC);
-        AfterTransactionJob<TagentVo> job = new AfterTransactionJob<>();
-        job.execute(pTagentVo, this::myExecute);
+        myExecute(pTagentVo);
     }
 
     protected abstract void myExecute(TagentVo tagentVo);

@@ -29,7 +29,7 @@ public class AfterRegisterJobManager extends ModuleInitializedListenerBase {
      * @param tagentVo tagent对象
      */
     public static void executeAll(TagentVo tagentVo) {
-        AfterTransactionJob<TagentVo> job = new AfterTransactionJob<>();
+        AfterTransactionJob<TagentVo> job = new AfterTransactionJob<>("TAGENT-AFTER-REGISTER-HANDLER");
         job.execute(tagentVo, tagentVo1 -> {
             for (IAfterRegister register : afterRegisterList) {
                 register.execute(tagentVo1);
