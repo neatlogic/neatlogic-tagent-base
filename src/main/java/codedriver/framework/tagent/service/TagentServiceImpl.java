@@ -80,6 +80,7 @@ public class TagentServiceImpl implements TagentService {
         account.setProtocolId(protocolVo.getId());
         account.setName(accountName);
         account.setIp(tagent.getIp());
+        account.setProtocolPort(protocolVo.getPort());
         //account.setAccount(tagent.getUser()); 这是安装用户不是 账号名，tagent 账号为null
         account.setFcu(UserContext.get().getUserUuid());
         account.setPasswordPlain(tagent.getCredential());
