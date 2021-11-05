@@ -27,7 +27,11 @@ public class TagentVersionVo extends BaseEditorVo {
     private Long tagentId;
 
     public TagentVersionVo() {
+    }
 
+    public TagentVersionVo(String _osType, String osbit) {
+        this.osType = _osType;
+        this.osbit = osbit;
     }
 
     public TagentVersionVo(String _osType, String _version, String osbit) {

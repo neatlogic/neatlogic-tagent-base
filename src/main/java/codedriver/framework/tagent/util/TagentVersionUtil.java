@@ -1,5 +1,7 @@
 package codedriver.framework.tagent.util;
 
+import java.util.List;
+
 public class TagentVersionUtil {
 
     public static int compareVersion(String version1, String version2) {
@@ -14,4 +16,25 @@ public class TagentVersionUtil {
         diff = (diff != 0) ? diff : versionArray1.length - versionArray2.length;
         return diff;
     }
+
+    /**
+     * 寻找最高版本的安装包
+     *
+     * @param nowVersion
+     * @param versionList
+     * @return
+     */
+    public static String findHighestVersion(String nowVersion, List<String> versionList) {
+        versionList.add(nowVersion);
+        String hightVersion = nowVersion;
+        for (int i = 0; i < versionList.size(); i++) {
+            String tryVersion = versionList.get(i);
+            if (TagentVersionUtil.compareVersion(tryVersion, nowVersion) > 0) {
+                hightVersion = tryVersion;
+            }
+
+        }
+        return hightVersion;
+    }
+
 }

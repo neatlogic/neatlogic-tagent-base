@@ -20,7 +20,7 @@ public interface TagentMapper {
 
     int searchTagentVersionCount();
 
-    int searchTagentUpgradeAuditCountByUser(String user);
+    int searchTagentUpgradeAuditCountByUserName(String user);
 
     int searchTagentUpgradeAuditDetailCountByAuditIdAndStatusAndIp(@Param("auditId") Long auditId, @Param("status") String status, @Param("ip") String ip);
 
@@ -56,7 +56,11 @@ public interface TagentMapper {
 
     void insertTagentPkgFile(TagentVersionVo versionVo);
 
+    void insertUpgradeAudit(TagentUpgradeAuditVo audit);
+
     int replaceTagent(TagentVo tagent);
+
+    void replaceTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
 
     int updateTagent(TagentVo tagentVo);
 

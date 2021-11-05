@@ -18,7 +18,7 @@ public class TagentUpgradeAuditVo extends BaseEditorVo {
     @EntityField(name = "ip", type = ApiParamType.STRING)
     private String ip;
     @EntityField(name = "端口", type = ApiParamType.INTEGER)
-    private String port;
+    private Integer port;
     @EntityField(name = "原版本", type = ApiParamType.STRING)
     private String sourceVersion;
     @EntityField(name = "目标版本", type = ApiParamType.STRING)
@@ -27,6 +27,8 @@ public class TagentUpgradeAuditVo extends BaseEditorVo {
     private Long runnerId;
     @EntityField(name = "runner name", type = ApiParamType.STRING)
     private String runnerName;
+    @EntityField(name = "uuid", type = ApiParamType.STRING)
+    private String uuid;
     @EntityField(name = "状态（升级是否成功）", type = ApiParamType.STRING)
     private String status;
     @EntityField(name = "结果", type = ApiParamType.STRING)
@@ -77,11 +79,11 @@ public class TagentUpgradeAuditVo extends BaseEditorVo {
         this.ip = ip;
     }
 
-    public String getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 
@@ -115,6 +117,14 @@ public class TagentUpgradeAuditVo extends BaseEditorVo {
 
     public void setRunnerName(String runnerName) {
         this.runnerName = runnerName;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getStatus() {
