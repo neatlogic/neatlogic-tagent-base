@@ -20,7 +20,7 @@ public interface TagentMapper {
 
     int searchTagentVersionCount();
 
-    int searchTagentUpgradeAuditCountByUserName(String user);
+    int searchTagentUpgradeAuditCountByUserName(String fcuName);
 
     int searchTagentUpgradeAuditDetailCountByAuditIdAndStatusAndIp(@Param("auditId") Long auditId, @Param("status") String status, @Param("ip") String ip);
 
