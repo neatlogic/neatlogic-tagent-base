@@ -33,8 +33,6 @@ public class TagentUpgradeAuditVo extends BaseEditorVo {
     private String status;
     @EntityField(name = "结果", type = ApiParamType.STRING)
     private String result;
-    @EntityField(name = "错误", type = ApiParamType.STRING)
-    private String error;
 
     public Long getId() {
         if (id == null) {
@@ -143,11 +141,4 @@ public class TagentUpgradeAuditVo extends BaseEditorVo {
         this.result = result;
     }
 
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
 }
