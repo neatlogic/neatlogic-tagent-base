@@ -29,7 +29,7 @@ public class TagentVersionUtil {
         String hightVersion = nowVersion;
         for (int i = 0; i < versionList.size(); i++) {
             String tryVersion = versionList.get(i);
-            if (TagentVersionUtil.compareVersion(tryVersion, nowVersion) > 0) {
+            if (TagentVersionUtil.compareVersion(nowVersion, tryVersion) < 0) {
                 hightVersion = tryVersion;
             }
 

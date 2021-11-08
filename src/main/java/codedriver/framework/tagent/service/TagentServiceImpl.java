@@ -149,7 +149,7 @@ public class TagentServiceImpl implements TagentService {
             tagentAudit.setStatus("working");
             tagentMapper.replaceTagentAuditDetail(tagentAudit);
 
-            if (TagentVersionUtil.compareVersion(tagentVo.getVersion(), versionVo.getVersion()) > 0) {
+            if (TagentVersionUtil.compareVersion(tagentVo.getVersion(), versionVo.getVersion()) >= 0) {
                 upgradeResult = "当前版本:" + versionVo.getVersion() + "与目标版本相同或更高，无需升级";
                 throw new TagentPkgVersionIsHighestVersionException(tagentVo.getVersion());
             }
