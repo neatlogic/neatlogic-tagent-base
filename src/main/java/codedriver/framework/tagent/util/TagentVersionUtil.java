@@ -26,15 +26,15 @@ public class TagentVersionUtil {
      */
     public static String findHighestVersion(String nowVersion, List<String> versionList) {
         versionList.add(nowVersion);
-        String hightVersion = nowVersion;
+        String highVersion = nowVersion;
         for (int i = 0; i < versionList.size(); i++) {
             String tryVersion = versionList.get(i);
             if (TagentVersionUtil.compareVersion(nowVersion, tryVersion) < 0) {
-                hightVersion = tryVersion;
+                highVersion = tryVersion;
             }
 
         }
-        return hightVersion;
+        return highVersion;
     }
 
 }
