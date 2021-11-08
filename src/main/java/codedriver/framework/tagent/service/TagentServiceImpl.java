@@ -7,6 +7,7 @@ package codedriver.framework.tagent.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
@@ -89,6 +90,7 @@ public class TagentServiceImpl implements TagentService {
             account.setId(oldAccount.getId());
         }
         resourceCenterMapper.replaceAccount(account);
+        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(),account.getIp()));
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
             tagent.setId(oldTagent.getId());
