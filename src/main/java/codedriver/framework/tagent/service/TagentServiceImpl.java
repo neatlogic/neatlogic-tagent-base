@@ -10,26 +10,33 @@ import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
+import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
+import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import codedriver.framework.exception.runner.RunnerNotFoundException;
 import codedriver.framework.exception.runner.RunnerUrlIllegalException;
+import codedriver.framework.file.core.FileStorageMediumFactory;
+import codedriver.framework.file.core.IFileStorageHandler;
+import codedriver.framework.file.dao.mapper.FileMapper;
+import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
-import codedriver.framework.tagent.dto.TagentMessageVo;
-import codedriver.framework.tagent.dto.TagentOSVo;
-import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.exception.TagentActionNotFoundEcexption;
-import codedriver.framework.tagent.exception.TagentIdNotFoundException;
-import codedriver.framework.tagent.exception.TagentIpNotFoundException;
+import codedriver.framework.tagent.dto.*;
+import codedriver.framework.tagent.enums.TagentAction;
+import codedriver.framework.tagent.exception.*;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
+import codedriver.framework.tagent.util.TagentHttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lvzk
@@ -46,6 +53,9 @@ public class TagentServiceImpl implements TagentService {
 
     @Resource
     RunnerMapper runnerMapper;
+
+    @Resource
+    FileMapper fileMapper;
 
     @Override
     public int updateTagentById(TagentVo tagent) {
@@ -73,7 +83,7 @@ public class TagentServiceImpl implements TagentService {
         }
         AccountVo account = new AccountVo();
         AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
-        if (protocolVo== null) {
+        if (protocolVo == null) {
             resourceCenterMapper.insertAccountProtocol(new AccountProtocolVo("tagent"));
             protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         }
@@ -90,7 +100,7 @@ public class TagentServiceImpl implements TagentService {
             account.setId(oldAccount.getId());
         }
         resourceCenterMapper.replaceAccount(account);
-        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(),account.getIp()));
+        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(), account.getIp()));
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
             tagent.setId(oldTagent.getId());
@@ -106,7 +116,114 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception{
+    public void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
+
+        String upgradeResult = StringUtils.EMPTY;
+        Boolean upgradeFlag = false;
+        TagentUpgradeAuditVo tagentAudit = new TagentUpgradeAuditVo();
+        tagentAudit.setAuditId(auditId);
+        tagentAudit.setIp(tagentVo.getIp());
+        tagentAudit.setPort(tagentVo.getPort());
+        //插入此次升级记录详情
+        tagentAudit.setSourceVersion(tagentVo.getVersion());
+        tagentAudit.setTargetVersion(targetVersion);
+        tagentAudit.setStatus("working");
+        tagentMapper.replaceTagentAuditDetail(tagentAudit);
+        try {
+            if (versionVo == null) {
+                throw new TagentPkgVersionAndDefaultVersionAreNotfoundException(targetVersion);
+            }
+            FileVo fileVo = fileMapper.getFileById(versionVo.getFileId());
+            if (fileVo == null) {
+                throw new TagentPkgNotFoundException(versionVo.getFileId());
+            }
+            String prefix = fileVo.getPath().split(":")[0];
+            IFileStorageHandler fileStorageHandler = FileStorageMediumFactory.getHandler(prefix.toUpperCase());
+            if (fileStorageHandler == null) {
+                throw new FileStorageMediumHandlerNotFoundException(prefix);
+            }
+            if (!fileStorageHandler.isExit(fileVo.getPath())) {
+                throw new TagentPkgNotFoundException();
+            }
+
+            RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
+            if (runnerVo == null) {
+                throw new RunnerNotFoundException(tagentVo.getRunnerId());
+            }
+            List<FileVo> fileVoList = new ArrayList<>();
+            fileVoList.add(fileVo);
+            Map<String, String> params = new HashMap<>();
+            params.put("type", TagentAction.UPGRADE.getValue());
+            params.put("ip", tagentVo.getIp());
+            params.put("port", (tagentVo.getPort()).toString());
+            params.put("user", tagentVo.getUser());
+            params.put("credential", tagentVo.getCredential());
+            params.put("fileName", fileVo.getName());
+            params.put("ignoreFile", versionVo.getIgnoreFile());
+            AccountVo accountVo = resourceCenterMapper.getAccountById(tagentVo.getAccountId());
+            if (accountVo == null) {
+                throw new ResourceCenterAccountNotFoundException();
+            }
+            params.put("credential", accountVo.getPasswordCipher());
+
+            String resultStr = new String(TagentHttpUtil.postFileWithParam(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", params, fileVoList));
+            if (StringUtils.isNotBlank(resultStr)) {
+                JSONObject resultObj = JSONObject.parseObject(resultStr);
+                if (resultObj.getString("Status").equals("OK")) {
+                    upgradeResult = "升级成功";
+                    upgradeFlag = true;
+                } else {
+                    upgradeResult = resultStr;
+                }
+            }
+        } catch (Exception e) {
+            upgradeResult = e.getMessage();
+        } finally {
+            tagentAudit.setStatus(upgradeFlag ? "successed" : "failed");
+            tagentAudit.setResult(upgradeResult);
+            tagentMapper.replaceTagentAuditDetail(tagentAudit);
+        }
+    }
+
+    /**
+     * 1、寻找对应的安装包（安装包由版本号、os类型、和CPU架构确定）
+     * 2、若无对应版本的安装包，则寻找使用“default”标记并对应版本号的安装包（如版本号、os类型一样cpu架构是default的安装包，os类型和cpu架构均可以使用“default”标记）
+     *
+     * @param tagentVo
+     * @param targetVersion
+     * @return
+     */
+    @Override
+    public TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion) {
+        String osType = this.getOsType(tagentVo.getOsType().toLowerCase(), tagentVo.getOsbit());
+        String obsit = tagentVo.getOsbit();
+
+        TagentVersionVo versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, osType, obsit);
+
+        if (versionVo == null) {
+            versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, "default", obsit);
+            if (versionVo == null) {
+                versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, osType, "default");
+                if (versionVo == null) {
+                    versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, "default", "default");
+                }
+            }
+        }
+/*
+        //匹配最高版本
+        if (isUsedHightestVersion && versionVo == null) {
+            String newVersion = StringUtils.EMPTY;
+            List<TagentVersionVo> versionVoList = tagentMapper.searchTagentPkgList(new TagentVersionVo(osType, obsit));
+            List<String> versionList = versionVoList.stream().map(TagentVersionVo::getVersion).collect(Collectors.toList());
+            newVersion = TagentVersionUtil.findHighestVersion(nowVersion, versionList);
+            versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(newVersion, osType, obsit);
+        }*/
+
+        return versionVo;
+    }
+
+    @Override
+    public JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception {
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(action);
         if (tagentHandler == null) {
             throw new TagentActionNotFoundEcexption(action);
@@ -119,9 +236,30 @@ public class TagentServiceImpl implements TagentService {
         if (runnerVo == null) {
             throw new RunnerNotFoundException(tagentVo.getRunnerId());
         }
-        if(StringUtils.isBlank(runnerVo.getUrl())){
+        if (StringUtils.isBlank(runnerVo.getUrl())) {
             throw new RunnerUrlIllegalException(runnerVo.getId());
         }
-        return tagentHandler.execTagentCmd(message,tagentVo,runnerVo);
+        return tagentHandler.execTagentCmd(message, tagentVo, runnerVo);
+    }
+
+    /**
+     * 根据os类型和CPU架构
+     *
+     * @param type
+     * @param cpuBit
+     * @return
+     */
+    private String getOsType(String type, String cpuBit) {
+        String osType;
+        if (type.equals("windows")) {
+            if (cpuBit.contains("64")) {
+                osType = TagentVersionVo.TagentOsType.WINDOWS64.getType();
+            } else {
+                osType = TagentVersionVo.TagentOsType.WINDOWS32.getType();
+            }
+        } else {
+            osType = TagentVersionVo.TagentOsType.LINUX.getType();
+        }
+        return osType;
     }
 }
