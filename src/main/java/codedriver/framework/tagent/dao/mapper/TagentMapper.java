@@ -42,6 +42,10 @@ public interface TagentMapper {
 
     TagentVo getTagentById(Long id);
 
+    List<TagentVo> getTagentByAccountId(Long accountId);
+
+    List<TagentVo> getTagentByIpList(@Param("ipList") List<String> ipList);
+
     TagentVersionVo getTagentVersionById(Long id);
 
     TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);
@@ -71,4 +75,5 @@ public interface TagentMapper {
     int deleteAllIpByTagentId(Long id);
 
     void deleteTagentVersionById(Long id);
+
 }

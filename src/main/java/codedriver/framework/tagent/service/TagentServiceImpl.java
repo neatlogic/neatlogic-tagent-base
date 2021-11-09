@@ -7,6 +7,7 @@ package codedriver.framework.tagent.service;
 
 import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.cmdb.dao.mapper.resourcecenter.ResourceCenterMapper;
+import codedriver.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
@@ -92,6 +93,7 @@ public class TagentServiceImpl implements TagentService {
         account.setProtocolId(protocolVo.getId());
         account.setName(accountName);
         account.setIp(tagent.getIp());
+        account.setProtocolPort(protocolVo.getPort());
         //account.setAccount(tagent.getUser()); 这是安装用户不是 账号名，tagent 账号为null
         account.setFcu(UserContext.get().getUserUuid());
         account.setPasswordPlain(tagent.getCredential());
@@ -100,6 +102,7 @@ public class TagentServiceImpl implements TagentService {
             account.setId(oldAccount.getId());
         }
         resourceCenterMapper.replaceAccount(account);
+        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(),account.getIp()));
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
             tagent.setId(oldTagent.getId());

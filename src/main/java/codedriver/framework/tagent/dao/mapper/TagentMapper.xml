@@ -383,6 +383,57 @@
         from tagent
 
     </select>
+    <select id="getTagentByAccountId" resultType="codedriver.framework.tagent.dto.TagentVo">
+        SELECT ft.`id`,
+               ft.`ip`,
+               ft.`port`,
+               ft.`name`                                  AS name,
+               ft.`version`                               AS version,
+               ft.`os_type`                               AS osType,
+               ft.`os_id`                                 AS osId,
+               ft.`os_version`                            AS osVersion,
+               ft.`osbit`                                 AS osbit,
+               ft.`account_id`                            AS accountId,
+               ft.`status`,
+               ft.`pcpu`,
+               ft.`mem`,
+               ft.`user`                                  AS user,
+               ft.`runner_id`                             AS runnerId,
+               ft.`runner_ip`                             AS runnerIp,
+               ft.`runner_port`                           AS runnerPort,
+               ft.`runner_group_id`                       AS runnerGroupId,
+               DATE_FORMAT(ft.`fcd`, '%Y-%m-%d %H:%i:%s') AS fcd,
+               DATE_FORMAT(ft.`lcd`, '%Y-%m-%d %H:%i:%s') AS lcd
+        FROM tagent ft
+        WHERE ft.`account_id` = #{value}
+    </select>
+    <select id="getTagentByIpList" resultType="codedriver.framework.tagent.dto.TagentVo">
+        SELECT ft.`id`,
+               ft.`ip`,
+               ft.`port`,
+               ft.`name`                                  AS name,
+               ft.`version`                               AS version,
+               ft.`os_type`                               AS osType,
+               ft.`os_id`                                 AS osId,
+               ft.`os_version`                            AS osVersion,
+               ft.`osbit`                                 AS osbit,
+               ft.`account_id`                            AS accountId,
+               ft.`status`,
+               ft.`pcpu`,
+               ft.`mem`,
+               ft.`user`                                  AS user,
+               ft.`runner_id`                             AS runnerId,
+               ft.`runner_ip`                             AS runnerIp,
+               ft.`runner_port`                           AS runnerPort,
+               ft.`runner_group_id`                       AS runnerGroupId,
+               DATE_FORMAT(ft.`fcd`, '%Y-%m-%d %H:%i:%s') AS fcd,
+               DATE_FORMAT(ft.`lcd`, '%Y-%m-%d %H:%i:%s') AS lcd
+        FROM tagent ft
+        WHERE  ft.`ip` in
+        <foreach collection="ipList" open="(" close=")" separator="," item="ip">
+            #{ip}
+        </foreach>
+    </select>
 
     <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
