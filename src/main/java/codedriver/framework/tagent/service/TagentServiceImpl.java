@@ -27,7 +27,6 @@ import codedriver.framework.tagent.exception.*;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
 import codedriver.framework.tagent.util.TagentHttpUtil;
-import codedriver.framework.tagent.util.TagentVersionUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +37,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @author lvzk
@@ -102,7 +100,7 @@ public class TagentServiceImpl implements TagentService {
             account.setId(oldAccount.getId());
         }
         resourceCenterMapper.replaceAccount(account);
-        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(),account.getIp()));
+        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(), account.getIp()));
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
             tagent.setId(oldTagent.getId());
@@ -118,7 +116,7 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, Long auditId) {
+    public void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
 
         String upgradeResult = StringUtils.EMPTY;
         Boolean upgradeFlag = false;
@@ -126,8 +124,15 @@ public class TagentServiceImpl implements TagentService {
         tagentAudit.setAuditId(auditId);
         tagentAudit.setIp(tagentVo.getIp());
         tagentAudit.setPort(tagentVo.getPort());
-
+        //插入此次升级记录详情
+        tagentAudit.setSourceVersion(tagentVo.getVersion());
+        tagentAudit.setTargetVersion(targetVersion);
+        tagentAudit.setStatus("working");
+        tagentMapper.replaceTagentAuditDetail(tagentAudit);
         try {
+            if (versionVo == null) {
+                throw new TagentPkgVersionAndDefaultVersionAreNotfoundException(targetVersion);
+            }
             FileVo fileVo = fileMapper.getFileById(versionVo.getFileId());
             if (fileVo == null) {
                 throw new TagentPkgNotFoundException(versionVo.getFileId());
@@ -145,18 +150,6 @@ public class TagentServiceImpl implements TagentService {
             if (runnerVo == null) {
                 throw new RunnerNotFoundException(tagentVo.getRunnerId());
             }
-
-            //插入此次升级记录详情
-            tagentAudit.setSourceVersion(tagentVo.getVersion());
-            tagentAudit.setTargetVersion(versionVo.getVersion());
-            tagentAudit.setStatus("working");
-            tagentMapper.replaceTagentAuditDetail(tagentAudit);
-
-            if (TagentVersionUtil.compareVersion(tagentVo.getVersion(), versionVo.getVersion()) >= 0) {
-                upgradeResult = "当前版本:" + versionVo.getVersion() + "与目标版本相同或更高，无需升级";
-                throw new TagentPkgVersionIsHighestVersionException(tagentVo.getVersion());
-            }
-
             List<FileVo> fileVoList = new ArrayList<>();
             fileVoList.add(fileVo);
             Map<String, String> params = new HashMap<>();
@@ -176,7 +169,7 @@ public class TagentServiceImpl implements TagentService {
             String resultStr = new String(TagentHttpUtil.postFileWithParam(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", params, fileVoList));
             if (StringUtils.isNotBlank(resultStr)) {
                 JSONObject resultObj = JSONObject.parseObject(resultStr);
-                if (resultObj.getString("Status").equals("OK")) {//需要runner返回的字段
+                if (resultObj.getString("Status").equals("OK")) {
                     upgradeResult = "升级成功";
                     upgradeFlag = true;
                 } else {
@@ -195,18 +188,15 @@ public class TagentServiceImpl implements TagentService {
     /**
      * 1、寻找对应的安装包（安装包由版本号、os类型、和CPU架构确定）
      * 2、若无对应版本的安装包，则寻找使用“default”标记并对应版本号的安装包（如版本号、os类型一样cpu架构是default的安装包，os类型和cpu架构均可以使用“default”标记）
-     * 3、若无对应的default标记的对应版本号的安装包，则使用最高版本的安装包
      *
      * @param tagentVo
      * @param targetVersion
-     * @param isUsedHightestVersion
      * @return
      */
     @Override
-    public TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion, Boolean isUsedHightestVersion) {
+    public TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion) {
         String osType = this.getOsType(tagentVo.getOsType().toLowerCase(), tagentVo.getOsbit());
         String obsit = tagentVo.getOsbit();
-        String nowVersion = tagentVo.getVersion();
 
         TagentVersionVo versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, osType, obsit);
 
@@ -219,18 +209,16 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
         }
-
+/*
+        //匹配最高版本
         if (isUsedHightestVersion && versionVo == null) {
             String newVersion = StringUtils.EMPTY;
             List<TagentVersionVo> versionVoList = tagentMapper.searchTagentPkgList(new TagentVersionVo(osType, obsit));
             List<String> versionList = versionVoList.stream().map(TagentVersionVo::getVersion).collect(Collectors.toList());
             newVersion = TagentVersionUtil.findHighestVersion(nowVersion, versionList);
             versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(newVersion, osType, obsit);
-        }
+        }*/
 
-        if (versionVo == null) {
-            throw new TagentPkgVersionAndDefaultVersionAreNotfoundException(targetVersion);
-        }
         return versionVo;
     }
 

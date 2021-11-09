@@ -20,9 +20,9 @@ public interface TagentService {
 
     Long saveTagent(TagentVo tagentVo);
 
-    void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, Long auditId);
+    void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId);
 
-    TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion, Boolean isUsedHightestVersion);
+    TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion);
 
     /**
      * 执行tagent action
