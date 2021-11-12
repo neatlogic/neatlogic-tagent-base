@@ -6,6 +6,7 @@
 package codedriver.framework.tagent.service;
 
 import codedriver.framework.tagent.dto.TagentMessageVo;
+import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import com.alibaba.fastjson.JSONObject;
 
@@ -19,10 +20,15 @@ public interface TagentService {
 
     Long saveTagent(TagentVo tagentVo);
 
+    void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId);
+
+    TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion);
+
     /**
      * 执行tagent action
+     *
      * @param message 入参
-     * @param action 执行动作
+     * @param action  执行动作
      */
     JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception;
 }

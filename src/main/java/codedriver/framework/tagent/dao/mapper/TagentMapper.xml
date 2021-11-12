@@ -246,6 +246,9 @@
             <if test="osType != null and osType != ''">
                 and tv.`os_type` = #{osType}
             </if>
+            <if test="version != null and version != ''">
+                and tv.`version` = #{version}
+            </if>
             <if test="osbit != null and osbit != ''">
                 and tv.`osbit` = #{osbit}
             </if>
@@ -299,7 +302,7 @@
         from tagent_version
     </select>
 
-    <select id="searchTagentUpgradeAuditCountByUser" resultType="java.lang.Integer"
+    <select id="searchTagentUpgradeAuditCountByUserName" resultType="java.lang.Integer"
             parameterType="java.lang.String">
         select count(a.`id`)
         from tagent_upgrade_audit a
@@ -348,7 +351,6 @@
         `source_version` as sourceVersion,
         `target_version` as targetVersion,
         `result`,
-        `error`,
         `status`
         from tagent_upgrade_detail
         where `audit_id` = #{auditId}
@@ -541,6 +543,11 @@
         `ip` = #{ip}
         AND `port` = #{port}
     </update>
+    <insert id="replaceTagentAuditDetail" parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
+        replace into tagent_upgrade_detail(`id`, `audit_id`, `ip`, `port`, `source_version`, `target_version`, `result`,
+                                           `status`)
+        values (#{id}, #{auditId}, #{ip}, #{port}, #{sourceVersion}, #{targetVersion}, #{result}, #{status})
+    </insert>
 
     <delete id="deleteAllIpByTagentId">
         DELETE
@@ -562,8 +569,13 @@
     </insert>
 
     <insert id="insertTagentPkgFile" parameterType="codedriver.framework.tagent.dto.TagentVersionVo">
-        INSERT INTO `tagent_version` (`id`, `os_type`, `osbit`, `version`, `file_id`)
-        VALUES (#{id}, #{osType}, #{osbit}, #{version}, #{fileId})
+        INSERT INTO `tagent_version` (`id`, `os_type`, `osbit`, `version`, `file_id`,`ignore_file`)
+        VALUES (#{id}, #{osType}, #{osbit}, #{version}, #{fileId},#{ignoreFile})
+    </insert>
+
+    <insert id="insertUpgradeAudit"  parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
+        insert into tagent_upgrade_audit(`id`, `uuid`, `count`, `fcd`, `network`)
+        values (#{id}, #{uuid}, #{count}, NOW(3), #{network})
     </insert>
 
     <resultMap id="TagentMap" type="codedriver.framework.tagent.dto.TagentVo">
