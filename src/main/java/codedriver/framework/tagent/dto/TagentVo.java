@@ -11,7 +11,6 @@ import codedriver.framework.common.util.RC4Util;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.framework.util.SnowflakeUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -78,8 +77,6 @@ public class TagentVo extends BaseEditorVo {
     @EntityField(name = "tagent状态", type = ApiParamType.STRING)
     private String status;
     private Integer isFirstCreate;
-    @JSONField(serialize = false)
-    private Long resourceId;//用于注册是提前生成配置项id，以便将来关联账号和资源
 
     public TagentVo() {
     }
@@ -110,16 +107,6 @@ public class TagentVo extends BaseEditorVo {
         this.id = id;
     }
 
-    public Long getResourceId() {
-        if (resourceId == null) {
-            resourceId = SnowflakeUtil.uniqueLong();
-        }
-        return resourceId;
-    }
-
-    private void setResourceId(Long resourceId) {
-        this.resourceId = resourceId;
-    }
 
     public String getIp() {
         return ip;
