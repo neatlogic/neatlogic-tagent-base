@@ -125,12 +125,6 @@
         WHERE ft.id = #{value}
     </select>
 
-    <select id="checkTagentVersion" parameterType="codedriver.framework.tagent.dto.TagentVersionVo" resultType="int">
-        select count(1)
-        from tagent_version
-        where `version` = #{version}
-    </select>
-
     <select id="getTagentPkgFileIdUsedCount" resultType="int">
         select count(1)
         from tagent_version
@@ -330,6 +324,7 @@
             LIMIT #{startNum}, #{pageSize}
         </if>
     </select>
+
     <select id="searchTagentUpgradeAuditDetailCountByAuditIdAndStatusAndIp" resultType="java.lang.Integer">
         select count(`id`)
         from tagent_upgrade_detail
@@ -341,6 +336,7 @@
             and `ip` =#{ip}
         </if>
     </select>
+
     <select id="searchTagenUpgradeAuditDetailList"
             resultType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo"
             parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
@@ -365,6 +361,7 @@
             LIMIT #{startNum}, #{pageSize}
         </if>
     </select>
+
     <select id="getTagentVersionVoByPkgVersionAndOSTypeAndOSBit"
             resultType="codedriver.framework.tagent.dto.TagentVersionVo">
         select `id`,
@@ -378,6 +375,7 @@
           and `os_type` = #{osType}
           and `osbit` = #{osbit}
     </select>
+
     <select id="searchTagentIdListByIpListAndPort" resultType="java.lang.Long">
         select `ip`
         from tagent
@@ -407,6 +405,7 @@
         FROM tagent ft
         WHERE ft.`account_id` = #{value}
     </select>
+
     <select id="getTagentByIpList" resultType="codedriver.framework.tagent.dto.TagentVo">
         SELECT ft.`id`,
                ft.`ip`,
@@ -568,8 +567,8 @@
         </foreach>
     </insert>
 
-    <insert id="insertTagentPkgFile" parameterType="codedriver.framework.tagent.dto.TagentVersionVo">
-        INSERT INTO `tagent_version` (`id`, `os_type`, `osbit`, `version`, `file_id`,`ignore_file`)
+    <insert id="replaceTagentPkgFile" parameterType="codedriver.framework.tagent.dto.TagentVersionVo">
+        REPLACE INTO `tagent_version` (`id`, `os_type`, `osbit`, `version`, `file_id`,`ignore_file`)
         VALUES (#{id}, #{osType}, #{osbit}, #{version}, #{fileId},#{ignoreFile})
     </insert>
 

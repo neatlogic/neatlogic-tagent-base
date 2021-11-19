@@ -195,19 +195,13 @@ public class TagentServiceImpl implements TagentService {
      */
     @Override
     public TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion) {
-        String osType = this.getOsType(tagentVo.getOsType().toLowerCase(), tagentVo.getOsbit());
+        String osType = tagentVo.getOsType();
         String obsit = tagentVo.getOsbit();
 
         TagentVersionVo versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, osType, obsit);
 
         if (versionVo == null) {
-            versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, "default", obsit);
-            if (versionVo == null) {
-                versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, osType, "default");
-                if (versionVo == null) {
-                    versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, "default", "default");
-                }
-            }
+            versionVo = tagentMapper.getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(targetVersion, osType, "default");
         }
 /*
         //匹配最高版本
