@@ -537,6 +537,9 @@
         <if test="mem !=null and mem !='' ">
             `mem` = #{mem},
         </if>
+        <if test="dieconnectCause !=null and dieconnectCause !='' ">
+            `disconnect_cause` = #{dieconnectCause},
+        </if>
         `lcd` = NOW(3)
         WHERE
         `ip` = #{ip}
