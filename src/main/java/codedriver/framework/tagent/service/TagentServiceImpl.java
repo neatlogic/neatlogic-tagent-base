@@ -12,6 +12,7 @@ import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
+import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
@@ -20,13 +21,14 @@ import codedriver.framework.file.core.FileStorageMediumFactory;
 import codedriver.framework.file.core.IFileStorageHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
+import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.*;
 import codedriver.framework.tagent.enums.TagentAction;
 import codedriver.framework.tagent.exception.*;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
-import codedriver.framework.tagent.util.TagentHttpUtil;
+import codedriver.framework.util.RestUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,9 +36,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author lvzk
@@ -152,7 +152,7 @@ public class TagentServiceImpl implements TagentService {
             }
             List<FileVo> fileVoList = new ArrayList<>();
             fileVoList.add(fileVo);
-            Map<String, String> params = new HashMap<>();
+            JSONObject params = new JSONObject();
             params.put("type", TagentAction.UPGRADE.getValue());
             params.put("ip", tagentVo.getIp());
             params.put("port", (tagentVo.getPort()).toString());
@@ -165,8 +165,8 @@ public class TagentServiceImpl implements TagentService {
                 throw new ResourceCenterAccountNotFoundException();
             }
             params.put("credential", accountVo.getPasswordCipher());
-
-            String resultStr = new String(TagentHttpUtil.postFileWithParam(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", params, fileVoList));
+            RestVo restVo = new RestVo.Builder(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).build();
+            String resultStr = RestUtil.sendPostRequest(restVo);
             if (StringUtils.isNotBlank(resultStr)) {
                 JSONObject resultObj = JSONObject.parseObject(resultStr);
                 if (resultObj.getString("Status").equals("OK")) {
