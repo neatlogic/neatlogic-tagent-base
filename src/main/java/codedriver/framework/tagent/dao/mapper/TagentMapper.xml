@@ -14,6 +14,7 @@
         t.`osbit`,
         t.`account_id` as accountId,
         t.`runner_id` as runnerId,
+        t.`disconnect_cause` as dieconnectCause,
         ar.`name` as runnerName,
         t.`runner_group_id` as runnerGroupId,
         t.`runner_ip` as runnerIp,
@@ -592,6 +593,7 @@
         <result column="osbit" property="osbit"/>
         <result column="accountId" property="accountId"/>
         <result column="runnerId" property="runnerId"/>
+        <result column="dieconnectCause" property="dieconnectCause"/>
         <result column="runnerName" property="runnerName"/>
         <result column="runnerGroupId" property="runnerGroupId"/>
         <result column="runnerIp" property="runnerIp"/>

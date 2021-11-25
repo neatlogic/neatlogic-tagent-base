@@ -14,7 +14,7 @@ import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountN
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
-import codedriver.framework.exception.runner.RunnerNotFoundException;
+import codedriver.framework.exception.runner.RunnerIdNotFoundException;
 import codedriver.framework.exception.runner.RunnerUrlIllegalException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
 import codedriver.framework.file.core.IFileStorageHandler;
@@ -148,7 +148,7 @@ public class TagentServiceImpl implements TagentService {
 
             RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
             if (runnerVo == null) {
-                throw new RunnerNotFoundException(tagentVo.getRunnerId());
+                throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
             }
             List<FileVo> fileVoList = new ArrayList<>();
             fileVoList.add(fileVo);
@@ -228,7 +228,7 @@ public class TagentServiceImpl implements TagentService {
         }
         RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
         if (runnerVo == null) {
-            throw new RunnerNotFoundException(tagentVo.getRunnerId());
+            throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
         }
         if (StringUtils.isBlank(runnerVo.getUrl())) {
             throw new RunnerUrlIllegalException(runnerVo.getId());
