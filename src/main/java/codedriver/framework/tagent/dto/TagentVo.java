@@ -75,7 +75,7 @@ public class TagentVo extends BaseEditorVo {
     @EntityField(name = "内存占用", type = ApiParamType.STRING)
     private String mem;
     @EntityField(name = "连接失败原因", type = ApiParamType.STRING)
-    private String dieconnectCause;
+    private String disConnectReasion;
     @EntityField(name = "tagent状态", type = ApiParamType.STRING)
     private String status;
     private Integer isFirstCreate;
@@ -305,12 +305,12 @@ public class TagentVo extends BaseEditorVo {
         this.status = status;
     }
 
-    public String getDieconnectCause() {
-        return dieconnectCause;
+    public String getDisConnectReasion() {
+        return disConnectReasion;
     }
 
-    public void setDieconnectCause(String dieconnectCause) {
-        this.dieconnectCause = dieconnectCause;
+    public void setDisConnectReasion(String disConnectReasion) {
+        this.disConnectReasion = disConnectReasion;
     }
 
     public Integer getIsFirstCreate() {

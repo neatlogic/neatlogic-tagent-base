@@ -14,7 +14,7 @@
         t.`osbit`,
         t.`account_id` as accountId,
         t.`runner_id` as runnerId,
-        t.`disconnect_cause` as dieconnectCause,
+        t.`disconnect_reason` as disConnectReasion,
         ar.`name` as runnerName,
         t.`runner_group_id` as runnerGroupId,
         t.`runner_ip` as runnerIp,
@@ -181,7 +181,7 @@
         <if test="accountId !=null ">
             `account_id` = #{accountId},
         </if>
-        <if test="status !=null and status !='' ">
+        <if test="status !=null">
             `status` = #{status},
         </if>
         <if test="pcpu !=null and pcpu !='' ">
@@ -301,7 +301,7 @@
             parameterType="java.lang.String">
         select count(a.`id`)
         from tagent_upgrade_audit a
-        left join user u on a.`uuid` = u.`uuid`
+        left join user u on a.`fcu` = u.`uuid`
         <if test="fcuName != null and fcuName != ''">
             where u.`user_name` = #{fcuName}
         </if>
@@ -314,9 +314,9 @@
         a.`count`,
         a.`fcd`,
         a.`network`,
-        a.`uuid`
+        a.`fcu`
         from tagent_upgrade_audit a
-        left join user u on a.`uuid` = u.`uuid`
+        left join user u on a.`fcu` = u.`uuid`
         <if test="fcuName != null and fcuName != ''">
             where u.`user_name` = #{fcuName}
         </if>
@@ -538,8 +538,8 @@
         <if test="mem !=null and mem !='' ">
             `mem` = #{mem},
         </if>
-        <if test="dieconnectCause !=null and dieconnectCause !='' ">
-            `disconnect_cause` = #{dieconnectCause},
+        <if test="disConnectReasion !=null and disConnectReasion !='' ">
+            `disconnect_reason` = #{disConnectReasion},
         </if>
         `lcd` = NOW(3)
         WHERE
@@ -577,8 +577,8 @@
     </insert>
 
     <insert id="insertUpgradeAudit"  parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
-        insert into tagent_upgrade_audit(`id`, `uuid`, `count`, `fcd`, `network`)
-        values (#{id}, #{uuid}, #{count}, NOW(3), #{network})
+        insert into tagent_upgrade_audit(`id`, `fcu`, `count`, `fcd`, `network`)
+        values (#{id}, #{fcu}, #{count}, NOW(3), #{network})
     </insert>
 
     <resultMap id="TagentMap" type="codedriver.framework.tagent.dto.TagentVo">
@@ -593,7 +593,7 @@
         <result column="osbit" property="osbit"/>
         <result column="accountId" property="accountId"/>
         <result column="runnerId" property="runnerId"/>
-        <result column="dieconnectCause" property="dieconnectCause"/>
+        <result column="disConnectReasion" property="disConnectReasion"/>
         <result column="runnerName" property="runnerName"/>
         <result column="runnerGroupId" property="runnerGroupId"/>
         <result column="runnerIp" property="runnerIp"/>
