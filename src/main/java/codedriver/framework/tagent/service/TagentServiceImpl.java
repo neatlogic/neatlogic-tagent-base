@@ -165,7 +165,7 @@ public class TagentServiceImpl implements TagentService {
                 throw new ResourceCenterAccountNotFoundException();
             }
             params.put("credential", accountVo.getPasswordCipher());
-            RestVo restVo = new RestVo.Builder(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).build();
+            RestVo restVo = new RestVo.Builder(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).setContentType(RestUtil.MULTI_FORM_DATA).build();
             String resultStr = RestUtil.sendPostRequest(restVo);
             if (StringUtils.isNotBlank(resultStr)) {
                 JSONObject resultObj = JSONObject.parseObject(resultStr);
