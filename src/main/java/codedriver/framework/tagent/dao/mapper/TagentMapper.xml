@@ -538,7 +538,7 @@
         <if test="mem !=null and mem !='' ">
             `mem` = #{mem},
         </if>
-        <if test="disConnectReasion !=null and disConnectReasion !='' ">
+        <if test="disConnectReasion !=null ">
             `disconnect_reason` = #{disConnectReasion},
         </if>
         `lcd` = NOW(3)
