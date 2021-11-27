@@ -14,7 +14,7 @@
         t.`osbit`,
         t.`account_id` as accountId,
         t.`runner_id` as runnerId,
-        t.`disconnect_reason` as disConnectReasion,
+        t.`disconnect_reason` as disConnectReason,
         ar.`name` as runnerName,
         t.`runner_group_id` as runnerGroupId,
         t.`runner_ip` as runnerIp,
@@ -538,8 +538,8 @@
         <if test="mem !=null and mem !='' ">
             `mem` = #{mem},
         </if>
-        <if test="disConnectReasion !=null ">
-            `disconnect_reason` = #{disConnectReasion},
+        <if test="disConnectReason !=null ">
+            `disconnect_reason` = #{disConnectReason},
         </if>
         `lcd` = NOW(3)
         WHERE
@@ -593,7 +593,7 @@
         <result column="osbit" property="osbit"/>
         <result column="accountId" property="accountId"/>
         <result column="runnerId" property="runnerId"/>
-        <result column="disConnectReasion" property="disConnectReasion"/>
+        <result column="disConnectReason" property="disConnectReason"/>
         <result column="runnerName" property="runnerName"/>
         <result column="runnerGroupId" property="runnerGroupId"/>
         <result column="runnerIp" property="runnerIp"/>
