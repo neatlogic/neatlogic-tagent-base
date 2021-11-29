@@ -15,7 +15,7 @@ import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
-import codedriver.framework.exception.runner.RunnerNotFoundException;
+import codedriver.framework.exception.runner.RunnerIdNotFoundException;
 import codedriver.framework.exception.runner.RunnerUrlIllegalException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
 import codedriver.framework.file.core.IFileStorageHandler;
@@ -148,7 +148,7 @@ public class TagentServiceImpl implements TagentService {
 
             RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
             if (runnerVo == null) {
-                throw new RunnerNotFoundException(tagentVo.getRunnerId());
+                throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
             }
             List<FileVo> fileVoList = new ArrayList<>();
             fileVoList.add(fileVo);
@@ -165,7 +165,7 @@ public class TagentServiceImpl implements TagentService {
                 throw new ResourceCenterAccountNotFoundException();
             }
             params.put("credential", accountVo.getPasswordCipher());
-            RestVo restVo = new RestVo.Builder(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).build();
+            RestVo restVo = new RestVo.Builder(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).setContentType(RestUtil.MULTI_FORM_DATA).build();
             String resultStr = RestUtil.sendPostRequest(restVo);
             if (StringUtils.isNotBlank(resultStr)) {
                 JSONObject resultObj = JSONObject.parseObject(resultStr);
@@ -228,7 +228,7 @@ public class TagentServiceImpl implements TagentService {
         }
         RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
         if (runnerVo == null) {
-            throw new RunnerNotFoundException(tagentVo.getRunnerId());
+            throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
         }
         if (StringUtils.isBlank(runnerVo.getUrl())) {
             throw new RunnerUrlIllegalException(runnerVo.getId());

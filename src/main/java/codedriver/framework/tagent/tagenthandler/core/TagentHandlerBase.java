@@ -10,7 +10,7 @@ public abstract class TagentHandlerBase implements ITagentHandler {
 
     @Override
     public JSONObject execTagentCmd(TagentMessageVo message,TagentVo tagentVo,RunnerVo runnerVo) throws Exception {
-        return myExecTagentCmd(message, tagentVo, runnerVo.getUrl());
+        return myExecTagentCmd(message, tagentVo, runnerVo);
     }
 
     /**
@@ -21,5 +21,5 @@ public abstract class TagentHandlerBase implements ITagentHandler {
      * @return 返回信息
      * @throws Exception 异常
      */
-    public abstract JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, String runnerUrl) throws Exception;
+    public abstract JSONObject myExecTagentCmd(TagentMessageVo message, TagentVo tagentVo, RunnerVo runnerVo) throws Exception;
 }
