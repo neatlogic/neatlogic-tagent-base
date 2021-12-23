@@ -45,6 +45,7 @@ import java.util.List;
 @Service
 public class TagentServiceImpl implements TagentService {
 
+
     @Resource
     ResourceCenterMapper resourceCenterMapper;
 
@@ -116,7 +117,7 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
+    public void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
 
         String upgradeResult = StringUtils.EMPTY;
         Boolean upgradeFlag = false;
