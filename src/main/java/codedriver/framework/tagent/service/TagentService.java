@@ -20,7 +20,7 @@ public interface TagentService {
 
     Long saveTagent(TagentVo tagentVo);
 
-    void batchUpdradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId);
+    void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId);
 
     TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion);
 
