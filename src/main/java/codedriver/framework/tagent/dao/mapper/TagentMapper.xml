@@ -50,7 +50,8 @@
             <if test="keyword !=null and keyword !='' ">
                 AND (t.`ip` LIKE CONCAT('%',#{keyword},'%')
                 OR t.`name` LIKE CONCAT('%',#{keyword},'%')
-                OR t.`os_version` LIKE CONCAT('%',#{keyword},'%'))
+                OR t.`os_version` LIKE CONCAT('%',#{keyword},'%')
+                OR ti.`ip` LIKE CONCAT('%',#{keyword},'%'))
             </if>
         </where>
         ORDER BY t.`id` DESC
@@ -79,6 +80,7 @@
     <select id="searchTagentCount" resultType="int" parameterType="codedriver.framework.tagent.dto.TagentVo">
         select count(distinct t.`id`)
         from tagent t
+        LEFT JOIN `tagent_ip` ti ON t.`id` = ti.`tagent_id`
         <where>
             <if test="osId !=null">
                 AND t.`os_id` = #{osId}
@@ -95,7 +97,8 @@
             <if test="keyword !=null and keyword !='' ">
                 AND (t.`ip` LIKE CONCAT('%',#{keyword},'%')
                 OR t.`name` LIKE CONCAT('%',#{keyword},'%')
-                OR t.`os_version` LIKE CONCAT('%',#{keyword},'%'))
+                OR t.`os_version` LIKE CONCAT('%',#{keyword},'%')
+                OR ti.`ip` LIKE CONCAT('%',#{keyword},'%'))
             </if>
         </where>
     </select>
