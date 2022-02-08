@@ -52,9 +52,9 @@ public interface TagentMapper {
 
     List<String> getTagentIpListByTagentIp(String ip);
 
-    int checkTagentIpIsExists(String oldIp);
+    int checkTagentIpIsExists(String ip);
 
-    int checkTagentIpIsContained(String oldIp);
+    int checkTagentIpIsContained(String ip);
 
     int getTagentPkgFileIdUsedCount(Long fileId);
 
