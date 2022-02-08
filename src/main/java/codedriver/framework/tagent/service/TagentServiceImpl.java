@@ -82,36 +82,24 @@ public class TagentServiceImpl implements TagentService {
         if (StringUtils.isBlank(tagent.getIp())) {
             throw new TagentIpNotFoundException(tagent);
         }
-        AccountVo account = new AccountVo();
         AccountProtocolVo protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         if (protocolVo == null) {
             resourceCenterMapper.insertAccountProtocol(new AccountProtocolVo("tagent"));
             protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         }
-        String accountName = tagent.getIp() + "_" + tagent.getPort() + "_tagent";
-        account.setProtocolId(protocolVo.getId());
-        account.setName(accountName);
-        account.setIp(tagent.getIp());
-        account.setProtocolPort(protocolVo.getPort());
-        //account.setAccount(tagent.getUser()); 这是安装用户不是 账号名，tagent 账号为null
-        account.setFcu(UserContext.get().getUserUuid());
-        account.setPasswordPlain(tagent.getCredential());
-        AccountVo oldAccount = resourceCenterMapper.getAccountByName(accountName);
-        if (oldAccount != null) {
-            account.setId(oldAccount.getId());
-        }
-        resourceCenterMapper.replaceAccount(account);
-        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(), account.getIp()));
+        tagent.setAccountId(saveTagentAccount(protocolVo, tagent.getIp(), tagent.getPort(), tagent.getCredential()));
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
             tagent.setId(oldTagent.getId());
         }
-        tagent.setAccountId(account.getId());
         tagentMapper.replaceTagent(tagent);
         List<String> ipList = tagent.getIpList();
         if (CollectionUtils.isNotEmpty(ipList)) {
             tagentMapper.deleteAllIpByTagentId(tagent.getId());
             tagentMapper.insertTagentIp(tagent.getId(), ipList);
+            for (String ip : ipList) {
+                saveTagentAccount(protocolVo, ip, tagent.getPort(), tagent.getCredential());
+            }
         }
         return tagent.getId();
     }
@@ -256,5 +244,33 @@ public class TagentServiceImpl implements TagentService {
             osType = TagentVersionVo.TagentOsType.LINUX.getType();
         }
         return osType;
+    }
+
+    /**
+     * 注册tagent关联的账号
+     *
+     * @param protocolVo
+     * @param ip
+     * @param port
+     * @param credential
+     * @return
+     */
+    private Long saveTagentAccount(AccountProtocolVo protocolVo, String ip, int port, String credential) {
+        AccountVo account = new AccountVo();
+        String accountName = ip + "_" + port + "_tagent";
+        account.setProtocolId(protocolVo.getId());
+        account.setName(accountName);
+        account.setIp(ip);
+        account.setProtocolPort(protocolVo.getPort());
+        //account.setAccount(tagent.getUser()); 这是安装用户不是 账号名，tagent 账号为null
+        account.setFcu(UserContext.get().getUserUuid());
+        account.setPasswordPlain(credential);
+        AccountVo oldAccount = resourceCenterMapper.getAccountByName(accountName);
+        if (oldAccount != null) {
+            account.setId(oldAccount.getId());
+        }
+        resourceCenterMapper.replaceAccount(account);
+        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(), account.getIp()));
+        return account.getId();
     }
 }
