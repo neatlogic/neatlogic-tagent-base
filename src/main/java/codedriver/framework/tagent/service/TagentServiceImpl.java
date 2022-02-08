@@ -102,9 +102,9 @@ public class TagentServiceImpl implements TagentService {
                     AccountVo accountVo = resourceCenterMapper.getAccountByName(ip + "_" + tagent.getPort() + "_tagent");
                     if (accountVo != null) {
                         Long accountId = accountVo.getId();
+                        resourceCenterMapper.deleteAccountById(accountId);
                         resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
                         resourceCenterMapper.deleteAccountTagByAccountId(accountId);
-                        resourceCenterMapper.deleteAccountById(accountId);
                         resourceCenterMapper.deleteAccountIpByAccountId(accountId);
                     }
                 }
