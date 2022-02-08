@@ -50,6 +50,12 @@ public interface TagentMapper {
 
     TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);
 
+    List<String> getTagentIpListByTagentIp(String ip);
+
+    int checkTagentIpIsExists(String oldIp);
+
+    int checkTagentIpIsContained(String oldIp);
+
     int getTagentPkgFileIdUsedCount(Long fileId);
 
     void insertOs(TagentOSVo newOS);

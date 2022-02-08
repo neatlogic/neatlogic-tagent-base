@@ -93,9 +93,21 @@ public class TagentServiceImpl implements TagentService {
             tagent.setId(oldTagent.getId());
         }
         tagentMapper.replaceTagent(tagent);
+        //删除旧账号
+        List<String> oldIpList = tagentMapper.getTagentIpListByTagentIp(tagent.getIp());
+        if (CollectionUtils.isNotEmpty(oldIpList)) {
+            oldIpList.removeIf(oldIp -> tagentMapper.checkTagentIpIsExists(oldIp) > 0 || tagentMapper.checkTagentIpIsContained(oldIp) > 1);
+            if (CollectionUtils.isNotEmpty(oldIpList)) {
+                for (TagentVo tagentVo : tagentMapper.getTagentByIpList(oldIpList)) {
+                    AccountVo accountVo = resourceCenterMapper.getAccountByName(tagentVo.getIp() + "_" + tagentVo.getPort() + "_tagent");
+                    resourceCenterMapper.deleteAccountById(accountVo.getId());
+                    resourceCenterMapper.deleteAccountIpByAccountId(accountVo.getId());
+                }
+            }
+        }
         List<String> ipList = tagent.getIpList();
+        tagentMapper.deleteAllIpByTagentId(tagent.getId());
         if (CollectionUtils.isNotEmpty(ipList)) {
-            tagentMapper.deleteAllIpByTagentId(tagent.getId());
             tagentMapper.insertTagentIp(tagent.getId(), ipList);
             for (String ip : ipList) {
                 saveTagentAccount(protocolVo, ip, tagent.getPort(), tagent.getCredential());

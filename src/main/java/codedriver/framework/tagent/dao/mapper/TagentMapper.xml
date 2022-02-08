@@ -437,6 +437,25 @@
         </foreach>
     </select>
 
+    <select id="getTagentIpListByTagentIp" resultType="java.lang.String">
+        SELECT ti.ip
+        FROM tagent_ip ti
+                 LEFT JOIN tagent t ON t.id = ti.tagent_id
+        WHERE t.ip = #{value}
+    </select>
+
+    <select id="checkTagentIpIsExists" resultType="int">
+        select count(distinct t.`id`)
+        from tagent t
+        where t.id = #{value}
+    </select>
+
+    <select id="checkTagentIpIsContained" resultType="int">
+        select count(distinct ti.`id`)
+        from tagent_ip ti
+        where ti.ip = #{value}
+    </select>
+
     <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
         REPLACE INTO tagent (`id`,
