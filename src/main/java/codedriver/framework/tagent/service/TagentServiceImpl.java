@@ -105,8 +105,8 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
         }
-        List<String> ipList = tagent.getIpList();
         tagentMapper.deleteAllIpByTagentId(tagent.getId());
+        List<String> ipList = tagent.getIpList();
         if (CollectionUtils.isNotEmpty(ipList)) {
             tagentMapper.insertTagentIp(tagent.getId(), ipList);
             for (String ip : ipList) {
