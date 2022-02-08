@@ -98,8 +98,8 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(oldIpList)) {
             oldIpList.removeIf(oldIp -> tagentMapper.checkTagentIpIsExists(oldIp) > 0 || tagentMapper.checkTagentIpIsContained(oldIp) > 1);
             if (CollectionUtils.isNotEmpty(oldIpList)) {
-                for (TagentVo tagentVo : tagentMapper.getTagentByIpList(oldIpList)) {
-                    AccountVo accountVo = resourceCenterMapper.getAccountByName(tagentVo.getIp() + "_" + tagentVo.getPort() + "_tagent");
+                for (String ip : oldIpList) {
+                    AccountVo accountVo = resourceCenterMapper.getAccountByName(ip + "_" + tagent.getPort() + "_tagent");
                     if (accountVo != null) {
                         Long accountId = accountVo.getId();
                         resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
