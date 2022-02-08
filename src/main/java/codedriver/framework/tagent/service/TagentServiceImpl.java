@@ -100,8 +100,13 @@ public class TagentServiceImpl implements TagentService {
             if (CollectionUtils.isNotEmpty(oldIpList)) {
                 for (TagentVo tagentVo : tagentMapper.getTagentByIpList(oldIpList)) {
                     AccountVo accountVo = resourceCenterMapper.getAccountByName(tagentVo.getIp() + "_" + tagentVo.getPort() + "_tagent");
-                    resourceCenterMapper.deleteAccountById(accountVo.getId());
-                    resourceCenterMapper.deleteAccountIpByAccountId(accountVo.getId());
+                    if (accountVo != null) {
+                        Long accountId = accountVo.getId();
+                        resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
+                        resourceCenterMapper.deleteAccountTagByAccountId(accountId);
+                        resourceCenterMapper.deleteAccountById(accountId);
+                        resourceCenterMapper.deleteAccountIpByAccountId(accountId);
+                    }
                 }
             }
         }
