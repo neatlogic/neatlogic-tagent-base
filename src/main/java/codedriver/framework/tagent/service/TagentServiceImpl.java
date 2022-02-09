@@ -103,8 +103,8 @@ public class TagentServiceImpl implements TagentService {
                     if (StringUtils.equals(oldAccountVo.getPasswordPlain(),tagent.getCredential())) {
                         if (ipList.contains(ip)) {
                             ipList.remove(ip);
+                            break;
                         }
-                        break;
                     }
                     Long accountId = oldAccountVo.getId();
                     resourceCenterMapper.deleteAccountById(accountId);
