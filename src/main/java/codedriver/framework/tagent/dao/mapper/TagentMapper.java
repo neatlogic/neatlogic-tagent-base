@@ -50,11 +50,7 @@ public interface TagentMapper {
 
     TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);
 
-    List<String> getTagentIpListByTagentIp(String ip);
-
-    int checkTagentIpIsExists(String ip);
-
-    int checkTagentIpIsContained(String ip);
+    List<String> getTagentIpListByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
     int getTagentPkgFileIdUsedCount(Long fileId);
 

@@ -94,19 +94,16 @@ public class TagentServiceImpl implements TagentService {
         }
         tagentMapper.replaceTagent(tagent);
         //删除旧账号
-        List<String> oldIpList = tagentMapper.getTagentIpListByTagentIp(tagent.getIp());
+        List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
         if (CollectionUtils.isNotEmpty(oldIpList)) {
-            oldIpList.removeIf(oldIp -> tagentMapper.checkTagentIpIsExists(oldIp) > 0 || tagentMapper.checkTagentIpIsContained(oldIp) > 1);
-            if (CollectionUtils.isNotEmpty(oldIpList)) {
-                for (String ip : oldIpList) {
-                    AccountVo accountVo = resourceCenterMapper.getAccountByName(ip + "_" + tagent.getPort() + "_tagent");
-                    if (accountVo != null) {
-                        Long accountId = accountVo.getId();
-                        resourceCenterMapper.deleteAccountById(accountId);
-                        resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
-                        resourceCenterMapper.deleteAccountTagByAccountId(accountId);
-                        resourceCenterMapper.deleteAccountIpByAccountId(accountId);
-                    }
+            for (String ip : oldIpList) {
+                AccountVo accountVo = resourceCenterMapper.getAccountByName(ip + "_" + tagent.getPort() + "_tagent");
+                if (accountVo != null) {
+                    Long accountId = accountVo.getId();
+                    resourceCenterMapper.deleteAccountById(accountId);
+                    resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
+                    resourceCenterMapper.deleteAccountTagByAccountId(accountId);
+                    resourceCenterMapper.deleteAccountIpByAccountId(accountId);
                 }
             }
         }
