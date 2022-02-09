@@ -576,14 +576,12 @@
         where `id` = #{value}
     </delete>
 
-    <delete id="deleteTagentIpList">
+    <delete id="deleteTagentIp">
         DELETE
         FROM tagent_ip
         WHERE
-        <foreach collection="deleteTagentIpList" item="ip" separator=",">
-            tagent_id = #{tagentId}
-            AND ip=#{ip}
-        </foreach>
+        tagent_id = #{tagentId}
+        AND ip = #{ip}
     </delete>
 
     <insert id="insertTagentIp">

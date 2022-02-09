@@ -76,5 +76,5 @@ public interface TagentMapper {
 
     void deleteTagentVersionById(Long id);
 
-    void deleteTagentIpList(@Param("tagentId") Long tagentId, @Param("deleteTagentIpList") List<String> deleteTagentIpList);
+    void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
 }

@@ -89,6 +89,8 @@ public class TagentServiceImpl implements TagentService {
             resourceCenterMapper.insertAccountProtocol(new AccountProtocolVo("tagent"));
             protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         }
+        AccountVo accountVo = new AccountVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
+        resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
         tagent.setAccountId(saveTagentAccount(protocolVo, tagent.getIp(), tagent.getPort(), tagent.getCredential()));
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
@@ -97,50 +99,59 @@ public class TagentServiceImpl implements TagentService {
         tagentMapper.replaceTagent(tagent);
 
         List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
-        List<String> ipList = new ArrayList<>(tagent.getIpList());
-        List<String> insertTagentIpList = new ArrayList<>(tagent.getIpList());
+        List<String> deleteTagentIpList = new ArrayList<>();
+        List<String> insertTagentIpList = new ArrayList<>();
 
+        List<AccountVo> replaceAccountList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(oldIpList)) {
-            //删除旧tagentIp
-            List<String> deleteTagentIpList = oldIpList.stream().filter(item -> !ipList.contains(item)).collect(toList());
-            insertTagentIpList = ipList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
-            if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
-                tagentMapper.deleteTagentIpList(tagent.getId(), deleteTagentIpList);
-            }
 
-            //删除旧账号
-            for (String ip : oldIpList) {
-                AccountVo oldAccountVo = resourceCenterMapper.getAccountByTagentIpAndPort(ip, tagent.getPort());
-                if (oldAccountVo != null) {
-                    if (StringUtils.equals(oldAccountVo.getPasswordPlain(), tagent.getCredential()) && ipList.contains(ip)) {
-                        ipList.remove(ip);
-                        continue;
+            deleteTagentIpList = oldIpList.stream().filter(item -> !tagent.getIpList().contains(item)).collect(toList());
+            insertTagentIpList = tagent.getIpList().stream().filter(item -> !oldIpList.contains(item)).collect(toList());
+            if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
+                //清除不存在的ip
+                if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
+                    for (String ip : deleteTagentIpList) {
+                        tagentMapper.deleteTagentIp(tagent.getId(), ip);
                     }
-                    Long accountId = oldAccountVo.getId();
-                    resourceCenterMapper.deleteAccountById(accountId);
-                    resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
-                    resourceCenterMapper.deleteAccountTagByAccountId(accountId);
-                    resourceCenterMapper.deleteAccountIpByAccountId(accountId);
+                }
+                //清除不存在的ip账号
+                for (String ip : deleteTagentIpList) {
+                    AccountVo oldAccountVo = resourceCenterMapper.getAccountByTagentIpAndPort(ip, tagent.getPort());
+                    if (oldAccountVo != null) {
+                        Long accountId = oldAccountVo.getId();
+                        resourceCenterMapper.deleteAccountById(accountId);
+                        resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
+                        resourceCenterMapper.deleteAccountTagByAccountId(accountId);
+                        resourceCenterMapper.deleteAccountIpByAccountId(accountId);
+                    }
                 }
             }
 
-        }
-
-        //保存账号
-        if (CollectionUtils.isNotEmpty(ipList)) {
-            for (String ip : ipList) {
-                saveTagentAccount(protocolVo, ip, tagent.getPort(), tagent.getCredential());
+            //更新和新增账号
+            oldIpList.removeAll(deleteTagentIpList);
+            oldIpList.addAll(insertTagentIpList);
+            for (String ip : oldIpList) {
+                AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
+                replaceAccountList.add(newAccountVo);
             }
-        }
 
-        //保存tagentIp
-        if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
-            tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
-        }
+            //保存账号
+            if (CollectionUtils.isNotEmpty(replaceAccountList)) {
+                for (AccountVo account : replaceAccountList) {
+                    resourceCenterMapper.replaceAccount(account);
+                    resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(), account.getIp()));
+                }
+            }
 
-        return tagent.getId();
+            //保存tagentIp
+            if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
+                tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+            }
+
+            return tagent.getId();
+        }
+        return null;
     }
-
     @Override
     public void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
 
