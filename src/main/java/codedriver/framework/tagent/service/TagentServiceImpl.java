@@ -38,6 +38,8 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * @author lvzk
  * @since 2021/8/23 17:39
@@ -93,12 +95,22 @@ public class TagentServiceImpl implements TagentService {
             tagent.setId(oldTagent.getId());
         }
         tagentMapper.replaceTagent(tagent);
-        //删除旧账号
+
         List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
         List<String> ipList = new ArrayList<>(tagent.getIpList());
+        List<String> insertTagentIpList = new ArrayList<>(tagent.getIpList());
+
         if (CollectionUtils.isNotEmpty(oldIpList)) {
+            //删除旧tagentIp
+            List<String> deleteTagentIpList = oldIpList.stream().filter(item -> !ipList.contains(item)).collect(toList());
+             insertTagentIpList = ipList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
+            if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
+                tagentMapper.deleteTagentIpList(tagent.getId(), deleteTagentIpList);
+            }
+
+            //删除旧账号
             for (String ip : oldIpList) {
-                AccountVo oldAccountVo = resourceCenterMapper.getAccountByTagentIpAndPort(ip,tagent.getPort());
+                AccountVo oldAccountVo = resourceCenterMapper.getAccountByTagentIpAndPort(ip, tagent.getPort());
                 if (oldAccountVo != null) {
                     if (StringUtils.equals(oldAccountVo.getPasswordPlain(), tagent.getCredential()) && ipList.contains(ip)) {
                         ipList.remove(ip);
@@ -111,14 +123,21 @@ public class TagentServiceImpl implements TagentService {
                     resourceCenterMapper.deleteAccountIpByAccountId(accountId);
                 }
             }
+
         }
-        tagentMapper.deleteAllIpByTagentId(tagent.getId());
-        if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
-            tagentMapper.insertTagentIp(tagent.getId(), tagent.getIpList());
+
+        //保存账号
+        if (CollectionUtils.isNotEmpty(ipList)) {
             for (String ip : ipList) {
                 saveTagentAccount(protocolVo, ip, tagent.getPort(), tagent.getCredential());
             }
         }
+
+        //保存tagentIp
+        if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
+            tagentMapper.insertTagentIp(tagent.getId(),insertTagentIpList);
+        }
+
         return tagent.getId();
     }
 

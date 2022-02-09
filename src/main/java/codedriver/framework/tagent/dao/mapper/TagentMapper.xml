@@ -576,6 +576,16 @@
         where `id` = #{value}
     </delete>
 
+    <delete id="deleteTagentIpList">
+        DELETE
+        FROM tagent_ip
+        WHERE
+        <foreach collection="deleteTagentIpList" item="ip" separator=",">
+            tagent_id = #{tagentId}
+            AND ip=#{ip}
+        </foreach>
+    </delete>
+
     <insert id="insertTagentIp">
         INSERT INTO tagent_ip (`tagent_id`,`ip`)
         VALUES

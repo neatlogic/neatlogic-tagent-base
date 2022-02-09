@@ -1,6 +1,5 @@
 package codedriver.framework.tagent.dao.mapper;
 
-import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
 import codedriver.framework.dto.runner.GroupNetworkVo;
 import codedriver.framework.tagent.dto.TagentOSVo;
 import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
@@ -77,4 +76,5 @@ public interface TagentMapper {
 
     void deleteTagentVersionById(Long id);
 
+    void deleteTagentIpList(@Param("tagentId") Long tagentId, @Param("deleteTagentIpList") List<String> deleteTagentIpList);
 }
