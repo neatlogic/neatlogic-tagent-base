@@ -103,7 +103,7 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(oldIpList)) {
             //删除旧tagentIp
             List<String> deleteTagentIpList = oldIpList.stream().filter(item -> !ipList.contains(item)).collect(toList());
-             insertTagentIpList = ipList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
+            insertTagentIpList = ipList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
             if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
                 tagentMapper.deleteTagentIpList(tagent.getId(), deleteTagentIpList);
             }
@@ -135,7 +135,7 @@ public class TagentServiceImpl implements TagentService {
 
         //保存tagentIp
         if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
-            tagentMapper.insertTagentIp(tagent.getId(),insertTagentIpList);
+            tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
         }
 
         return tagent.getId();
