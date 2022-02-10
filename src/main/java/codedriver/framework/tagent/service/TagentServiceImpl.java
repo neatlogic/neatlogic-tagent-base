@@ -97,7 +97,7 @@ public class TagentServiceImpl implements TagentService {
             account.setId(oldAccount.getId());
         }
         if (!account.equals(oldAccount)) {
-            resourceCenterMapper.replaceAccount(account);
+            resourceCenterMapper.insertAccount(account);
             resourceCenterMapper.insertAccountIp(new AccountIpVo(account.getId(), account.getIp()));
         }
         tagent.setAccountId(account.getId());
