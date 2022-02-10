@@ -113,7 +113,6 @@ public class TagentServiceImpl implements TagentService {
 
         List<AccountVo> replaceAccountList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(oldIpList)) {
-
             deleteTagentIpList = oldIpList.stream().filter(item -> !tagent.getIpList().contains(item)).collect(toList());
             insertTagentIpList = tagent.getIpList().stream().filter(item -> !oldIpList.contains(item)).collect(toList());
             if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
@@ -146,6 +145,12 @@ public class TagentServiceImpl implements TagentService {
                 if (oldAccountVo == null || !oldAccountVo.equals(newAccountVo)) {
                     replaceAccountList.add(newAccountVo);
                 }
+            }
+        } else if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
+            for (String ip : tagent.getIpList()) {
+                AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
+                replaceAccountList.add(newAccountVo);
+                insertTagentIpList.add(ip);
             }
         }
         if (CollectionUtils.isNotEmpty(replaceAccountList)) {
