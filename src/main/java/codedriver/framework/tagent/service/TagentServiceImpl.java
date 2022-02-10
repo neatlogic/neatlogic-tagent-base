@@ -140,6 +140,9 @@ public class TagentServiceImpl implements TagentService {
                 AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
                 AccountVo oldAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(ip, protocolVo.getPort());
                 if (oldAccountVo != null) {
+                    oldAccountVo.setIp(ip);
+                    oldAccountVo.setProtocolId(protocolVo.getId());
+                    oldAccountVo.setProtocolPort(protocolVo.getPort());
                     newAccountVo.setId(oldAccountVo.getId());
                 }
                 if (oldAccountVo == null || !oldAccountVo.equals(newAccountVo)) {
