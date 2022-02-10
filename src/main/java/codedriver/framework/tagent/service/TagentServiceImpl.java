@@ -104,8 +104,10 @@ public class TagentServiceImpl implements TagentService {
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
             tagent.setId(oldTagent.getId());
+            tagentMapper.updateTagent(tagent);
+        } else {
+            tagentMapper.insertTagent(tagent);
         }
-        tagentMapper.replaceTagent(tagent);
 
         List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
         List<String> deleteTagentIpList = new ArrayList<>();
