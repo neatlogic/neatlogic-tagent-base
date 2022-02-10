@@ -147,7 +147,7 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
         } else {
-            //更新账号
+            //新增账号
             if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
                 for (String ip : tagent.getIpList()) {
                     AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
