@@ -310,5 +310,4 @@ public class TagentServiceImpl implements TagentService {
         }
         return osType;
     }
-
 }
