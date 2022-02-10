@@ -146,12 +146,16 @@ public class TagentServiceImpl implements TagentService {
                     replaceAccountList.add(newAccountVo);
                 }
             }
-        } else if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
-            for (String ip : tagent.getIpList()) {
-                AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
-                replaceAccountList.add(newAccountVo);
-                insertTagentIpList.add(ip);
+        } else {
+            //更新账号
+            if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
+                for (String ip : tagent.getIpList()) {
+                    AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
+                    replaceAccountList.add(newAccountVo);
+                    insertTagentIpList.add(ip);
+                }
             }
+
         }
         if (CollectionUtils.isNotEmpty(replaceAccountList)) {
             for (AccountVo accountVo : replaceAccountList) {
