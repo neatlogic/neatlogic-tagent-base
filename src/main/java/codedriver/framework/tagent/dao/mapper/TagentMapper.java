@@ -62,7 +62,7 @@ public interface TagentMapper {
 
     void insertUpgradeAudit(TagentUpgradeAuditVo audit);
 
-    int replaceTagent(TagentVo tagent);
+    int insertTagent(TagentVo tagent);
 
     void replaceTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
 
