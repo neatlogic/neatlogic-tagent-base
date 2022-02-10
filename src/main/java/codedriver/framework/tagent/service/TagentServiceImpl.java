@@ -147,22 +147,22 @@ public class TagentServiceImpl implements TagentService {
                     replaceAccountList.add(newAccountVo);
                 }
             }
-            if (CollectionUtils.isNotEmpty(replaceAccountList)) {
-                for (AccountVo accountVo : replaceAccountList) {
-                    resourceCenterMapper.replaceAccount(accountVo);
-                    resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
-                }
-            }
-
-            //保存tagentIp
-            if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
-                tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
-            }
-
-            return tagent.getId();
         }
-        return null;
+        if (CollectionUtils.isNotEmpty(replaceAccountList)) {
+            for (AccountVo accountVo : replaceAccountList) {
+                resourceCenterMapper.replaceAccount(accountVo);
+                resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
+            }
+        }
+
+        //保存tagentIp
+        if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
+            tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+        }
+
+        return tagent.getId();
     }
+
 
     @Override
     public void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
