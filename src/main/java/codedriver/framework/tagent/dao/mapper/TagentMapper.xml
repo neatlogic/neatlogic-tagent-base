@@ -448,9 +448,9 @@
             AND t.port=#{port}
     </select>
 
-    <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
+    <insert id="replaceTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
             keyProperty="id" keyColumn="id">
-        INSERT IGNORE INTO tagent (`id`,
+        REPLACE INTO tagent (`id`,
         `ip`,
         `port`,
         `name`,
