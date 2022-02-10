@@ -111,7 +111,9 @@ public class TagentServiceImpl implements TagentService {
         List<String> deleteTagentIpList = new ArrayList<>();
         List<String> insertTagentIpList = new ArrayList<>();
 
-        List<AccountVo> replaceAccountList = new ArrayList<>();
+        List<AccountVo> insertAccountList = new ArrayList<>();
+        List<AccountVo> updateAccountList = new ArrayList<>();
+
         if (CollectionUtils.isNotEmpty(oldIpList)) {
             deleteTagentIpList = oldIpList.stream().filter(item -> !tagent.getIpList().contains(item)).collect(toList());
             insertTagentIpList = tagent.getIpList().stream().filter(item -> !oldIpList.contains(item)).collect(toList());
@@ -122,6 +124,7 @@ public class TagentServiceImpl implements TagentService {
                 }
                 //清除不存在的ip对应的账号
                 for (String ip : deleteTagentIpList) {
+                    //存在情况：之前注册的ipList含有tagent的ip，现在注册的ipList不含tagent的ip，加此判断，防止误删
                     if (StringUtils.equals(ip, tagent.getIp())) {
                         continue;
                     }
@@ -148,29 +151,38 @@ public class TagentServiceImpl implements TagentService {
                     oldAccountVo.setProtocolPort(protocolVo.getPort());
                     newAccountVo.setId(oldAccountVo.getId());
                 }
-                if (oldAccountVo == null || !oldAccountVo.equals(newAccountVo)) {
-                    replaceAccountList.add(newAccountVo);
+                if (oldAccountVo == null) {
+                    insertAccountList.add(newAccountVo);
+                } else if (!oldAccountVo.equals(newAccountVo)) {
+                    updateAccountList.add(newAccountVo);
                 }
+
             }
         } else {
             //新增账号
             if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
                 for (String ip : tagent.getIpList()) {
                     AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
-                    replaceAccountList.add(newAccountVo);
+                    insertAccountList.add(newAccountVo);
                     insertTagentIpList.add(ip);
                 }
             }
-
         }
-        if (CollectionUtils.isNotEmpty(replaceAccountList)) {
-            for (AccountVo accountVo : replaceAccountList) {
-                resourceCenterMapper.replaceAccount(accountVo);
+
+        if (CollectionUtils.isNotEmpty(insertAccountList)) {
+            for (AccountVo accountVo : insertAccountList) {
+                resourceCenterMapper.insertAccount(accountVo);
                 resourceCenterMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
             }
         }
+        if (CollectionUtils.isNotEmpty(updateAccountList)) {
+            for (AccountVo accountVo : updateAccountList) {
+                accountVo.setName(null);
+                resourceCenterMapper.updateAccount(accountVo);
+            }
+        }
 
-        //保存tagentIp
+        //新增tagentIp
         if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
             tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
         }
