@@ -122,7 +122,7 @@ public class TagentServiceImpl implements TagentService {
                 }
                 //清除不存在的ip对应的账号
                 for (String ip : deleteTagentIpList) {
-                    AccountVo oldAccountVo = resourceCenterMapper.getAccountByTagentIpAndPort(ip, tagent.getPort());
+                    AccountVo oldAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
                     if (oldAccountVo != null) {
                         Long accountId = oldAccountVo.getId();
                         resourceCenterMapper.deleteAccountById(accountId);
