@@ -98,7 +98,7 @@ public class TagentServiceImpl implements TagentService {
         }
         if (!account.equals(oldAccount)) {
             resourceCenterMapper.replaceAccount(account);
-            resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(account.getId(), account.getIp()));
+            resourceCenterMapper.replaceAccountIp(new AccountIpVo(account.getId(), account.getIp()));
         }
         tagent.setAccountId(account.getId());
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
@@ -163,7 +163,7 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(replaceAccountList)) {
             for (AccountVo accountVo : replaceAccountList) {
                 resourceCenterMapper.replaceAccount(accountVo);
-                resourceCenterMapper.insertIgnoreAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
+                resourceCenterMapper.replaceAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
             }
         }
 
