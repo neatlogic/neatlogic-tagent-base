@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -97,8 +98,8 @@ public class TagentServiceImpl implements TagentService {
             account.setId(oldAccount.getId());
         }
         if (!account.equals(oldAccount)) {
-            resourceCenterMapper.insertAccount(account);
             resourceCenterMapper.insertAccountIp(new AccountIpVo(account.getId(), account.getIp()));
+            resourceCenterMapper.insertAccount(account);
         }
         tagent.setAccountId(account.getId());
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
@@ -176,6 +177,7 @@ public class TagentServiceImpl implements TagentService {
         }
 
         if (CollectionUtils.isNotEmpty(insertAccountList)) {
+            insertAccountList = insertAccountList.stream().filter(s -> !StringUtils.equals(s.getIp(), tagent.getIp())).collect(Collectors.toList());
             for (AccountVo accountVo : insertAccountList) {
                 resourceCenterMapper.insertAccount(accountVo);
                 resourceCenterMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
