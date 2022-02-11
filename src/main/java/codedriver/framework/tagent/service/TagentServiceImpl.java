@@ -110,15 +110,19 @@ public class TagentServiceImpl implements TagentService {
         }
 
         List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+        List<String> newIpList = new ArrayList<>();
         List<String> deleteTagentIpList = new ArrayList<>();
         List<String> insertTagentIpList = new ArrayList<>();
 
         List<AccountVo> insertAccountList = new ArrayList<>();
         List<AccountVo> updateAccountList = new ArrayList<>();
 
+        if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
+            newIpList.addAll(tagent.getIpList());
+        }
         if (CollectionUtils.isNotEmpty(oldIpList)) {
-            deleteTagentIpList = oldIpList.stream().filter(item -> !tagent.getIpList().contains(item)).collect(toList());
-            insertTagentIpList = tagent.getIpList().stream().filter(item -> !oldIpList.contains(item)).collect(toList());
+            deleteTagentIpList = oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList());
+            insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
             if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
                 //清除不存在的ip
                 for (String ip : deleteTagentIpList) {
@@ -162,8 +166,8 @@ public class TagentServiceImpl implements TagentService {
             }
         } else {
             //新增账号
-            if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
-                for (String ip : tagent.getIpList()) {
+            if (CollectionUtils.isNotEmpty(newIpList)) {
+                for (String ip : newIpList) {
                     AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
                     insertAccountList.add(newAccountVo);
                     insertTagentIpList.add(ip);
