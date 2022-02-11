@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -168,7 +169,9 @@ public class TagentServiceImpl implements TagentService {
             if (CollectionUtils.isNotEmpty(newIpList)) {
                 for (String ip : newIpList) {
                     AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
-                    insertAccountList.add(newAccountVo);
+                    if (!insertAccountList.stream().map(AccountVo::getIp).collect(Collectors.toList()).contains(ip)) {
+                        insertAccountList.add(newAccountVo);
+                    }
                     insertTagentIpList.add(ip);
                 }
             }
