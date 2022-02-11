@@ -104,8 +104,10 @@ public class TagentServiceImpl implements TagentService {
             oldAccount.setProtocolId(protocolVo.getId());
             oldAccount.setProtocolPort(protocolVo.getPort());
             account.setId(oldAccount.getId());
-            updateAccountList.add(account);
-        }else {
+            if (!oldAccount.equals(account)) {
+                updateAccountList.add(account);
+            }
+        } else {
             insertAccountList.add(account);
         }
         tagent.setAccountId(account.getId());
