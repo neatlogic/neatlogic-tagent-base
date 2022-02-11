@@ -50,6 +50,10 @@ public interface TagentMapper {
 
     TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);
 
+    List<String> getTagentIpListByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    TagentVo getTagentByIp(String ip);
+
     int getTagentPkgFileIdUsedCount(Long fileId);
 
     void insertOs(TagentOSVo newOS);
@@ -60,7 +64,7 @@ public interface TagentMapper {
 
     void insertUpgradeAudit(TagentUpgradeAuditVo audit);
 
-    int replaceTagent(TagentVo tagent);
+    int insertTagent(TagentVo tagent);
 
     void replaceTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
 
@@ -74,4 +78,5 @@ public interface TagentMapper {
 
     void deleteTagentVersionById(Long id);
 
+    void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
 }
