@@ -456,7 +456,7 @@
         FROM tagent t
                  LEFT JOIN tagent_ip ti ON ti.tagent_id = t.id
         WHERE
-            ti.ip = #{VALUES}
+            ti.ip = #{VALUE}
     </select>
 
     <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
