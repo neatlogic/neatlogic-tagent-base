@@ -448,19 +448,18 @@
             AND t.port=#{port}
     </select>
 
-    <select id="getTagentByIp" resultType="codedriver.framework.tagent.dto.TagentVo">
+    <select id="getTagentListByAccountId" resultType="codedriver.framework.tagent.dto.TagentVo">
         SELECT t.id,
                t.`name`,
                t.ip,
                t.`port`
         FROM tagent t
                  LEFT JOIN tagent_ip ti ON ti.tagent_id = t.id
-        WHERE
-            ti.ip = #{VALUE}
+                 LEFT JOIN cmdb_resourcecenter_account_ip a ON a.ip = ti.ip
+        WHERE a.account_id = #{value}
     </select>
 
-    <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" useGeneratedKeys="true"
-            keyProperty="id" keyColumn="id">
+    <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" >
         INSERT INTO tagent (`id`,
         `ip`,
         `port`,

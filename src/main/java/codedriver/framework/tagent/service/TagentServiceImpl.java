@@ -89,6 +89,14 @@ public class TagentServiceImpl implements TagentService {
             resourceCenterMapper.insertAccountProtocol(new AccountProtocolVo("tagent"));
             protocolVo = resourceCenterMapper.getAccountProtocolVoByProtocolName("tagent");
         }
+        List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
+        List<String> newIpList = new ArrayList<>();
+        List<String> deleteTagentIpList = new ArrayList<>();
+        List<String> insertTagentIpList = new ArrayList<>();
+
+        List<AccountVo> insertAccountList = new ArrayList<>();
+        List<AccountVo> updateAccountList = new ArrayList<>();
+
         AccountVo account = new AccountVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
         AccountVo oldAccount = resourceCenterMapper.getAccountByTagentIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldAccount != null) {
@@ -96,10 +104,11 @@ public class TagentServiceImpl implements TagentService {
             oldAccount.setProtocolId(protocolVo.getId());
             oldAccount.setProtocolPort(protocolVo.getPort());
             account.setId(oldAccount.getId());
-        }
-        if (!account.equals(oldAccount)) {
-            resourceCenterMapper.insertAccountIp(new AccountIpVo(account.getId(), account.getIp()));
-            resourceCenterMapper.insertAccount(account);
+            if (!oldAccount.equals(account)) {
+                updateAccountList.add(account);
+            }
+        } else {
+            insertAccountList.add(account);
         }
         tagent.setAccountId(account.getId());
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
@@ -109,14 +118,6 @@ public class TagentServiceImpl implements TagentService {
         } else {
             tagentMapper.insertTagent(tagent);
         }
-
-        List<String> oldIpList = tagentMapper.getTagentIpListByTagentIpAndPort(tagent.getIp(), tagent.getPort());
-        List<String> newIpList = new ArrayList<>();
-        List<String> deleteTagentIpList = new ArrayList<>();
-        List<String> insertTagentIpList = new ArrayList<>();
-
-        List<AccountVo> insertAccountList = new ArrayList<>();
-        List<AccountVo> updateAccountList = new ArrayList<>();
 
         if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
             newIpList.addAll(tagent.getIpList());
@@ -170,14 +171,15 @@ public class TagentServiceImpl implements TagentService {
             if (CollectionUtils.isNotEmpty(newIpList)) {
                 for (String ip : newIpList) {
                     AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
-                    insertAccountList.add(newAccountVo);
+                    if (!insertAccountList.stream().map(AccountVo::getIp).collect(Collectors.toList()).contains(ip)) {
+                        insertAccountList.add(newAccountVo);
+                    }
                     insertTagentIpList.add(ip);
                 }
             }
         }
 
         if (CollectionUtils.isNotEmpty(insertAccountList)) {
-            insertAccountList = insertAccountList.stream().filter(s -> !StringUtils.equals(s.getIp(), tagent.getIp())).collect(Collectors.toList());
             for (AccountVo accountVo : insertAccountList) {
                 resourceCenterMapper.insertAccount(accountVo);
                 resourceCenterMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
