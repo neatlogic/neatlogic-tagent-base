@@ -306,7 +306,7 @@ public class TagentServiceImpl implements TagentService {
     public JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception {
         ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(action);
         if (tagentHandler == null) {
-            throw new TagentActionNotFoundException(action);
+            throw new TagentActionNotFoundEcexption(action);
         }
         TagentVo tagentVo = tagentMapper.getTagentById(message.getTagentId());
         if (tagentVo == null) {
