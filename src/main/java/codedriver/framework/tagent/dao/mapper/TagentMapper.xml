@@ -459,6 +459,19 @@
         WHERE a.account_id = #{value}
     </select>
 
+    <select id="getTagentListByAccountIdList" resultType="codedriver.framework.tagent.dto.TagentVo">
+        SELECT t.id,
+               t.`name`,
+               t.ip,
+               t.`port`,
+               t.`account_id` as accountId
+        FROM tagent t
+        WHERE t.`account_id` in
+        <foreach collection="list" item="accountId" open="(" separator="," close=")">
+            #{accountId}
+        </foreach>
+    </select>
+
     <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" >
         INSERT INTO tagent (`id`,
         `ip`,
