@@ -325,11 +325,6 @@
           and `osbit` = #{osbit}
     </select>
 
-    <select id="searchTagentIdListByIpListAndPort" resultType="java.lang.Long">
-        select `ip`
-        from tagent
-
-    </select>
     <select id="getTagentByAccountId" resultType="codedriver.framework.tagent.dto.TagentVo">
         SELECT ft.`id`,
                ft.`ip`,

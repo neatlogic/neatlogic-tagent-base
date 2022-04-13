@@ -32,8 +32,6 @@ public interface TagentMapper {
 
     List<TagentUpgradeAuditVo> searchTagenUpgradeAuditDetailList(TagentUpgradeAuditVo auditVo);
 
-    List<Long> searchTagentIdListByIpListAndPort(@Param("ipList") List<String> ipList, @Param("portList") List<String> portList);
-
     Long getAccountIdById(Long id);
 
     TagentOSVo getOsByName(String toLowerCase);
