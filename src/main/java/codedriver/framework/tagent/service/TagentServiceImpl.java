@@ -76,7 +76,7 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
         }
-        return tagentMapper.updateTagentById(tagent);
+        return tagentMapper.updateTagent(tagent);
     }
 
     @Override

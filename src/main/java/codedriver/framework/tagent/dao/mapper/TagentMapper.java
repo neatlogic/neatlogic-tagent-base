@@ -58,6 +58,8 @@ public interface TagentMapper {
 
     int getTagentPkgFileIdUsedCount(Long fileId);
 
+    Long getTagentIdByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
     void insertOs(TagentOSVo newOS);
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
