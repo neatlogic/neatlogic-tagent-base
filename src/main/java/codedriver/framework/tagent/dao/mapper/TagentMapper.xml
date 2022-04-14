@@ -468,12 +468,6 @@
         UPDATE
         tagent
         SET
-        <if test="ip !=null and ip !='' ">
-            `ip` = #{ip},
-        </if>
-        <if test="port != null">
-            `port` = #{port},
-        </if>
         <if test="name !=null and name !='' ">
             `name` = #{name},
         </if>
@@ -526,6 +520,17 @@
         WHERE
         `id` = #{id}
     </update>
+
+    <update id="updateTagentStatus">
+        UPDATE
+        tagent
+        SET `status` = #{status}
+        <if test="disConnectReason !=null ">
+            , `disconnect_reason` = #{disConnectReason}
+        </if>
+        where `id`=#{id}
+    </update>
+
     <insert id="replaceTagentAuditDetail" parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
         replace into tagent_upgrade_detail(`id`, `audit_id`, `ip`, `port`, `source_version`, `target_version`, `result`,
                                            `status`)

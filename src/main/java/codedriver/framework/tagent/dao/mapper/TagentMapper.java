@@ -72,7 +72,7 @@ public interface TagentMapper {
 
     int updateTagent(TagentVo tagentVo);
 
-    int updateTagentById(TagentVo tagent);
+    void updateTagentStatus(TagentVo tagent);
 
     void deleteTagentById(Long id);
 
