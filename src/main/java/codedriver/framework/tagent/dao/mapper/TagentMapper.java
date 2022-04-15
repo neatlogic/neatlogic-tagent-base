@@ -32,8 +32,6 @@ public interface TagentMapper {
 
     List<TagentUpgradeAuditVo> searchTagenUpgradeAuditDetailList(TagentUpgradeAuditVo auditVo);
 
-    List<Long> searchTagentIdListByIpListAndPort(@Param("ipList") List<String> ipList, @Param("portList") List<String> portList);
-
     Long getAccountIdById(Long id);
 
     TagentOSVo getOsByName(String toLowerCase);
@@ -58,6 +56,8 @@ public interface TagentMapper {
 
     int getTagentPkgFileIdUsedCount(Long fileId);
 
+    Long getTagentIdByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
     void insertOs(TagentOSVo newOS);
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
@@ -70,9 +70,9 @@ public interface TagentMapper {
 
     void replaceTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
 
-    int updateTagent(TagentVo tagentVo);
+    int updateTagentById(TagentVo tagentVo);
 
-    int updateTagentById(TagentVo tagent);
+    void updateTagentStatusAndDisConnectReasonById(@Param("status") String status, @Param("disConnectReason") String disConnectReason, @Param("id") Long id);
 
     void deleteTagentById(Long id);
 

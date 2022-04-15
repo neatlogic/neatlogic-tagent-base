@@ -114,7 +114,7 @@ public class TagentServiceImpl implements TagentService {
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
         if (oldTagent != null) {
             tagent.setId(oldTagent.getId());
-            tagentMapper.updateTagent(tagent);
+            tagentMapper.updateTagentById(tagent);
         } else {
             tagentMapper.insertTagent(tagent);
         }
