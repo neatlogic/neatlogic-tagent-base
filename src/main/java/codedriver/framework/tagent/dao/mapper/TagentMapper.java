@@ -72,7 +72,7 @@ public interface TagentMapper {
 
     int updateTagent(TagentVo tagentVo);
 
-    void updateTagentStatus(TagentVo tagent);
+    void updateTagentStatusAndDisConnectReasonById(@Param("status") String status, @Param("disConnectReason") String disConnectReason, @Param("id") Long id);
 
     void deleteTagentById(Long id);
 
@@ -81,4 +81,6 @@ public interface TagentMapper {
     void deleteTagentVersionById(Long id);
 
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
+
+
 }

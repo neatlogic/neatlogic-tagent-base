@@ -521,7 +521,7 @@
         `id` = #{id}
     </update>
 
-    <update id="updateTagentStatus">
+    <update id="updateTagentStatusAndDisConnectReasonById">
         UPDATE
         tagent
         SET `status` = #{status}
