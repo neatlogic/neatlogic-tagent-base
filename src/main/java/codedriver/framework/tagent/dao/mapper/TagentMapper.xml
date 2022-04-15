@@ -464,7 +464,7 @@
         NOW(3))
     </insert>
 
-    <update id="updateTagent" parameterType="codedriver.framework.tagent.dto.TagentVo">
+    <update id="updateTagentById" parameterType="codedriver.framework.tagent.dto.TagentVo">
         UPDATE
         tagent
         SET
