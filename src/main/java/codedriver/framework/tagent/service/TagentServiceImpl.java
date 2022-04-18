@@ -125,27 +125,8 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(oldIpList)) {
             deleteTagentIpList = oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList());
             insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
-            if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
-                //清除不存在的ip
-                for (String ip : deleteTagentIpList) {
-                    tagentMapper.deleteTagentIp(tagent.getId(), ip);
-                }
-                //清除不存在的ip对应的账号
-                for (String ip : deleteTagentIpList) {
-                    //存在情况：之前注册的ipList含有tagent的ip，现在注册的ipList不含tagent的ip，加此判断，防止误删
-                    if (StringUtils.equals(ip, tagent.getIp())) {
-                        continue;
-                    }
-                    AccountVo oldAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
-                    if (oldAccountVo != null) {
-                        Long accountId = oldAccountVo.getId();
-                        resourceCenterMapper.deleteAccountById(accountId);
-                        resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
-                        resourceCenterMapper.deleteAccountTagByAccountId(accountId);
-                        resourceCenterMapper.deleteAccountIpByAccountId(accountId);
-                    }
-                }
-            }
+            deleteTagentIpList(deleteTagentIpList, tagent);
+
 
             //新增和更新账号
             oldIpList.removeAll(deleteTagentIpList);
@@ -200,6 +181,30 @@ public class TagentServiceImpl implements TagentService {
         return tagent.getId();
     }
 
+    @Override
+    public void deleteTagentIpList(List<String> deleteTagentIpList, TagentVo tagent) {
+        if (CollectionUtils.isNotEmpty(deleteTagentIpList)) {
+            //清除不存在的ip
+            for (String ip : deleteTagentIpList) {
+                tagentMapper.deleteTagentIp(tagent.getId(), ip);
+            }
+            //清除不存在的ip对应的账号
+            for (String ip : deleteTagentIpList) {
+                //存在情况：之前注册的ipList含有tagent的ip，现在注册的ipList不含tagent的ip，加此判断，防止误删
+                if (StringUtils.equals(ip, tagent.getIp())) {
+                    continue;
+                }
+                AccountVo oldAccountVo = resourceCenterMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
+                if (oldAccountVo != null) {
+                    Long accountId = oldAccountVo.getId();
+                    resourceCenterMapper.deleteAccountById(accountId);
+                    resourceCenterMapper.deleteResourceAccountByAccountId(accountId);
+                    resourceCenterMapper.deleteAccountTagByAccountId(accountId);
+                    resourceCenterMapper.deleteAccountIpByAccountId(accountId);
+                }
+            }
+        }
+    }
 
     @Override
     public void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
