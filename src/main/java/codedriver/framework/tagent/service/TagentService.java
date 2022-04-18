@@ -10,6 +10,8 @@ import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import com.alibaba.fastjson.JSONObject;
 
+import java.util.List;
+
 /**
  * @author lvzk
  * @since 2021/8/23 17:40
@@ -31,4 +33,12 @@ public interface TagentService {
      * @param action  执行动作
      */
     JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception;
+
+
+    /**
+     * 删除tagent 包含ip（ipList）
+     * @param deleteTagentIpList
+     * @param tagent
+     */
+    void deleteTagentIpList(List<String> deleteTagentIpList, TagentVo tagent);
 }
