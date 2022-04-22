@@ -15,7 +15,7 @@ import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
-import codedriver.framework.exception.runner.RunnerUrlIllegalException;
+import codedriver.framework.exception.runner.RunnerUrlIsNullException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
 import codedriver.framework.file.core.IFileStorageHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -24,6 +24,7 @@ import codedriver.framework.integration.authentication.enums.AuthenticateType;
 import codedriver.framework.tagent.dao.mapper.TagentMapper;
 import codedriver.framework.tagent.dto.*;
 import codedriver.framework.tagent.enums.TagentAction;
+import codedriver.framework.tagent.enums.TagentUpgradeStatus;
 import codedriver.framework.tagent.exception.*;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
@@ -69,8 +70,7 @@ public class TagentServiceImpl implements TagentService {
                 if (os != null) {
                     tagent.setOsId(os.getId());
                 } else {
-                    TagentOSVo newOS = new TagentOSVo();
-                    newOS.setName(tagentVo.getOsType());
+                    TagentOSVo newOS = new TagentOSVo(tagentVo.getOsType());
                     tagentMapper.insertOs(newOS);
                     tagent.setOsId(newOS.getId());
                 }
@@ -80,7 +80,7 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public Long saveTagent(TagentVo tagent) {
+    public Long saveTagentAndAccount(TagentVo tagent) {
         if (StringUtils.isBlank(tagent.getIp())) {
             throw new TagentIpNotFoundException(tagent);
         }
@@ -116,6 +116,7 @@ public class TagentServiceImpl implements TagentService {
             tagent.setId(oldTagent.getId());
             tagentMapper.updateTagentById(tagent);
         } else {
+            tagent.setIsFirstCreate(1);
             tagentMapper.insertTagent(tagent);
         }
 
@@ -126,7 +127,6 @@ public class TagentServiceImpl implements TagentService {
             deleteTagentIpList = oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList());
             insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
             deleteTagentIpList(deleteTagentIpList, tagent);
-
 
             //新增和更新账号
             oldIpList.removeAll(deleteTagentIpList);
@@ -210,16 +210,10 @@ public class TagentServiceImpl implements TagentService {
     public void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
 
         String upgradeResult = StringUtils.EMPTY;
-        Boolean upgradeFlag = false;
-        TagentUpgradeAuditVo tagentAudit = new TagentUpgradeAuditVo();
-        tagentAudit.setAuditId(auditId);
-        tagentAudit.setIp(tagentVo.getIp());
-        tagentAudit.setPort(tagentVo.getPort());
+        boolean upgradeFlag = false;
+        TagentUpgradeAuditVo tagentAudit = new TagentUpgradeAuditVo(auditId, tagentVo.getIp(), tagentVo.getPort(), tagentVo.getVersion(), targetVersion, TagentUpgradeStatus.WORKING.getValue());
         //插入此次升级记录详情
-        tagentAudit.setSourceVersion(tagentVo.getVersion());
-        tagentAudit.setTargetVersion(targetVersion);
-        tagentAudit.setStatus("working");
-        tagentMapper.replaceTagentAuditDetail(tagentAudit);
+        tagentMapper.insertTagentAuditDetail(tagentAudit);
         try {
             if (versionVo == null) {
                 throw new TagentPkgVersionAndDefaultVersionAreNotfoundException(targetVersion);
@@ -270,9 +264,9 @@ public class TagentServiceImpl implements TagentService {
         } catch (Exception e) {
             upgradeResult = e.getMessage();
         } finally {
-            tagentAudit.setStatus(upgradeFlag ? "successed" : "failed");
+            tagentAudit.setStatus(upgradeFlag ? TagentUpgradeStatus.SUCCEED.getValue() : TagentUpgradeStatus.FAILED.getValue());
             tagentAudit.setResult(upgradeResult);
-            tagentMapper.replaceTagentAuditDetail(tagentAudit);
+            tagentMapper.updateTagentAuditDetailStateAndResultById(tagentAudit.getId(),tagentAudit.getStatus(),tagentAudit.getResult());
         }
     }
 
@@ -322,7 +316,7 @@ public class TagentServiceImpl implements TagentService {
             throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
         }
         if (StringUtils.isBlank(runnerVo.getUrl())) {
-            throw new RunnerUrlIllegalException(runnerVo.getId());
+            throw new RunnerUrlIsNullException(runnerVo.getId());
         }
         return tagentHandler.execTagentCmd(message, tagentVo, runnerVo);
     }

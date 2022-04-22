@@ -18,12 +18,39 @@ import java.util.List;
  **/
 public interface TagentService {
 
-    int updateTagentById(TagentVo tagent);
+    /**
+     * 更新tagent信息（包括更新os信息，如果不存在os则insert后再绑定osId）
+     *
+     * @param tagentVo
+     * @return
+     */
+    int updateTagentById(TagentVo tagentVo);
 
-    Long saveTagent(TagentVo tagentVo);
+    /**
+     * 保存tagent和相关账号
+     *
+     * @param tagentVo
+     * @return
+     */
+    Long saveTagentAndAccount(TagentVo tagentVo);
 
+    /**
+     * 批量升级tagent
+     *
+     * @param tagentVo      tagentVo
+     * @param versionVo     安装包vo
+     * @param targetVersion 目标版本号
+     * @param auditId       升级记录id
+     */
     void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId);
 
+    /**
+     * 获取对应的安装包版本
+     *
+     * @param tagentVo      tagent
+     * @param targetVersion 目标版本号
+     * @return 匹配到的安装包vo
+     */
     TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion);
 
     /**
@@ -37,8 +64,9 @@ public interface TagentService {
 
     /**
      * 删除tagent 包含ip（ipList）
-     * @param deleteTagentIpList
-     * @param tagent
+     *
+     * @param deleteTagentIpList 需要删除的tagent ipList
+     * @param tagent             tagentVo
      */
     void deleteTagentIpList(List<String> deleteTagentIpList, TagentVo tagent);
 }

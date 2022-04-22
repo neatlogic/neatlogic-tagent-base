@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import java.util.List;
 
 public enum TagentUpgradeStatus implements IEnum {
-    SUCCESSED("successed", "成功"),
+    SUCCEED("succeed", "成功"),
     FAILED("failed", "失败"),
     WORKING("working", "进行中");
     private final String value;

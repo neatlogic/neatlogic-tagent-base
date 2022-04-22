@@ -39,6 +39,21 @@ public class TagentUpgradeAuditVo extends BaseEditorVo {
         return id;
     }
 
+    public TagentUpgradeAuditVo(Long auditId, String ip, Integer port, String sourceVersion, String targetVersion, String status) {
+        this.auditId = auditId;
+        this.ip = ip;
+        this.port = port;
+        this.sourceVersion = sourceVersion;
+        this.targetVersion = targetVersion;
+        this.status = status;
+
+    }
+
+    public TagentUpgradeAuditVo() {
+
+    }
+
+
     public void setId(Long id) {
         this.id = id;
     }
