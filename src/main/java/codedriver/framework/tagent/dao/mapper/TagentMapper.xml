@@ -540,19 +540,17 @@
     </update>
 
     <insert id="insertTagentAuditDetail" parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
-        replace
+        insert
         into tagent_upgrade_detail(`id`, `audit_id`, `ip`, `port`, `source_version`, `target_version`, `result`,
-                                           `status`)
-        values (
-        #{id},
-        #{auditId},
-        #{ip},
-        #{port},
-        #{sourceVersion},
-        #{targetVersion},
-        #{result},
-        #{status}
-        )
+                                   `status`)
+        values (#{id},
+                #{auditId},
+                #{ip},
+                #{port},
+                #{sourceVersion},
+                #{targetVersion},
+                #{result},
+                #{status})
     </insert>
 
     <delete id="deleteAllIpByTagentId">
