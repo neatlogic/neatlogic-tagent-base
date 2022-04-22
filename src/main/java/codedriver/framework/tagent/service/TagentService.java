@@ -37,18 +37,18 @@ public interface TagentService {
     /**
      * 批量升级tagent
      *
-     * @param tagentVo tagentVo
-     * @param versionVo 安装包vo
+     * @param tagentVo      tagentVo
+     * @param versionVo     安装包vo
      * @param targetVersion 目标版本号
-     * @param auditId 升级记录id
+     * @param auditId       升级记录id
      */
     void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId);
 
     /**
      * 获取对应的安装包版本
      *
-     * @param tagentVo tagent
-     * @param targetVersion 准备升级的版本号
+     * @param tagentVo      tagent
+     * @param targetVersion 目标版本号
      * @return 匹配到的安装包vo
      */
     TagentVersionVo findTagentPkgVersion(TagentVo tagentVo, String targetVersion);
@@ -66,7 +66,7 @@ public interface TagentService {
      * 删除tagent 包含ip（ipList）
      *
      * @param deleteTagentIpList 需要删除的tagent ipList
-     * @param tagent tagentVo
+     * @param tagent             tagentVo
      */
     void deleteTagentIpList(List<String> deleteTagentIpList, TagentVo tagent);
 }
