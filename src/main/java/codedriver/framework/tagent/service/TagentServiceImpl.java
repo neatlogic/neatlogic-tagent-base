@@ -128,7 +128,6 @@ public class TagentServiceImpl implements TagentService {
             insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
             deleteTagentIpList(deleteTagentIpList, tagent);
 
-
             //新增和更新账号
             oldIpList.removeAll(deleteTagentIpList);
             oldIpList.addAll(insertTagentIpList);
