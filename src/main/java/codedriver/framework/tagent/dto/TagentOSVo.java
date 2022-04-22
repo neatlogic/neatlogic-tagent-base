@@ -14,6 +14,13 @@ public class TagentOSVo extends BaseEditorVo {
     @EntityField(name = "描述", type = ApiParamType.STRING)
     private String description;
 
+    public TagentOSVo(String name) {
+        this.name = name;
+    }
+
+    public TagentOSVo() {
+    }
+
     public Long getId() {
         if(id == null){
             SnowflakeUtil.uniqueLong();

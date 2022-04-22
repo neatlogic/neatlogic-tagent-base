@@ -12,7 +12,7 @@ import java.util.List;
 public interface TagentMapper {
     List<TagentVo> searchTagent(TagentVo tagentVo);
 
-    List<String> searchTagentVersion();
+    List<String> getAllTagentVersion();
 
     List<TagentOSVo> searchTagentOSType();
 
@@ -28,9 +28,9 @@ public interface TagentMapper {
 
     List<TagentVersionVo> searchTagentPkgList(TagentVersionVo tagentVersion);
 
-    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditList(TagentUpgradeAuditVo auditVo);
+    List<TagentUpgradeAuditVo> searchTagentUpgradeAuditList(TagentUpgradeAuditVo auditVo);
 
-    List<TagentUpgradeAuditVo> searchTagenUpgradeAuditDetailList(TagentUpgradeAuditVo auditVo);
+    List<TagentUpgradeAuditVo> searchTagentUpgradeAuditDetailList(TagentUpgradeAuditVo auditVo);
 
     Long getAccountIdById(Long id);
 
