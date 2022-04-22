@@ -15,7 +15,7 @@ import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
-import codedriver.framework.exception.runner.RunnerUrlIllegalException;
+import codedriver.framework.exception.runner.RunnerUrlIsNullException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
 import codedriver.framework.file.core.IFileStorageHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
@@ -214,7 +214,7 @@ public class TagentServiceImpl implements TagentService {
         boolean upgradeFlag = false;
         TagentUpgradeAuditVo tagentAudit = new TagentUpgradeAuditVo(auditId, tagentVo.getIp(), tagentVo.getPort(), tagentVo.getVersion(), targetVersion, TagentUpgradeStatus.WORKING.getValue());
         //插入此次升级记录详情
-        tagentMapper.replaceTagentAuditDetail(tagentAudit);
+        tagentMapper.insertTagentAuditDetail(tagentAudit);
         try {
             if (versionVo == null) {
                 throw new TagentPkgVersionAndDefaultVersionAreNotfoundException(targetVersion);
@@ -267,7 +267,7 @@ public class TagentServiceImpl implements TagentService {
         } finally {
             tagentAudit.setStatus(upgradeFlag ? TagentUpgradeStatus.SUCCEED.getValue() : TagentUpgradeStatus.FAILED.getValue());
             tagentAudit.setResult(upgradeResult);
-            tagentMapper.replaceTagentAuditDetail(tagentAudit);
+            tagentMapper.updateTagentAuditDetailStateAndResultById(tagentAudit.getId(),tagentAudit.getStatus(),tagentAudit.getResult());
         }
     }
 
@@ -317,7 +317,7 @@ public class TagentServiceImpl implements TagentService {
             throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
         }
         if (StringUtils.isBlank(runnerVo.getUrl())) {
-            throw new RunnerUrlIllegalException(runnerVo.getId());
+            throw new RunnerUrlIsNullException(runnerVo.getId());
         }
         return tagentHandler.execTagentCmd(message, tagentVo, runnerVo);
     }

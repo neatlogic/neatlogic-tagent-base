@@ -68,7 +68,9 @@ public interface TagentMapper {
 
     int insertTagent(TagentVo tagent);
 
-    void replaceTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
+    void insertTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
+
+    void updateTagentAuditDetailStateAndResultById(@Param("id") Long id, @Param("status") String status, @Param("result") String result);
 
     int updateTagentById(TagentVo tagentVo);
 
