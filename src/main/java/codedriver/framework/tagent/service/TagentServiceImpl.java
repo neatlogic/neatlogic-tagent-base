@@ -116,6 +116,7 @@ public class TagentServiceImpl implements TagentService {
             tagent.setId(oldTagent.getId());
             tagentMapper.updateTagentById(tagent);
         } else {
+            tagent.setIsFirstCreate(1);
             tagentMapper.insertTagent(tagent);
         }
 
