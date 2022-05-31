@@ -34,9 +34,15 @@
         LEFT JOIN `runner` ar ON t.`runner_id` = ar.`id`
         LEFT JOIN `runnergroup` apg ON t.`runner_group_id` = apg.`id`
         LEFT JOIN `tagent_ip` ti ON t.`id` = ti.`tagent_id`
+        <if test="osName !=null">
+            LEFT JOIN `tagent_os` tos ON tos.`id` = t.`os_id`
+        </if>
         <where>
             <if test="osId !=null">
                 AND t.`os_id` = #{osId}
+            </if>
+            <if test="osName !=null">
+                LEFT JOIN `tagent_os` tos ON tos.`id` = t.`os_id`
             </if>
             <if test="version !=null and version !='' ">
                 AND t.`version` = #{version}
