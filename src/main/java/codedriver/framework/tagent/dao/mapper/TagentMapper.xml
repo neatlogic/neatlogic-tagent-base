@@ -42,7 +42,7 @@
                 AND t.`os_id` = #{osId}
             </if>
             <if test="osName !=null">
-                LEFT JOIN `tagent_os` tos ON tos.`id` = t.`os_id`
+                AND tos.`name` = #{osName}
             </if>
             <if test="version !=null and version !='' ">
                 AND t.`version` = #{version}
