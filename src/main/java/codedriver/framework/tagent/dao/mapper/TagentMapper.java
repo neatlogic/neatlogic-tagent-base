@@ -14,8 +14,6 @@ public interface TagentMapper {
 
     List<String> getAllTagentVersion();
 
-    List<TagentOSVo> searchTagentOSType();
-
     int searchTagentCount(TagentVo tagentVo);
 
     int searchTagentVersionCount();

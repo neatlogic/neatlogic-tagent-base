@@ -71,19 +71,19 @@
         from tagent
     </select>
 
-    <select id="searchTagentOSType" resultType="codedriver.framework.tagent.dto.TagentOSVo">
-        select `id`   as id,
-               `name` as name
-        from tagent_os
-    </select>
-
     <select id="searchTagentCount" resultType="int" parameterType="codedriver.framework.tagent.dto.TagentVo">
         select count(distinct t.`id`)
         from tagent t
         LEFT JOIN `tagent_ip` ti ON t.`id` = ti.`tagent_id`
+        <if test="osName !=null">
+            LEFT JOIN `tagent_os` tos ON tos.`id` = t.`os_id`
+        </if>
         <where>
             <if test="osId !=null">
                 AND t.`os_id` = #{osId}
+            </if>
+            <if test="osName !=null">
+                AND tos.`name` = #{osName}
             </if>
             <if test="version !=null and version !='' ">
                 AND t.`version` = #{version}
