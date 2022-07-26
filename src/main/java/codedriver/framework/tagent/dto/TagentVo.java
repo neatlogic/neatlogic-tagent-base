@@ -211,10 +211,7 @@ public class TagentVo extends BaseEditorVo {
     }
 
     public void setCredential(String credential) {
-        if (StringUtils.isNotBlank(credential) && credential.startsWith("{ENCRYPTED}")) {
-            credential = RC4Util.decrypt(encryptKey, credential.substring(11));
-        }
-        this.credential = credential;
+        this.credential = RC4Util.decrypt(encryptKey, credential);
     }
 
     public Long getAccountId() {
