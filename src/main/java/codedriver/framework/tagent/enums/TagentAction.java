@@ -11,7 +11,7 @@ public enum TagentAction implements IEnum {
     DOWNLOAD_LOG("downloadLog", "下载日志"),
     GET_CONFIG("getConfig", "获取配置"),
     SAVE_CONFIG("saveConfig", "保存日志"),
-    RESTART("restart", "重启"),
+    RELOAD("reload", "重启"),
     RESET_PASSWORD("resetPassword", "重置密码"),
     STATUS_CHECK("statusCheck", "检查状态"),
     UPGRADE("upgrade", "升级");
