@@ -12,7 +12,7 @@ public enum TagentAction implements IEnum {
     GET_CONFIG("getConfig", "获取配置"),
     SAVE_CONFIG("saveConfig", "保存日志"),
     RELOAD("reload", "重启"),
-    RESET_PASSWORD("resetPassword", "重置密码"),
+    RESET_CREDENTIAL("resetcred", "重置密码"),
     STATUS_CHECK("statusCheck", "检查状态"),
     UPGRADE("upgrade", "升级");
     private final String value;
