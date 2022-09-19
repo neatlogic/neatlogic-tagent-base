@@ -423,6 +423,51 @@
           and t.port = #{port}
     </select>
 
+    <select id="getTagentIdCountByRunnerGroupIdList" resultType="int">
+        SELECT count(t.id)
+        FROM tagent t
+        where t.runner_group_id in
+        <foreach collection="list" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getTagentIdListByRunnerGroupIdList" resultType="java.lang.Long">
+        SELECT t.id
+        FROM tagent t
+        where t.runner_group_id in
+        <foreach collection="list" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getTagentListByRunnerGroupIdList" resultType="codedriver.framework.tagent.dto.TagentVo">
+        SELECT t.id,
+        t.ip,
+        t.port,
+        t.name AS name,
+        t.version AS version,
+        t.os_type AS osType,
+        t.os_version AS osVersion,
+        t.osbit AS osbit,
+        t.account_id AS accountId,
+        t.status,
+        t.pcpu,
+        t.mem,
+        t.user AS user,
+        t.runner_id AS runnerId,
+        t.runner_ip AS runnerIp,
+        t.runner_port AS runnerPort,
+        t.runner_group_id AS runnerGroupId,
+        DATE_FORMAT(t.fcd, '%Y-%m-%d %H:%i:%s') AS fcd,
+        DATE_FORMAT(t.lcd, '%Y-%m-%d %H:%i:%s') AS lcd
+        FROM tagent t
+        where t.runner_group_id in
+        <foreach collection="list" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+    </select>
+
     <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" >
         INSERT INTO tagent (`id`,
         `ip`,

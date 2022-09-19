@@ -5,20 +5,29 @@
 
 package codedriver.framework.tagent.service;
 
+import codedriver.framework.asynchronization.threadlocal.TenantContext;
+import codedriver.framework.asynchronization.threadlocal.UserContext;
 import codedriver.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import codedriver.framework.cmdb.dto.resourcecenter.AccountVo;
+import codedriver.framework.cmdb.dto.resourcecenter.IpVo;
 import codedriver.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
+import codedriver.framework.common.util.FileUtil;
+import codedriver.framework.common.util.IpUtil;
+import codedriver.framework.common.util.PageUtil;
 import codedriver.framework.crossover.CrossoverServiceFactory;
 import codedriver.framework.dao.mapper.runner.RunnerMapper;
 import codedriver.framework.dto.RestVo;
+import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
 import codedriver.framework.exception.runner.RunnerUrlIsNullException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
+import codedriver.framework.file.core.FileTypeHandlerFactory;
 import codedriver.framework.file.core.IFileStorageHandler;
+import codedriver.framework.file.core.IFileTypeHandler;
 import codedriver.framework.file.dao.mapper.FileMapper;
 import codedriver.framework.file.dto.FileVo;
 import codedriver.framework.integration.authentication.enums.AuthenticateType;
@@ -30,17 +39,22 @@ import codedriver.framework.tagent.exception.*;
 import codedriver.framework.tagent.tagenthandler.core.ITagentHandler;
 import codedriver.framework.tagent.tagenthandler.core.TagentHandlerFactory;
 import codedriver.framework.util.RestUtil;
+import codedriver.module.framework.file.handler.LocalFileSystemHandler;
+import codedriver.module.framework.file.handler.MinioFileSystemHandler;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 /**
  * @author lvzk
@@ -206,6 +220,152 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
+    public List<TagentVo> getTagentList(List<IpVo> ipPortList, List<NetworkVo> networkVoList, List<Long> runnerGroupIdList) {
+
+        List<TagentVo> returnTagentVoList = new ArrayList<>();
+
+        if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList) && CollectionUtils.isEmpty(runnerGroupIdList)) {
+            throw new TagentBatchActionCheckLessTagentIpAndPortException();
+        }
+
+        Set<Long> tagentIdSet = new HashSet<>();
+        //ip：port
+        if (CollectionUtils.isNotEmpty(ipPortList)) {
+            List<TagentVo> tagentVoList = new ArrayList<>();
+            for (IpVo ipVo : ipPortList) {
+                TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(ipVo.getIp(), ipVo.getPort());
+                if (tagentVo == null) {
+                    continue;
+                }
+                tagentVoList.add(tagentVo);
+                tagentIdSet.add(tagentVo.getId());
+            }
+            returnTagentVoList.addAll(tagentVoList);
+        }
+
+        //网段掩码
+        if (CollectionUtils.isNotEmpty(networkVoList)) {
+            TagentVo tagentVo = new TagentVo();
+            int tagentCount = tagentMapper.searchTagentCount(tagentVo);
+            tagentVo.setPageSize(100);
+            List<TagentVo> searchTagentList = new ArrayList<>();
+            int pageCount = PageUtil.getPageCount(tagentCount, 100);
+            for (int i = 1; i <= pageCount; i++) {
+                tagentVo.setCurrentPage(i);
+                searchTagentList = tagentMapper.searchTagent(tagentVo);
+                for (TagentVo tagent : searchTagentList) {
+                    for (NetworkVo networkVo : networkVoList) {
+                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !tagentIdSet.contains(tagent.getId())) {
+                            returnTagentVoList.add(tagent);
+                            tagentIdSet.add(tagent.getId());
+                        }
+                    }
+                }
+            }
+        }
+
+        //代理组
+        if (CollectionUtils.isNotEmpty(runnerGroupIdList)) {
+            List<TagentVo> tagentVoList = tagentMapper.getTagentListByRunnerGroupIdList(runnerGroupIdList);
+            if (CollectionUtils.isNotEmpty(tagentVoList)) {
+                tagentIdSet.addAll(tagentVoList.stream().map(TagentVo::getId).collect(Collectors.toList()));
+                returnTagentVoList.addAll(tagentVoList);
+            }
+        }
+        return returnTagentVoList;
+    }
+
+    @Override
+    public JSONObject batchExecTagentChannelAction(TagentAction action, List<TagentVo> tagentList) throws Exception {
+        Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
+        List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdList(runnerIdSet);
+        String fileDataString = "操作人：" + UserContext.get().getUserName() + "\t操作时间：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + "\t操作tagent台数：" + tagentList.size() + "\n\n";
+        List<String> returnDataList = new ArrayList<>();
+        if (CollectionUtils.isEmpty(runnerList)) {
+            fileDataString = fileDataString + "所选tagent都找不到执行器：\n" + tagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("\t")) + (tagentList.size() > 5 ? "等" : "") + "\n\n";
+            returnDataList.add("所选tagent都找不到执行器");
+        } else {
+            Map<Long, RunnerVo> runnerVoMap = runnerList.stream().collect(Collectors.toMap(RunnerVo::getId, e -> e));
+            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(action.getValue());
+            if (tagentHandler == null) {
+                throw new TagentActionNotFoundException(action.getValue());
+            }
+
+            List<TagentVo> runnerNotFoundTagentList = new ArrayList<>();
+            List<TagentVo> runnerDisConnectTagentList = new ArrayList<>();
+            List<TagentVo> heartbeatNotFoundTagentList = new ArrayList<>();
+            List<TagentVo> successTagentList = new ArrayList<>();
+            for (TagentVo tagentVo : tagentList) {
+                try {
+                    RunnerVo runnerVo = runnerVoMap.get(tagentVo.getRunnerId());
+                    if (runnerVo == null) {
+                        runnerNotFoundTagentList.add(tagentVo);
+                        continue;
+                    }
+                    JSONObject resultObj = tagentHandler.execTagentCmd(new TagentMessageVo(), tagentVo, runnerVo);
+                    if (StringUtils.equals(resultObj.getString("Data"), "send command succeed")) {
+                        successTagentList.add(tagentVo);
+                    }
+                } catch (TagentRunnerConnectRefusedException e) {
+                    runnerDisConnectTagentList.add(tagentVo);
+                } catch (TagentActionFailedException e) {
+                    heartbeatNotFoundTagentList.add(tagentVo);
+                }
+            }
+
+            String space = "     ";
+            if (CollectionUtils.isNotEmpty(runnerNotFoundTagentList)) {
+                fileDataString = fileDataString + "以下tagent对应的执行器不存在：\n" + runnerNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + runnerNotFoundTagentList.size() + "台" + "\n\n";
+                returnDataList.add("以下tagent对应的执行器不存在：" + runnerNotFoundTagentList.subList(0, Math.min(runnerNotFoundTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (runnerNotFoundTagentList.size() > 5 ? "等，" : "，") + "共" + runnerNotFoundTagentList.size() + "台");
+            }
+            if (CollectionUtils.isNotEmpty(runnerDisConnectTagentList)) {
+                fileDataString = fileDataString + "以下tagent对应的执行器连接失败：\n" + runnerDisConnectTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + runnerDisConnectTagentList.size() + "台" + "\n\n";
+                returnDataList.add("以下tagent对应的执行器连接失败：" + runnerDisConnectTagentList.subList(0, Math.min(runnerDisConnectTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (runnerDisConnectTagentList.size() > 5 ? "等，" : "，") + "共" + runnerDisConnectTagentList.size() + "台");
+            }
+            if (CollectionUtils.isNotEmpty(heartbeatNotFoundTagentList)) {
+                fileDataString = fileDataString + "以下tagent的心跳不存在：\n" + heartbeatNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + heartbeatNotFoundTagentList.size() + "台" + "\n\n";
+                returnDataList.add("以下tagent的心跳不存在：" + heartbeatNotFoundTagentList.subList(0, Math.min(heartbeatNotFoundTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (heartbeatNotFoundTagentList.size() > 5 ? "等，" : "，") + "共" + heartbeatNotFoundTagentList.size() + "台");
+            }
+            if (CollectionUtils.isNotEmpty(successTagentList)) {
+                fileDataString = fileDataString + "以下tagent" + action.getText() + "成功：\n" + successTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + successTagentList.size() + "台" + "\n\n";
+                returnDataList.add("以下tagent" + action.getText() + "成功：" + successTagentList.subList(0, Math.min(successTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (successTagentList.size() > 5 ? "等，" : "，") + "共" + successTagentList.size() + "台");
+            }
+        }
+        JSONObject returnObj = new JSONObject();
+        InputStream inputStream = new ByteArrayInputStream(fileDataString.getBytes(StandardCharsets.UTF_8));
+        IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler("TAGENT");
+        FileVo fileVo = new FileVo();
+        fileVo.setName("tagent批量" + action.getText() + "详细结果.txt");
+        fileVo.setSize((long) inputStream.available());
+        fileVo.setUserUuid(UserContext.get().getUserUuid());
+        fileVo.setType("TAGENT");
+        fileVo.setContentType("text/plain");
+        if (fileTypeHandler.needSave()) {
+            FileVo oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), null);
+            String filePath;
+            if (oldFileVo != null) {
+                fileVo.setId(oldFileVo.getId());
+            }
+            try {
+                filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, TenantContext.get().getTenantUuid(), inputStream, fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+            } catch (Exception ex) {
+                // 如果minio出现异常，则上传到本地
+                filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, TenantContext.get().getTenantUuid(), inputStream, fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
+            }
+            fileVo.setPath(filePath);
+            if (oldFileVo == null) {
+                fileMapper.insertFile(fileVo);
+            } else {
+                fileMapper.updateFile(fileVo);
+            }
+            returnObj.put("data", returnDataList);
+            returnObj.put("dataFileName", fileVo.getName());
+            returnObj.put("dataFileUrl", "api/binary/file/download?id=" + fileVo.getId());
+        }
+        return returnObj;
+    }
+
+    @Override
     public void batchUpgradeTagent(TagentVo tagentVo, TagentVersionVo versionVo, String targetVersion, Long auditId) {
 
         String upgradeResult = StringUtils.EMPTY;
@@ -266,7 +426,7 @@ public class TagentServiceImpl implements TagentService {
         } finally {
             tagentAudit.setStatus(upgradeFlag ? TagentUpgradeStatus.SUCCEED.getValue() : TagentUpgradeStatus.FAILED.getValue());
             tagentAudit.setResult(upgradeResult);
-            tagentMapper.updateTagentAuditDetailStateAndResultById(tagentAudit.getId(),tagentAudit.getStatus(),tagentAudit.getResult());
+            tagentMapper.updateTagentAuditDetailStateAndResultById(tagentAudit.getId(), tagentAudit.getStatus(), tagentAudit.getResult());
         }
     }
 
