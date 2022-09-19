@@ -281,7 +281,7 @@ public class TagentServiceImpl implements TagentService {
         JSONObject returnObj = new JSONObject();
         String space = "     ";
         Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
-        List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdList(runnerIdSet);
+        List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdSet(runnerIdSet);
         //文件内容
         String fileDataString = "user：" + UserContext.get().getUserName() + space + "time：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + space + "tagentCount：" + tagentList.size() + "\n\n";
         if (CollectionUtils.isEmpty(runnerList)) {
