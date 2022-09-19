@@ -277,22 +277,20 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public JSONObject batchExecTagentChannelAction(TagentAction action, List<TagentVo> tagentList) throws Exception {
+    public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList) throws Exception {
         JSONObject returnObj = new JSONObject();
         Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
         List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdList(runnerIdSet);
         //文件内容（全部结果）
-        String fileDataString = "操作人：" + UserContext.get().getUserName() + "\t操作时间：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + "\t操作tagent台数：" + tagentList.size() + "\n\n";
+        String fileDataString = "user：" + UserContext.get().getUserName() + "\ttime：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + "\ttagentCount：" + tagentList.size() + "\n\n";
         //返回部分结果（部分结果）
-        List<String> returnDataList = new ArrayList<>();
         if (CollectionUtils.isEmpty(runnerList)) {
             fileDataString = fileDataString + "所选tagent都找不到执行器：\n" + tagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("\t")) + (tagentList.size() > 5 ? "等" : "") + "\n\n";
-            returnDataList.add("所选tagent都找不到执行器");
         } else {
             Map<Long, RunnerVo> runnerVoMap = runnerList.stream().collect(Collectors.toMap(RunnerVo::getId, e -> e));
-            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(action.getValue());
+            ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(action);
             if (tagentHandler == null) {
-                throw new TagentActionNotFoundException(action.getValue());
+                throw new TagentActionNotFoundException(action);
             }
 
             List<TagentVo> runnerNotFoundTagentList = new ArrayList<>();
@@ -319,20 +317,20 @@ public class TagentServiceImpl implements TagentService {
 
             String space = "     ";
             if (CollectionUtils.isNotEmpty(runnerNotFoundTagentList)) {
-                fileDataString = fileDataString + "以下tagent对应的执行器不存在：\n" + runnerNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + runnerNotFoundTagentList.size() + "台" + "\n\n";
-                returnDataList.add("以下tagent对应的执行器不存在：" + runnerNotFoundTagentList.subList(0, Math.min(runnerNotFoundTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (runnerNotFoundTagentList.size() > 5 ? "等，" : "，") + "共" + runnerNotFoundTagentList.size() + "台");
+                fileDataString = fileDataString + "The following tagent's  runner not exist, there are " + runnerNotFoundTagentList.size() + " sets here：\n" + runnerNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
+                returnObj.put("runnerNotFoundTagentList", runnerNotFoundTagentList);
             }
             if (CollectionUtils.isNotEmpty(runnerDisConnectTagentList)) {
-                fileDataString = fileDataString + "以下tagent对应的执行器连接失败：\n" + runnerDisConnectTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + runnerDisConnectTagentList.size() + "台" + "\n\n";
-                returnDataList.add("以下tagent对应的执行器连接失败：" + runnerDisConnectTagentList.subList(0, Math.min(runnerDisConnectTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (runnerDisConnectTagentList.size() > 5 ? "等，" : "，") + "共" + runnerDisConnectTagentList.size() + "台");
+                fileDataString = fileDataString + "The following tagent's runner is disconnected, there are " + runnerDisConnectTagentList.size() + " sets here：\n" + runnerDisConnectTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
+                returnObj.put("runnerDisConnectTagentList", runnerDisConnectTagentList);
             }
             if (CollectionUtils.isNotEmpty(heartbeatNotFoundTagentList)) {
-                fileDataString = fileDataString + "以下tagent的心跳不存在：\n" + heartbeatNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + heartbeatNotFoundTagentList.size() + "台" + "\n\n";
-                returnDataList.add("以下tagent的心跳不存在：" + heartbeatNotFoundTagentList.subList(0, Math.min(heartbeatNotFoundTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (heartbeatNotFoundTagentList.size() > 5 ? "等，" : "，") + "共" + heartbeatNotFoundTagentList.size() + "台");
+                fileDataString = fileDataString + "The following tagent's heart not exist, there are " + heartbeatNotFoundTagentList.size() + " sets here：\n" + heartbeatNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
+                returnObj.put("heartbeatNotFoundTagentList", heartbeatNotFoundTagentList);
             }
             if (CollectionUtils.isNotEmpty(successTagentList)) {
-                fileDataString = fileDataString + "以下tagent" + action.getText() + "成功：\n" + successTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "，共" + successTagentList.size() + "台" + "\n\n";
-                returnDataList.add("以下tagent" + action.getText() + "成功：" + successTagentList.subList(0, Math.min(successTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (successTagentList.size() > 5 ? "等，" : "，") + "共" + successTagentList.size() + "台");
+                fileDataString = fileDataString + "The following tagent " + action + " succeeded, there are " + successTagentList.size() + " sets here：\n" + successTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
+                returnObj.put("successTagentList", successTagentList);
             }
         }
 
@@ -343,7 +341,7 @@ public class TagentServiceImpl implements TagentService {
             throw new FileTypeHandlerNotFoundException("TAGENT");
         }
         FileVo fileVo = new FileVo();
-        fileVo.setName("tagent批量" + action.getText() + "详细结果.txt");
+        fileVo.setName("tagentBatch" + action.substring(0, 1).toUpperCase() + action.substring(1) + "Results.txt");
         fileVo.setSize((long) inputStream.available());
         fileVo.setUserUuid(UserContext.get().getUserUuid());
         fileVo.setType("TAGENT");
@@ -367,11 +365,19 @@ public class TagentServiceImpl implements TagentService {
             } else {
                 fileMapper.updateFile(fileVo);
             }
-            returnObj.put("data", returnDataList);
             returnObj.put("dataFileName", fileVo.getName());
             returnObj.put("dataFileUrl", "api/binary/file/download?id=" + fileVo.getId());
         }
         return returnObj;
+    }
+
+    @Override
+    public JSONObject batchExecTagentChannelAction(String action, List<IpVo> ipVoList, List<NetworkVo> networkVoList, List<Long> runnerGroupIdList) throws Exception {
+        List<TagentVo> tagentList = getTagentList(ipVoList, networkVoList, runnerGroupIdList);
+        if (CollectionUtils.isNotEmpty(tagentList)) {
+            return batchExecTagentChannelAction(action, tagentList);
+        }
+        return null;
     }
 
     @Override

@@ -10,7 +10,6 @@ import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.tagent.dto.TagentMessageVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
-import codedriver.framework.tagent.enums.TagentAction;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
@@ -91,5 +90,18 @@ public interface TagentService {
      * @return 执行结果
      * @throws Exception e
      */
-    JSONObject batchExecTagentChannelAction(TagentAction action, List<TagentVo> tagentList) throws Exception;
+    JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList) throws Exception;
+
+    /**
+     * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)）
+     *
+     * @param action            执行命令的动作
+     * @param ipVoList          ip：port列表
+     * @param networkVoList     网段掩码列表
+     * @param runnerGroupIdList 代理组列表
+     * @return 执行结果
+     * @throws Exception e
+     */
+    JSONObject batchExecTagentChannelAction(String action, List<IpVo> ipVoList, List<NetworkVo> networkVoList, List<Long> runnerGroupIdList) throws Exception;
+
 }
