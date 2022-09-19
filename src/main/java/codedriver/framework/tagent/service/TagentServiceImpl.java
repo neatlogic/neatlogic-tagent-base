@@ -22,6 +22,7 @@ import codedriver.framework.dto.RestVo;
 import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.dto.runner.RunnerVo;
 import codedriver.framework.exception.file.FileStorageMediumHandlerNotFoundException;
+import codedriver.framework.exception.file.FileTypeHandlerNotFoundException;
 import codedriver.framework.exception.runner.RunnerIdNotFoundException;
 import codedriver.framework.exception.runner.RunnerUrlIsNullException;
 import codedriver.framework.file.core.FileStorageMediumFactory;
@@ -277,9 +278,12 @@ public class TagentServiceImpl implements TagentService {
 
     @Override
     public JSONObject batchExecTagentChannelAction(TagentAction action, List<TagentVo> tagentList) throws Exception {
+        JSONObject returnObj = new JSONObject();
         Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
         List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdList(runnerIdSet);
+        //文件内容（全部结果）
         String fileDataString = "操作人：" + UserContext.get().getUserName() + "\t操作时间：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + "\t操作tagent台数：" + tagentList.size() + "\n\n";
+        //返回部分结果（部分结果）
         List<String> returnDataList = new ArrayList<>();
         if (CollectionUtils.isEmpty(runnerList)) {
             fileDataString = fileDataString + "所选tagent都找不到执行器：\n" + tagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("\t")) + (tagentList.size() > 5 ? "等" : "") + "\n\n";
@@ -331,9 +335,13 @@ public class TagentServiceImpl implements TagentService {
                 returnDataList.add("以下tagent" + action.getText() + "成功：" + successTagentList.subList(0, Math.min(successTagentList.size(), 5)).stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("、")) + (successTagentList.size() > 5 ? "等，" : "，") + "共" + successTagentList.size() + "台");
             }
         }
-        JSONObject returnObj = new JSONObject();
+
+        //生成txt文件
         InputStream inputStream = new ByteArrayInputStream(fileDataString.getBytes(StandardCharsets.UTF_8));
         IFileTypeHandler fileTypeHandler = FileTypeHandlerFactory.getHandler("TAGENT");
+        if (fileTypeHandler == null) {
+            throw new FileTypeHandlerNotFoundException("TAGENT");
+        }
         FileVo fileVo = new FileVo();
         fileVo.setName("tagent批量" + action.getText() + "详细结果.txt");
         fileVo.setSize((long) inputStream.available());
@@ -341,6 +349,7 @@ public class TagentServiceImpl implements TagentService {
         fileVo.setType("TAGENT");
         fileVo.setContentType("text/plain");
         if (fileTypeHandler.needSave()) {
+            //始终只存最新的一份数据
             FileVo oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), null);
             String filePath;
             if (oldFileVo != null) {
