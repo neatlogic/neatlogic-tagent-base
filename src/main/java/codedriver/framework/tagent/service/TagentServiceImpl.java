@@ -325,7 +325,7 @@ public class TagentServiceImpl implements TagentService {
                 returnObj.put("runnerDisConnectTagentList", runnerDisConnectTagentList);
             }
             if (CollectionUtils.isNotEmpty(heartbeatNotFoundTagentList)) {
-                fileDataString = fileDataString + "The following tagent's heart not exist, there are " + heartbeatNotFoundTagentList.size() + " sets here：\n" + heartbeatNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
+                fileDataString = fileDataString + "The following tagent's heart beat not exist, there are " + heartbeatNotFoundTagentList.size() + " sets here：\n" + heartbeatNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
                 returnObj.put("heartbeatNotFoundTagentList", heartbeatNotFoundTagentList);
             }
             if (CollectionUtils.isNotEmpty(successTagentList)) {
