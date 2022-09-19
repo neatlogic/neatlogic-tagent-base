@@ -441,8 +441,8 @@
         t.runner_ip AS runnerIp,
         t.runner_port AS runnerPort,
         t.runner_group_id AS runnerGroupId,
-        DATE_FORMAT(t.fcd, '%Y-%m-%d %H:%i:%s') AS fcd,
-        DATE_FORMAT(t.lcd, '%Y-%m-%d %H:%i:%s') AS lcd
+        t.fcd AS fcd,
+        t.lcd AS lcd
         FROM tagent t
         where t.runner_group_id in
         <foreach collection="list" open="(" separator="," close=")" item="id">
