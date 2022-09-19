@@ -6,6 +6,7 @@
 package codedriver.framework.tagent.service;
 
 import codedriver.framework.tagent.dto.TagentMessageVo;
+import codedriver.framework.tagent.dto.TagentSearchVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import com.alibaba.fastjson.JSONObject;
@@ -69,4 +70,32 @@ public interface TagentService {
      * @param tagent             tagentVo
      */
     void deleteTagentIpList(List<String> deleteTagentIpList, TagentVo tagent);
+
+    /**
+     * 通过ip：port、网段掩码、执行器组 过滤tagent
+     *
+     * @param tagentSearchVo searchVo
+     * @return tagent列表
+     */
+    List<TagentVo> getTagentList(TagentSearchVo tagentSearchVo);
+
+    /**
+     * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)）
+     *
+     * @param action     执行命令的动作
+     * @param tagentList 需要执行的tagent列表
+     * @return 执行结果
+     * @throws Exception e
+     */
+    JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList) throws Exception;
+
+    /**
+     * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)）
+     *
+     * @param tagentSearchVo searchVo
+     * @return 执行结果
+     * @throws Exception e
+     */
+    JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo) throws Exception;
+
 }
