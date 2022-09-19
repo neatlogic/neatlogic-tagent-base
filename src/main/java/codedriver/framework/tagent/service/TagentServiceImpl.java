@@ -279,13 +279,15 @@ public class TagentServiceImpl implements TagentService {
     @Override
     public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList) throws Exception {
         JSONObject returnObj = new JSONObject();
+        String space = "     ";
         Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
         List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdList(runnerIdSet);
         //文件内容（全部结果）
-        String fileDataString = "user：" + UserContext.get().getUserName() + "\ttime：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + "\ttagentCount：" + tagentList.size() + "\n\n";
+        String fileDataString = "user：" + UserContext.get().getUserName() + space + "time：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + space + "tagentCount：" + tagentList.size() + "\n\n";
         //返回部分结果（部分结果）
         if (CollectionUtils.isEmpty(runnerList)) {
-            fileDataString = fileDataString + "所选tagent都找不到执行器：\n" + tagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining("\t")) + (tagentList.size() > 5 ? "等" : "") + "\n\n";
+            fileDataString = fileDataString + "All tagent's runner are not exist, there are " + tagentList.size() + " sets here：\n" + tagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
+            returnObj.put("runnerDisConnectTagentList", tagentList);
         } else {
             Map<Long, RunnerVo> runnerVoMap = runnerList.stream().collect(Collectors.toMap(RunnerVo::getId, e -> e));
             ITagentHandler tagentHandler = TagentHandlerFactory.getInstance(action);
@@ -315,7 +317,6 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
 
-            String space = "     ";
             if (CollectionUtils.isNotEmpty(runnerNotFoundTagentList)) {
                 fileDataString = fileDataString + "The following tagent's  runner not exist, there are " + runnerNotFoundTagentList.size() + " sets here：\n" + runnerNotFoundTagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
                 returnObj.put("runnerNotFoundTagentList", runnerNotFoundTagentList);
