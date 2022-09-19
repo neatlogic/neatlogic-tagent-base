@@ -5,9 +5,8 @@
 
 package codedriver.framework.tagent.service;
 
-import codedriver.framework.cmdb.dto.resourcecenter.IpVo;
-import codedriver.framework.dto.runner.NetworkVo;
 import codedriver.framework.tagent.dto.TagentMessageVo;
+import codedriver.framework.tagent.dto.TagentSearchVo;
 import codedriver.framework.tagent.dto.TagentVersionVo;
 import codedriver.framework.tagent.dto.TagentVo;
 import com.alibaba.fastjson.JSONObject;
@@ -75,12 +74,10 @@ public interface TagentService {
     /**
      * 通过ip：port、网段掩码、代理组 过滤tagent
      *
-     * @param ipVoList          ip：port列表
-     * @param networkVoList     网段掩码列表
-     * @param runnerGroupIdList 代理组列表
+     * @param tagentSearchVo searchVo
      * @return tagent列表
      */
-    List<TagentVo> getTagentList(List<IpVo> ipVoList, List<NetworkVo> networkVoList, List<Long> runnerGroupIdList);
+    List<TagentVo> getTagentList(TagentSearchVo tagentSearchVo);
 
     /**
      * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)）
@@ -95,13 +92,10 @@ public interface TagentService {
     /**
      * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)）
      *
-     * @param action            执行命令的动作
-     * @param ipVoList          ip：port列表
-     * @param networkVoList     网段掩码列表
-     * @param runnerGroupIdList 代理组列表
+     * @param tagentSearchVo searchVo
      * @return 执行结果
      * @throws Exception e
      */
-    JSONObject batchExecTagentChannelAction(String action, List<IpVo> ipVoList, List<NetworkVo> networkVoList, List<Long> runnerGroupIdList) throws Exception;
+    JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo) throws Exception;
 
 }

@@ -221,19 +221,19 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public List<TagentVo> getTagentList(List<IpVo> ipPortList, List<NetworkVo> networkVoList, List<Long> runnerGroupIdList) {
+    public List<TagentVo> getTagentList(TagentSearchVo tagentSearchVo) {
 
         List<TagentVo> returnTagentVoList = new ArrayList<>();
 
-        if (CollectionUtils.isEmpty(ipPortList) && CollectionUtils.isEmpty(networkVoList) && CollectionUtils.isEmpty(runnerGroupIdList)) {
+        if (CollectionUtils.isEmpty(tagentSearchVo.getIpPortList()) && CollectionUtils.isEmpty(tagentSearchVo.getNetworkVoList()) && CollectionUtils.isEmpty(tagentSearchVo.getRunnerGroupIdList())) {
             throw new TagentBatchActionCheckLessTagentIpAndPortException();
         }
 
         Set<Long> tagentIdSet = new HashSet<>();
         //ip：port
-        if (CollectionUtils.isNotEmpty(ipPortList)) {
+        if (CollectionUtils.isNotEmpty(tagentSearchVo.getIpPortList())) {
             List<TagentVo> tagentVoList = new ArrayList<>();
-            for (IpVo ipVo : ipPortList) {
+            for (IpVo ipVo : tagentSearchVo.getIpPortList()) {
                 TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(ipVo.getIp(), ipVo.getPort());
                 if (tagentVo == null) {
                     continue;
@@ -245,7 +245,7 @@ public class TagentServiceImpl implements TagentService {
         }
 
         //网段掩码
-        if (CollectionUtils.isNotEmpty(networkVoList)) {
+        if (CollectionUtils.isNotEmpty(tagentSearchVo.getNetworkVoList())) {
             TagentVo tagentVo = new TagentVo();
             int tagentCount = tagentMapper.searchTagentCount(tagentVo);
             tagentVo.setPageSize(100);
@@ -255,7 +255,7 @@ public class TagentServiceImpl implements TagentService {
                 tagentVo.setCurrentPage(i);
                 searchTagentList = tagentMapper.searchTagent(tagentVo);
                 for (TagentVo tagent : searchTagentList) {
-                    for (NetworkVo networkVo : networkVoList) {
+                    for (NetworkVo networkVo : tagentSearchVo.getNetworkVoList()) {
                         if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !tagentIdSet.contains(tagent.getId())) {
                             returnTagentVoList.add(tagent);
                             tagentIdSet.add(tagent.getId());
@@ -266,8 +266,8 @@ public class TagentServiceImpl implements TagentService {
         }
 
         //代理组
-        if (CollectionUtils.isNotEmpty(runnerGroupIdList)) {
-            List<TagentVo> tagentVoList = tagentMapper.getTagentListByRunnerGroupIdList(runnerGroupIdList);
+        if (CollectionUtils.isNotEmpty(tagentSearchVo.getRunnerGroupIdList())) {
+            List<TagentVo> tagentVoList = tagentMapper.getTagentListByRunnerGroupIdList(tagentSearchVo.getRunnerGroupIdList());
             if (CollectionUtils.isNotEmpty(tagentVoList)) {
                 tagentIdSet.addAll(tagentVoList.stream().map(TagentVo::getId).collect(Collectors.toList()));
                 returnTagentVoList.addAll(tagentVoList);
@@ -282,9 +282,8 @@ public class TagentServiceImpl implements TagentService {
         String space = "     ";
         Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
         List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdList(runnerIdSet);
-        //文件内容（全部结果）
+        //文件内容
         String fileDataString = "user：" + UserContext.get().getUserName() + space + "time：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + space + "tagentCount：" + tagentList.size() + "\n\n";
-        //返回部分结果（部分结果）
         if (CollectionUtils.isEmpty(runnerList)) {
             fileDataString = fileDataString + "All tagent's runner are not exist, there are " + tagentList.size() + " sets here：\n" + tagentList.stream().map(e -> e.getIp() + ":" + e.getPort()).collect(Collectors.joining(space)) + "\n\n";
             returnObj.put("runnerDisConnectTagentList", tagentList);
@@ -373,8 +372,8 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public JSONObject batchExecTagentChannelAction(String action, List<IpVo> ipVoList, List<NetworkVo> networkVoList, List<Long> runnerGroupIdList) throws Exception {
-        List<TagentVo> tagentList = getTagentList(ipVoList, networkVoList, runnerGroupIdList);
+    public JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo) throws Exception {
+        List<TagentVo> tagentList = getTagentList(tagentSearchVo);
         if (CollectionUtils.isNotEmpty(tagentList)) {
             return batchExecTagentChannelAction(action, tagentList);
         }
