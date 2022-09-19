@@ -56,8 +56,6 @@ public interface TagentMapper {
 
     int getTagentIdCountByRunnerGroupIdList(List<Long> runnerGroupIdList);
 
-    List<Long> getTagentIdListByRunnerGroupIdList(List<Long> runnerGroupIdList);
-
     int getTagentPkgFileIdUsedCount(Long fileId);
 
     Long getTagentIdByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
