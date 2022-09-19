@@ -24,7 +24,7 @@ public class TagentSearchVo {
     @JSONField(serialize = false)
     List<NetworkVo> networkVoList; //网段掩码列表
     @JSONField(serialize = false)
-    List<Long> runnerGroupIdList; //执行期组id列表
+    List<Long> runnerGroupIdList; //执行器组id列表
 
     public String getAction() {
         return action;

@@ -72,7 +72,7 @@ public interface TagentService {
     void deleteTagentIpList(List<String> deleteTagentIpList, TagentVo tagent);
 
     /**
-     * 通过ip：port、网段掩码、代理组 过滤tagent
+     * 通过ip：port、网段掩码、执行器组 过滤tagent
      *
      * @param tagentSearchVo searchVo
      * @return tagent列表

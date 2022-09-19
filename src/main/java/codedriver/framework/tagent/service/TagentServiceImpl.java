@@ -265,7 +265,7 @@ public class TagentServiceImpl implements TagentService {
             }
         }
 
-        //代理组
+        //执行器组
         if (CollectionUtils.isNotEmpty(tagentSearchVo.getRunnerGroupIdList())) {
             List<TagentVo> tagentVoList = tagentMapper.getTagentListByRunnerGroupIdList(tagentSearchVo.getRunnerGroupIdList());
             if (CollectionUtils.isNotEmpty(tagentVoList)) {
