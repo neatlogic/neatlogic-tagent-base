@@ -451,8 +451,8 @@
     </select>
 
     <select id="getTagentOSTypeList" resultType="codedriver.framework.tagent.dto.TagentOSVo">
-        select `id`   as id,
-               `name` as name
+        select `id`,
+               `name`
         from tagent_os
     </select>
 
