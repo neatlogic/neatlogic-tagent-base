@@ -48,6 +48,8 @@ public interface TagentMapper {
 
     List<TagentVo> getTagentListByRunnerGroupIdList(List<Long> runnerGroupIdList);
 
+    List<TagentOSVo> getTagentOSTypeList();
+
     TagentVersionVo getTagentVersionById(Long id);
 
     TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);

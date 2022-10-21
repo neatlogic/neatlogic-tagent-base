@@ -450,6 +450,12 @@
         </foreach>
     </select>
 
+    <select id="getTagentOSTypeList" resultType="codedriver.framework.tagent.dto.TagentOSVo">
+        select `id`,
+               `name`
+        from tagent_os
+    </select>
+
     <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" >
         INSERT INTO tagent (`id`,
         `ip`,
