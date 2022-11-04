@@ -14,7 +14,9 @@ public enum TagentAction implements IEnum {
     RELOAD("reload", "重启"),
     RESET_CREDENTIAL("resetcred", "重置密码"),
     STATUS_CHECK("statusCheck", "检查状态"),
-    UPGRADE("upgrade", "升级");
+    UPGRADE("upgrade", "升级"),
+    BATCH_SAVE_CONFIG("batchSaveConfig", "批量修改配置文件")
+    ;
     private final String value;
     private final String text;
 
