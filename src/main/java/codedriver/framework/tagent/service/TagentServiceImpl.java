@@ -277,7 +277,7 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList) throws Exception {
+        public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList, TagentMessageVo tagentMessageVo) throws Exception {
         JSONObject returnObj = new JSONObject();
         String space = "     ";
         Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
@@ -305,7 +305,7 @@ public class TagentServiceImpl implements TagentService {
                         runnerNotFoundTagentList.add(tagentVo);
                         continue;
                     }
-                    JSONObject resultObj = tagentHandler.execTagentCmd(new TagentMessageVo(), tagentVo, runnerVo);
+                    JSONObject resultObj = tagentHandler.execTagentCmd(tagentMessageVo, tagentVo, runnerVo);
                     if (StringUtils.equals(resultObj.getString("Data"), "send command succeed")) {
                         successTagentList.add(tagentVo);
                     }
@@ -372,10 +372,10 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo) throws Exception {
+    public JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo, TagentMessageVo tagentMessageVo) throws Exception {
         List<TagentVo> tagentList = getTagentList(tagentSearchVo);
         if (CollectionUtils.isNotEmpty(tagentList)) {
-            return batchExecTagentChannelAction(action, tagentList);
+            return batchExecTagentChannelAction(action, tagentList, tagentMessageVo);
         }
         return null;
     }

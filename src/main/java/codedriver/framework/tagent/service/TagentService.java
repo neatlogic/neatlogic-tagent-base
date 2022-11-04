@@ -80,22 +80,25 @@ public interface TagentService {
     List<TagentVo> getTagentList(TagentSearchVo tagentSearchVo);
 
     /**
-     * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)）
+     * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)、batchSaveConfig(批量修改配置文件)）
      *
-     * @param action     执行命令的动作
-     * @param tagentList 需要执行的tagent列表
+     * @param action          执行命令的动作
+     * @param tagentList      需要执行的tagent列表
+     * @param tagentMessageVo tagent信息
      * @return 执行结果
      * @throws Exception e
      */
-    JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList) throws Exception;
+    JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList, TagentMessageVo tagentMessageVo) throws Exception;
 
     /**
-     * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)）
+     * 批量执行tagent心跳通道命令（现在支持的tagent心跳通道命令的有 reload(重启) resetcred(重置密码)、batchSaveConfig(批量修改配置文件)）
      *
-     * @param tagentSearchVo searchVo
+     * @param action          执行命令的动作
+     * @param tagentSearchVo  searchVo
+     * @param tagentMessageVo tagent信息
      * @return 执行结果
      * @throws Exception e
      */
-    JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo) throws Exception;
+    JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo, TagentMessageVo tagentMessageVo) throws Exception;
 
 }
