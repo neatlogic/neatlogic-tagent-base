@@ -157,11 +157,23 @@
         WHERE name = #{value}
     </select>
 
+    <select id="getOsBitByName" resultType="codedriver.framework.tagent.dto.TagentOsBitVo">
+        SELECT `id`,
+               `name`
+        FROM `tagent_osbit`
+        WHERE name = #{value}
+    </select>
+
     <insert id="insertOs" parameterType="codedriver.framework.tagent.dto.TagentOSVo">
         INSERT ignore INTO `tagent_os` (`id`, `name`, `description`, `fcu`, `fcd`, `lcd`, `lcu`)
         VALUES (#{id}, #{name},
                 #{description},
                 #{fcu}, NOW(3), NOW(3), #{fcu})
+    </insert>
+
+    <insert id="insertOsBit" parameterType="codedriver.framework.tagent.dto.TagentOsBitVo">
+        INSERT ignore INTO `tagent_osbit` (`id`, `name`)
+        VALUES (#{id}, #{name})
     </insert>
 
     <select id="getAccountIdById" resultType="long">
@@ -456,6 +468,17 @@
         from tagent_os
     </select>
 
+    <select id="getTagentOsBitList" resultType="codedriver.framework.tagent.dto.TagentOsBitVo">
+        select `id`,
+               `name`
+        from tagent_osbit
+    </select>
+
+    <select id="getTagentOsBitStringList" resultType="java.lang.String">
+        select distinct `osbit`
+        from tagent
+    </select>
+
     <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" >
         INSERT INTO tagent (`id`,
         `ip`,
@@ -465,6 +488,7 @@
         `os_id`,
         `os_type`,
         `os_version`,
+        `osbit_id`,
         `osbit`,
         `account_id`,
         `runner_id`,
@@ -487,6 +511,7 @@
         #{osId},
         #{osType},
         #{osVersion},
+        #{osbitId},
         #{osbit},
         #{accountId},
         #{runnerId},
@@ -522,7 +547,10 @@
         <if test="osVersion !=null and osVersion !='' ">
             `os_version` = #{osVersion},
         </if>
-        <if test="osbit !=null and osbit !='' ">
+        <if test="osbitId !=null and osbitId !='' ">
+            `osbit_id` = #{osbitId},
+        </if>
+            <if test="osbit !=null and osbit !='' ">
             `osbit` = #{osbit},
         </if>
         <if test="runnerId !=null ">
@@ -578,6 +606,12 @@
 
     </update>
 
+    <update id="updateTagentOsBitIdByOsBit">
+        update tagent
+        set `osbit_id`=#{osBitId}
+        where osbit = #{osBit}
+    </update>
+
     <insert id="insertTagentAuditDetail" parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
         insert
         into tagent_upgrade_detail(`id`, `audit_id`, `ip`, `port`, `source_version`, `target_version`, `result`,
@@ -627,6 +661,14 @@
     <insert id="insertUpgradeAudit" parameterType="codedriver.framework.tagent.dto.TagentUpgradeAuditVo">
         insert into tagent_upgrade_audit(`id`, `fcu`, `count`, `fcd`, `network`)
         values (#{id}, #{fcu}, #{count}, NOW(3), #{network})
+    </insert>
+
+    <insert id="insertOsBitList" parameterType="codedriver.framework.tagent.dto.TagentOsBitVo">
+        insert into tagent_osbit(`id`, `name`)
+        values
+        <foreach collection="osBitVoList" item="osBitVo" separator=",">
+            (#{osBitVo.id}, #{osBitVo.name})
+        </foreach>
     </insert>
 
     <resultMap id="TagentMap" type="codedriver.framework.tagent.dto.TagentVo">

@@ -1,10 +1,7 @@
 package codedriver.framework.tagent.dao.mapper;
 
 import codedriver.framework.dto.runner.GroupNetworkVo;
-import codedriver.framework.tagent.dto.TagentOSVo;
-import codedriver.framework.tagent.dto.TagentUpgradeAuditVo;
-import codedriver.framework.tagent.dto.TagentVersionVo;
-import codedriver.framework.tagent.dto.TagentVo;
+import codedriver.framework.tagent.dto.*;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -32,7 +29,9 @@ public interface TagentMapper {
 
     Long getAccountIdById(Long id);
 
-    TagentOSVo getOsByName(String toLowerCase);
+    TagentOSVo getOsByName(String name);
+
+    TagentOsBitVo getOsBitByName(String name);
 
     TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
@@ -50,6 +49,8 @@ public interface TagentMapper {
 
     List<TagentOSVo> getTagentOSTypeList();
 
+    List<TagentOsBitVo> getTagentOsBitList();
+
     TagentVersionVo getTagentVersionById(Long id);
 
     TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);
@@ -60,7 +61,9 @@ public interface TagentMapper {
 
     Long getTagentIdByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
-    void insertOs(TagentOSVo newOS);
+    void insertOs(TagentOSVo tagentOSVo);
+
+    void insertOsBit(TagentOsBitVo tagentOsBitVo);
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
 
@@ -85,4 +88,9 @@ public interface TagentMapper {
     void deleteTagentVersionById(Long id);
 
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
+
+    //刷数据接口用，后面可以删除
+    List<String> getTagentOsBitStringList();
+    void insertOsBitList(@Param("osBitVoList") List<TagentOsBitVo> osBitVoList);
+    void updateTagentOsBitIdByOsBit(@Param("osBitId") Long osBitId, @Param("osBit") String osBit);
 }

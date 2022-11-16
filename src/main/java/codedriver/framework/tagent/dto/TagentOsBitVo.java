@@ -5,25 +5,23 @@ import codedriver.framework.common.dto.BaseEditorVo;
 import codedriver.framework.restful.annotation.EntityField;
 import codedriver.framework.util.SnowflakeUtil;
 
-public class TagentOSVo extends BaseEditorVo {
+public class TagentOsBitVo extends BaseEditorVo {
     private static final long serialVersionUID = -6989056143057900024L;
-    @EntityField(name = "OS id", type = ApiParamType.LONG)
+    @EntityField(name = "id", type = ApiParamType.LONG)
     private Long id;
-    @EntityField(name = "OS name", type = ApiParamType.STRING)
+    @EntityField(name = "name", type = ApiParamType.STRING)
     private String name;
-    @EntityField(name = "描述", type = ApiParamType.STRING)
-    private String description;
 
-    public TagentOSVo(String name) {
+    public TagentOsBitVo() {
+    }
+
+    public TagentOsBitVo(String name) {
         this.name = name;
     }
 
-    public TagentOSVo() {
-    }
-
     public Long getId() {
-        if(id == null){
-            id = SnowflakeUtil.uniqueLong();
+        if (id == null) {
+           id = SnowflakeUtil.uniqueLong();
         }
         return id;
     }
@@ -40,11 +38,4 @@ public class TagentOSVo extends BaseEditorVo {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }
