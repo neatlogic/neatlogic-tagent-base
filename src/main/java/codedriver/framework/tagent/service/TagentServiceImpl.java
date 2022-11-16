@@ -88,15 +88,8 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
 
-            if (tagentVo.getOsbitId() == null && StringUtils.isNotBlank(tagent.getOsbit())) {
-                TagentOsBitVo osBitVo = tagentMapper.getOsBitByName(tagent.getOsbit());
-                if (osBitVo != null) {
-                    tagent.setOsbitId(osBitVo.getId());
-                } else {
-                    TagentOsBitVo newOsBitVo = new TagentOsBitVo(tagent.getOsbit());
-                    tagentMapper.insertOsBit(newOsBitVo);
-                    tagent.setOsbitId(newOsBitVo.getId());
-                }
+            if ( StringUtils.isNotBlank(tagent.getOsbit())) {
+                tagentMapper.insertOsBit(tagent.getOsbit());
             }
         }
         return tagentMapper.updateTagentById(tagent);

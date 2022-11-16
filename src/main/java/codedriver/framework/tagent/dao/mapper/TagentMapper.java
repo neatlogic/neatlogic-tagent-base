@@ -31,8 +31,6 @@ public interface TagentMapper {
 
     TagentOSVo getOsByName(String name);
 
-    TagentOsBitVo getOsBitByName(String name);
-
     TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
     TagentVo getTagentById(Long id);
@@ -49,7 +47,7 @@ public interface TagentMapper {
 
     List<TagentOSVo> getTagentOSTypeList();
 
-    List<TagentOsBitVo> getTagentOsBitList();
+    List<String> getTagentOsBitList();
 
     TagentVersionVo getTagentVersionById(Long id);
 
@@ -63,7 +61,7 @@ public interface TagentMapper {
 
     void insertOs(TagentOSVo tagentOSVo);
 
-    void insertOsBit(TagentOsBitVo tagentOsBitVo);
+    void insertOsBit(String osbit);
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
 
@@ -90,7 +88,7 @@ public interface TagentMapper {
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
 
     //刷数据接口用，后面可以删除
-    List<String> getTagentOsBitStringList();
-    void insertOsBitList(@Param("osBitVoList") List<TagentOsBitVo> osBitVoList);
-    void updateTagentOsBitIdByOsBit(@Param("osBitId") Long osBitId, @Param("osBit") String osBit);
+//    List<String> getTagentOsBitStringList();
+//    void insertOsBitList(@Param("osBitVoList") List<TagentOsBitVo> osBitVoList);
+//    void updateTagentOsBitIdByOsBit(@Param("osBitId") Long osBitId, @Param("osBit") String osBit);
 }
