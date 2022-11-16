@@ -77,6 +77,7 @@ public class TagentServiceImpl implements TagentService {
     public int updateTagentById(TagentVo tagent) {
         TagentVo tagentVo = tagentMapper.getTagentById(tagent.getId());
         if (tagentVo != null) {
+            //保存tagent ostype
             if (tagentVo.getOsId() == null && StringUtils.isNotBlank(tagent.getOsType())) {
                 TagentOSVo os = tagentMapper.getOsByName(tagent.getOsType().toLowerCase());
                 if (os != null) {
@@ -88,6 +89,7 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
 
+            //保存tagent osbit
             if ( StringUtils.isNotBlank(tagent.getOsbit())) {
                 tagentMapper.insertOsBit(tagent.getOsbit());
             }
