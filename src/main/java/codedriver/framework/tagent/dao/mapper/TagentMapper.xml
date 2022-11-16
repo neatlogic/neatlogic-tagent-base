@@ -172,7 +172,7 @@
     </insert>
 
     <insert id="insertOsBit" parameterType="codedriver.framework.tagent.dto.TagentOsBitVo">
-        INSERT ignore INTO `tagent_osbit` (`id`, `name`)
+        INSERT INTO `tagent_osbit` (`id`, `name`)
         VALUES (#{id}, #{name})
     </insert>
 
