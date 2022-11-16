@@ -87,8 +87,4 @@ public interface TagentMapper {
 
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
 
-    //刷数据接口用，后面可以删除
-//    List<String> getTagentOsBitStringList();
-//    void insertOsBitList(@Param("osBitVoList") List<TagentOsBitVo> osBitVoList);
-//    void updateTagentOsBitIdByOsBit(@Param("osBitId") Long osBitId, @Param("osBit") String osBit);
 }

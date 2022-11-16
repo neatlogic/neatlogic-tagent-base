@@ -50,8 +50,6 @@ public class TagentVo extends BaseEditorVo {
     private String osType;
     @EntityField(name = "系统版本", type = ApiParamType.STRING)
     private String osVersion;
-    @EntityField(name = "cpu架构 id", type = ApiParamType.LONG)
-    private Long osbitId;
     @EntityField(name = "cpu架构", type = ApiParamType.STRING)
     private String osbit;
     @EntityField(name = "密码", type = ApiParamType.STRING)
@@ -198,14 +196,6 @@ public class TagentVo extends BaseEditorVo {
 
     public void setOsVersion(String osVersion) {
         this.osVersion = osVersion;
-    }
-
-    public Long getOsbitId() {
-        return osbitId;
-    }
-
-    public void setOsbitId(Long osbitId) {
-        this.osbitId = osbitId;
     }
 
     public String getOsbit() {
