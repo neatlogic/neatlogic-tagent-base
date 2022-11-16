@@ -23,7 +23,7 @@ public class TagentOSVo extends BaseEditorVo {
 
     public Long getId() {
         if(id == null){
-            SnowflakeUtil.uniqueLong();
+            id = SnowflakeUtil.uniqueLong();
         }
         return id;
     }

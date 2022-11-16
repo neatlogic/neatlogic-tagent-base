@@ -76,16 +76,22 @@ public class TagentServiceImpl implements TagentService {
     @Override
     public int updateTagentById(TagentVo tagent) {
         TagentVo tagentVo = tagentMapper.getTagentById(tagent.getId());
-        if (tagentVo != null && tagentVo.getOsId() == null) {
-            if (StringUtils.isNotBlank(tagentVo.getOsType())) {
-                TagentOSVo os = tagentMapper.getOsByName(tagentVo.getOsType().toLowerCase());
+        if (tagentVo != null) {
+            //保存tagent ostype
+            if (tagentVo.getOsId() == null && StringUtils.isNotBlank(tagent.getOsType())) {
+                TagentOSVo os = tagentMapper.getOsByName(tagent.getOsType().toLowerCase());
                 if (os != null) {
                     tagent.setOsId(os.getId());
                 } else {
-                    TagentOSVo newOS = new TagentOSVo(tagentVo.getOsType());
+                    TagentOSVo newOS = new TagentOSVo(tagent.getOsType());
                     tagentMapper.insertOs(newOS);
                     tagent.setOsId(newOS.getId());
                 }
+            }
+
+            //保存tagent osbit
+            if ( StringUtils.isNotBlank(tagent.getOsbit())) {
+                tagentMapper.insertOsBit(tagent.getOsbit());
             }
         }
         return tagentMapper.updateTagentById(tagent);
@@ -277,7 +283,7 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-        public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList, TagentMessageVo tagentMessageVo) throws Exception {
+    public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList, TagentMessageVo tagentMessageVo) throws Exception {
         JSONObject returnObj = new JSONObject();
         String space = "     ";
         Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());

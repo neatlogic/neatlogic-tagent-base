@@ -50,7 +50,7 @@ public class TagentVo extends BaseEditorVo {
     private String osType;
     @EntityField(name = "系统版本", type = ApiParamType.STRING)
     private String osVersion;
-    @EntityField(name = "osbit", type = ApiParamType.STRING)
+    @EntityField(name = "cpu架构", type = ApiParamType.STRING)
     private String osbit;
     @EntityField(name = "密码", type = ApiParamType.STRING)
     private String credential;

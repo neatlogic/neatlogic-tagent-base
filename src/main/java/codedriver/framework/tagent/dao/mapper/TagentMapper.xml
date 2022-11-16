@@ -164,6 +164,14 @@
                 #{fcu}, NOW(3), NOW(3), #{fcu})
     </insert>
 
+    <insert id="insertOsBit" parameterType="java.lang.String">
+        INSERT
+        ignore INTO `tagent_osbit` (`osbit`)
+        VALUES (
+        #{osbit}
+        )
+    </insert>
+
     <select id="getAccountIdById" resultType="long">
         select `account_id`
         from tagent
@@ -454,6 +462,11 @@
         select `id`,
                `name`
         from tagent_os
+    </select>
+
+    <select id="getTagentOsBitList" resultType="java.lang.String">
+        select `osbit`
+        from tagent_osbit
     </select>
 
     <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" >
