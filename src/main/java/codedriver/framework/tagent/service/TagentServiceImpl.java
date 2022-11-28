@@ -90,7 +90,7 @@ public class TagentServiceImpl implements TagentService {
             }
 
             //保存tagent osbit
-            if ( StringUtils.isNotBlank(tagent.getOsbit())) {
+            if (StringUtils.isNotBlank(tagent.getOsbit())) {
                 tagentMapper.insertOsBit(tagent.getOsbit());
             }
         }
@@ -127,7 +127,14 @@ public class TagentServiceImpl implements TagentService {
                 updateAccountList.add(account);
             }
         } else {
-            insertAccountList.add(account);
+            AccountVo registeredTagentAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
+            if (registeredTagentAccountVo != null) {
+                //如果注册的主ip是其他tagent的包含ip，会将账号占用
+                account.setId(registeredTagentAccountVo.getId());
+                updateAccountList.add(account);
+            } else {
+                insertAccountList.add(account);
+            }
         }
         tagent.setAccountId(account.getId());
         TagentVo oldTagent = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
@@ -140,16 +147,37 @@ public class TagentServiceImpl implements TagentService {
         }
 
         if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
+            //如果包含ip列表包含了其他tagent的主ip，则注册失败
+            List<TagentVo> tagentVoList = tagentMapper.getTagentListByIpList(tagent.getIpList());
+            if (CollectionUtils.isNotEmpty(tagentVoList)) {
+                if (tagentVoList.size() > 1) {
+                    for (TagentVo tagentVo : tagentVoList) {
+                        if (!tagentVo.getIp().equals(tagent.getIp())) {
+                            throw new TagentIpListContainOtherTagentMainIpException(tagent, tagentVo);
+                        }
+                    }
+                } else {
+                    if (!tagentVoList.get(0).getIp().equals(tagent.getIp())) {
+                        throw new TagentIpListContainOtherTagentMainIpException(tagent, tagentVoList.get(0));
+                    }
+                }
+            }
             newIpList.addAll(tagent.getIpList());
         }
         if (CollectionUtils.isNotEmpty(oldIpList)) {
-            deleteTagentIpList = oldIpList.stream().filter(item -> !newIpList.contains(item)).collect(toList());
-            insertTagentIpList = newIpList.stream().filter(item -> !oldIpList.contains(item)).collect(toList());
+            List<String> finalNewIpList = newIpList;
+            deleteTagentIpList = oldIpList.stream().filter(item -> !finalNewIpList.contains(item)).collect(toList());
+            List<String> finalOldIpList = oldIpList;
+            insertTagentIpList = newIpList.stream().filter(item -> !finalOldIpList.contains(item)).collect(toList());
             deleteTagentIpList(deleteTagentIpList, tagent);
 
             //新增和更新账号
             oldIpList.removeAll(deleteTagentIpList);
             oldIpList.addAll(insertTagentIpList);
+            List<String> sameIpList = tagentMapper.getTagentIpListByIpList(oldIpList);
+            if (CollectionUtils.isNotEmpty(sameIpList)) {
+                oldIpList = oldIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
+            }
             for (String ip : oldIpList) {
                 AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
                 AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(ip, protocolVo.getPort());
@@ -169,12 +197,16 @@ public class TagentServiceImpl implements TagentService {
         } else {
             //新增账号
             if (CollectionUtils.isNotEmpty(newIpList)) {
+                insertTagentIpList.addAll(newIpList);
+                List<String> sameIpList = tagentMapper.getTagentIpListByIpList(newIpList);
+                if (CollectionUtils.isNotEmpty(sameIpList)) {
+                    newIpList = newIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
+                }
                 for (String ip : newIpList) {
                     AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
                     if (!insertAccountList.stream().map(AccountVo::getIp).collect(Collectors.toList()).contains(ip)) {
                         insertAccountList.add(newAccountVo);
                     }
-                    insertTagentIpList.add(ip);
                 }
             }
         }
@@ -207,11 +239,16 @@ public class TagentServiceImpl implements TagentService {
             for (String ip : deleteTagentIpList) {
                 tagentMapper.deleteTagentIp(tagent.getId(), ip);
             }
+
+            List<String> sameIpList = tagentMapper.getTagentIpListByIpList(deleteTagentIpList);
             IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
             //清除不存在的ip对应的账号
             for (String ip : deleteTagentIpList) {
                 //存在情况：之前注册的ipList含有tagent的ip，现在注册的ipList不含tagent的ip，加此判断，防止误删
                 if (StringUtils.equals(ip, tagent.getIp())) {
+                    continue;
+                }
+                if (CollectionUtils.isNotEmpty(sameIpList) && sameIpList.contains(ip)) {
                     continue;
                 }
                 AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
