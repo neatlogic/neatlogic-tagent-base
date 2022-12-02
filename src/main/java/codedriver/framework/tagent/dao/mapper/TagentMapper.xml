@@ -469,6 +469,42 @@
         from tagent_osbit
     </select>
 
+    <select id="getTagentIpListByIpList" resultType="java.lang.String">
+        SELECT distinct ti.ip
+        FROM tagent_ip ti
+        WHERE ti.ip in
+        <foreach collection="ipList" open="(" close=")" item="ip" separator=",">
+            #{ip}
+        </foreach>
+    </select>
+
+    <select id="getTagentListByIpList" resultType="codedriver.framework.tagent.dto.TagentVo">
+        SELECT t.id,
+        t.ip,
+        t.port,
+        t.name AS name,
+        t.version AS version,
+        t.os_type AS osType,
+        t.os_version AS osVersion,
+        t.osbit AS osbit,
+        t.account_id AS accountId,
+        t.status,
+        t.pcpu,
+        t.mem,
+        t.user AS user,
+        t.runner_id AS runnerId,
+        t.runner_ip AS runnerIp,
+        t.runner_port AS runnerPort,
+        t.runner_group_id AS runnerGroupId,
+        t.fcd AS fcd,
+        t.lcd AS lcd
+        FROM tagent t
+        where t.ip in
+        <foreach collection="ipList" open="(" close=")" item="ip" separator=",">
+            #{ip}
+        </foreach>
+    </select>
+
     <insert id="insertTagent" parameterType="codedriver.framework.tagent.dto.TagentVo" >
         INSERT INTO tagent (`id`,
         `ip`,

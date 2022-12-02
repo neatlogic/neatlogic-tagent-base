@@ -45,6 +45,8 @@ public interface TagentMapper {
 
     List<TagentVo> getTagentListByRunnerGroupIdList(List<Long> runnerGroupIdList);
 
+    List<TagentVo> getTagentListByIpList(@Param("ipList") List<String> ipList);
+
     List<TagentOSVo> getTagentOSTypeList();
 
     List<String> getTagentOsBitList();
@@ -54,6 +56,8 @@ public interface TagentMapper {
     TagentVersionVo getTagentVersionVoByPkgVersionAndOSTypeAndOSBit(@Param("version") String version, @Param("osType") String osType, @Param("osbit") String osbit);
 
     List<String> getTagentIpListByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    List<String> getTagentIpListByIpList(@Param("ipList") List<String> ipList);
 
     int getTagentPkgFileIdUsedCount(Long fileId);
 
