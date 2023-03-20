@@ -1,13 +1,14 @@
 package neatlogic.framework.tagent.enums;
 
 import neatlogic.framework.dependency.core.IFromType;
+import neatlogic.framework.util.I18nUtils;
 
 /**
  * @author longrf
  * @date 2022/3/10 12:11 下午
  */
 public enum TagentFromType implements IFromType {
-    TAGENT_ACCOUNT("tagentaccount","tagent帐号");
+    TAGENT_ACCOUNT("tagentaccount","enum.tagent.tagentfromtype.tagent_account");
 
     private String value;
     private String text;
@@ -34,6 +35,6 @@ public enum TagentFromType implements IFromType {
      */
     @Override
     public String getText() {
-        return text;
+        return I18nUtils.getMessage(text);
     }
 }
