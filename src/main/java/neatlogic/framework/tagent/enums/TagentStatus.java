@@ -3,12 +3,13 @@ package neatlogic.framework.tagent.enums;
 import neatlogic.framework.common.constvalue.IEnum;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.I18nUtils;
 
 import java.util.List;
 
 public enum TagentStatus implements IEnum {
-    CONNECTED("connected", "已连接"),
-    DISCONNECTED("disconnected", "未连接");
+    CONNECTED("connected", "enum.tagent.tagentstatus.connected"),
+    DISCONNECTED("disconnected", "enum.tagent.tagentstatus.disconnected");
     private final String value;
     private final String text;
 
@@ -22,7 +23,7 @@ public enum TagentStatus implements IEnum {
     }
 
     public String getText() {
-        return text;
+        return I18nUtils.getMessage(text);
     }
 
     @Override

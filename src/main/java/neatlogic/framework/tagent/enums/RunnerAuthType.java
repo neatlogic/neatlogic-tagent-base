@@ -3,12 +3,13 @@ package neatlogic.framework.tagent.enums;
 import neatlogic.framework.common.constvalue.IEnum;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.I18nUtils;
 
 import java.util.List;
 
 public enum RunnerAuthType implements IEnum {
-    BASIC("basic", "basic"),
-    HMAC("hmac", "hmac");
+    BASIC("basic", "enum.tagent.runnerauthtype.basic"),
+    HMAC("hmac", "enum.tagent.runnerauthtype.hmac");
     private final String value;
     private final String text;
 
@@ -22,7 +23,7 @@ public enum RunnerAuthType implements IEnum {
     }
 
     public String getText() {
-        return text;
+        return I18nUtils.getMessage(text);
     }
 
     @Override

@@ -3,19 +3,20 @@ package neatlogic.framework.tagent.enums;
 import neatlogic.framework.common.constvalue.IEnum;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.I18nUtils;
 
 import java.util.List;
 
 public enum TagentAction implements IEnum {
-    GET_LOGS("getlogs", "获取日志列表"),
-    DOWNLOAD_LOG("downloadLog", "下载日志"),
-    GET_CONFIG("getConfig", "获取配置"),
-    SAVE_CONFIG("saveConfig", "保存日志"),
-    RELOAD("reload", "重启"),
-    RESET_CREDENTIAL("resetcred", "重置密码"),
-    STATUS_CHECK("statusCheck", "检查状态"),
-    UPGRADE("upgrade", "升级"),
-    BATCH_SAVE_CONFIG("batchSaveConfig", "批量修改配置文件")
+    GET_LOGS("getlogs", "enum.tagent.tagentaction.get_logs"),
+    DOWNLOAD_LOG("downloadLog", "enum.tagent.tagentaction.download_log"),
+    GET_CONFIG("getConfig", "enum.tagent.tagentaction.get_config"),
+    SAVE_CONFIG("saveConfig", "enum.tagent.tagentaction.save_config"),
+    RELOAD("reload", "enum.tagent.tagentaction.reload"),
+    RESET_CREDENTIAL("resetcred", "enum.tagent.tagentaction.reset_credential"),
+    STATUS_CHECK("statusCheck", "enum.tagent.tagentaction.status_check"),
+    UPGRADE("upgrade", "enum.tagent.tagentaction.upgrade"),
+    BATCH_SAVE_CONFIG("batchSaveConfig", "enum.tagent.tagentaction.batch_save_config")
     ;
     private final String value;
     private final String text;
@@ -30,7 +31,7 @@ public enum TagentAction implements IEnum {
     }
 
     public String getText() {
-        return text;
+        return I18nUtils.getMessage(text);
     }
 
     @Override
