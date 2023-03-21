@@ -3,13 +3,14 @@ package neatlogic.framework.tagent.enums;
 import neatlogic.framework.common.constvalue.IEnum;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import neatlogic.framework.util.I18nUtils;
 
 import java.util.List;
 
 public enum TagentUpgradeStatus implements IEnum {
-    SUCCEED("succeed", "成功"),
-    FAILED("failed", "失败"),
-    WORKING("working", "进行中");
+    SUCCEED("succeed", "enum.tagent.tagentupgradestatus.succeed"),
+    FAILED("failed", "enum.tagent.tagentupgradestatus.failed"),
+    WORKING("working", "enum.tagent.tagentupgradestatus.working");
     private final String value;
     private final String text;
 
@@ -23,7 +24,7 @@ public enum TagentUpgradeStatus implements IEnum {
     }
 
     public String getText() {
-        return text;
+        return I18nUtils.getMessage(text);
     }
 
     @Override
