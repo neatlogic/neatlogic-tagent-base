@@ -478,7 +478,7 @@
         </foreach>
     </select>
 
-    <select id="getTagentListByIpList" resultType="neatlogic.framework.tagent.dto.TagentVo">
+    <select id="getTagentListByIpListAndPort" resultType="neatlogic.framework.tagent.dto.TagentVo">
         SELECT t.id,
         t.ip,
         t.port,
@@ -503,6 +503,7 @@
         <foreach collection="ipList" open="(" close=")" item="ip" separator=",">
             #{ip}
         </foreach>
+        and t.port = #{port}
     </select>
 
     <select id="getTagentIpListByTagentId" resultType="java.lang.String">
@@ -512,31 +513,16 @@
     </select>
 
     <select id="getTagentByIpOrTagentIpAndPort" resultType="neatlogic.framework.tagent.dto.TagentVo">
-        SELECT t.id,
-               t.ip,
-               t.port,
-               t.name                                  AS name,
-               t.version                               AS version,
-               t.os_type                               AS osType,
-               t.os_version                            AS osVersion,
-               t.osbit                                 AS osbit,
-               t.account_id                            AS accountId,
-               t.status,
-               t.pcpu,
-               t.mem,
-               t.user                                  AS user,
-               t.runner_id                             AS runnerId,
-               t.runner_ip                             AS runnerIp,
-               t.runner_port                           AS runnerPort,
-               t.runner_group_id                       AS runnerGroupId,
-               DATE_FORMAT(t.fcd, '%Y-%m-%d %H:%i:%s') AS fcd,
-               DATE_FORMAT(t.lcd, '%Y-%m-%d %H:%i:%s') AS lcd,
-               rg.`name`                               AS runnerGroupName
+        SELECT DISTINCT t.id,
+                        t.ip,
+                        t.port,
+                        t.name,
+                        t.runner_id as runnerId
         FROM tagent t
-            LEFT JOIN runnergroup rg ON t.`runner_group_id` = rg.`id`
-            LEFT JOIN tagent_ip ti ON t.`id` = ti.`tagent_id`
-        WHERE  t.port = #{port}
-          AND (t.ip = #{ip} or  ti.ip = #{ip})
+                 LEFT JOIN tagent_ip ti ON t.`id` = ti.`tagent_id`
+        WHERE t.port = #{port}
+          AND (t.ip = #{ip}
+            or ti.ip = #{ip})
     </select>
 
     <insert id="insertTagent" parameterType="neatlogic.framework.tagent.dto.TagentVo" >
@@ -592,6 +578,9 @@
         SET
         <if test="name !=null and name !='' ">
             `name` = #{name},
+        </if>
+        <if test="ip !=null and ip !='' ">
+            `ip` = #{ip},
         </if>
         <if test="version !=null and version !='' ">
             `version` = #{version},

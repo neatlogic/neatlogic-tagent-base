@@ -47,7 +47,7 @@ public interface TagentMapper {
 
     List<TagentVo> getTagentListByRunnerGroupIdList(List<Long> runnerGroupIdList);
 
-    List<TagentVo> getTagentListByIpList(@Param("ipList") List<String> ipList);
+    List<TagentVo> getTagentListByIpListAndPort(@Param("ipList") List<String> ipList, @Param("port") Integer port);
 
     List<TagentOSVo> getTagentOSTypeList();
 
