@@ -478,7 +478,7 @@
         </foreach>
     </select>
 
-    <select id="getTagentListByIpListAndPort" resultType="neatlogic.framework.tagent.dto.TagentVo">
+    <select id="getTagentListByIpListAndPortAndTagentId" resultType="neatlogic.framework.tagent.dto.TagentVo">
         SELECT t.id,
         t.ip,
         t.port,
@@ -504,6 +504,7 @@
             #{ip}
         </foreach>
         and t.port = #{port}
+        and t.id != #{tagentId}
     </select>
 
     <select id="getTagentIpListByTagentId" resultType="java.lang.String">
