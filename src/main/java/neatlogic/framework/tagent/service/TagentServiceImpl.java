@@ -151,7 +151,6 @@ public class TagentServiceImpl implements TagentService {
         } else {
             //重新注册tagent
 
-            //这里抛异常的话，证明前面ip逻辑的代码有问题
             TagentVo oldTagentVo = tagentMapper.getTagentById(tagent.getId());
             AccountVo newTagentAccountVo = new AccountVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
             AccountVo oldTagentAccount = resourceAccountCrossoverMapper.getAccountByTagentId(tagent.getId());
@@ -181,7 +180,7 @@ public class TagentServiceImpl implements TagentService {
                         updateAccountList.add(newTagentAccountVo);
                     }
 
-                    //如果新包含ip不包含旧的主ip，删除原主ip账号信息、tagent_ip的记录，这种情况确定要删除账号，直接删除
+                    //如果新包含ip不包含旧的主ip，这种情况确定要删除账号，直接删除原主ip账号信息、tagent_ip的记录
                     if (CollectionUtils.isEmpty(tagent.getIpList()) || !tagent.getIpList().contains(oldTagentAccount.getIp())) {
                         tagentMapper.deleteTagentIp(oldTagentVo.getId(), oldTagentVo.getIp());
                         AccountVo oldIpAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(oldTagentVo.getIp(), tagent.getPort());
@@ -280,15 +279,15 @@ public class TagentServiceImpl implements TagentService {
             }
         }
         if (CollectionUtils.isNotEmpty(insertAccountList)) {
-            for (AccountVo account : insertAccountList) {
-                resourceAccountCrossoverMapper.insertAccount(account);
-                resourceAccountCrossoverMapper.insertAccountIp(new AccountIpVo(account.getId(), account.getIp()));
+            for (AccountVo accountVo : insertAccountList) {
+                resourceAccountCrossoverMapper.insertAccount(accountVo);
+                resourceAccountCrossoverMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
             }
         }
         if (CollectionUtils.isNotEmpty(updateAccountList)) {
-            for (AccountVo account : updateAccountList) {
-                account.setName(null);
-                resourceAccountCrossoverMapper.updateAccount(account);
+            for (AccountVo accountVo : updateAccountList) {
+                accountVo.setName(null);
+                resourceAccountCrossoverMapper.updateAccount(accountVo);
             }
         }
 
