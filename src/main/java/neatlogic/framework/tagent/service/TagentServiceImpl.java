@@ -278,6 +278,7 @@ public class TagentServiceImpl implements TagentService {
                 }
             }
         }
+
         if (CollectionUtils.isNotEmpty(insertAccountList)) {
             for (AccountVo accountVo : insertAccountList) {
                 resourceAccountCrossoverMapper.insertAccount(accountVo);
