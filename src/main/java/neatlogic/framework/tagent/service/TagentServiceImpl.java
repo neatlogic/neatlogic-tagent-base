@@ -264,7 +264,7 @@ public class TagentServiceImpl implements TagentService {
             //新增账号
             if (CollectionUtils.isNotEmpty(newIpList)) {
                 insertTagentIpList.addAll(newIpList);
-                //应该是查找相同ip port的账号，不存在的才需要新增
+                //查找相同ip port的账号，不存在的才需要新增
                 List<String> sameIpList = resourceAccountCrossoverMapper.getAccountIpByIpListAndPort(newIpList, tagent.getPort());
                 if (CollectionUtils.isNotEmpty(sameIpList)) {
                     newIpList = newIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
