@@ -236,7 +236,7 @@ public class TagentServiceImpl implements TagentService {
 
         //如果包含ip列表包含了其他tagent的主ip，则注册失败
         if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
-            //若得到的tagent列表里面为空或者只有和当前注册的tagent的主ip相同，才是没有问题的，否则都是包含ip列表包含了其他tagent的主ip
+            //若得到的tagent列表里面为空或者只有和当前注册的tagent的id相同，才是没有问题的，否则都是包含ip列表包含了其他tagent的主ip
             List<TagentVo> tagentVoList = tagentMapper.getTagentListByIpListAndPort(tagent.getIpList(), tagent.getPort());
             if (CollectionUtils.isNotEmpty(tagentVoList)) {
                 if (tagentVoList.size() > 1) {
