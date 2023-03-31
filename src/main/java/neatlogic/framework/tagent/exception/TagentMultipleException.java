@@ -19,6 +19,7 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.tagent.dto.TagentVo;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author longrf
@@ -26,7 +27,7 @@ import java.util.List;
  */
 
 public class TagentMultipleException extends ApiRuntimeException {
-    public TagentMultipleException(List<TagentVo> tagentVoList) {
-        super("通过输入ip和输入port找到多个tagent，注册失败：" + tagentVoList.toString());
+    public TagentMultipleException(String insertTagentIp, Integer insertTagentPort, List<TagentVo> tagentVoList) {
+        super("注册失败，通过输入ip(" + insertTagentIp + ")和输入port(" + insertTagentPort + ")找到多个tagent：" + tagentVoList.stream().map(a -> a.getIp() + ":" + a.getPort() + "(" + a.getName() + ")").collect(Collectors.joining(",")));
     }
 }
