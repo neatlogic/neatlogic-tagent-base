@@ -122,16 +122,20 @@ public class TagentServiceImpl implements TagentService {
 
         //tagent的默认端口为3939，若不是3939则新增协议
         IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-        AccountProtocolVo protocolVo = resourceAccountCrossoverMapper.getAccountProtocolVoByNameAndPort("tagent", tagent.getPort());
-        if (protocolVo == null) {
-            if (tagent.getPort() == 3939) {
+        AccountProtocolVo protocolVo = null;
+        if (tagent.getPort() == 3939) {
+            protocolVo = resourceAccountCrossoverMapper.getAccountProtocolVoByNameAndPort("tagent", tagent.getPort());
+            if (protocolVo == null) {
                 protocolVo = new AccountProtocolVo("tagent", tagent.getPort());
-            } else {
-                protocolVo = new AccountProtocolVo("tagent." + tagent.getPort(), tagent.getPort());
+                resourceAccountCrossoverMapper.insertAccountProtocol(protocolVo);
             }
-            resourceAccountCrossoverMapper.insertAccountProtocol(protocolVo);
+        } else {
+            protocolVo = resourceAccountCrossoverMapper.getAccountProtocolVoByNameAndPort("tagent." + tagent.getPort(), tagent.getPort());
+            if (protocolVo == null) {
+                protocolVo = new AccountProtocolVo("tagent." + tagent.getPort(), tagent.getPort());
+                resourceAccountCrossoverMapper.insertAccountProtocol(protocolVo);
+            }
         }
-
 
         List<String> newIpList = new ArrayList<>();
         List<String> insertTagentIpList = new ArrayList<>();
