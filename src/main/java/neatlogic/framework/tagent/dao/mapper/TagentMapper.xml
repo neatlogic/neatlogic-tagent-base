@@ -478,7 +478,7 @@
         </foreach>
     </select>
 
-    <select id="getTagentListByIpList" resultType="neatlogic.framework.tagent.dto.TagentVo">
+    <select id="getTagentListByIpListAndPortAndTagentId" resultType="neatlogic.framework.tagent.dto.TagentVo">
         SELECT t.id,
         t.ip,
         t.port,
@@ -503,6 +503,27 @@
         <foreach collection="ipList" open="(" close=")" item="ip" separator=",">
             #{ip}
         </foreach>
+        and t.port = #{port}
+        and t.id != #{tagentId}
+    </select>
+
+    <select id="getTagentIpListByTagentId" resultType="java.lang.String">
+        SELECT ti.ip
+        FROM tagent_ip ti
+        WHERE ti.tagent_id = #{value}
+    </select>
+
+    <select id="getTagentByIpOrTagentIpAndPort" resultType="neatlogic.framework.tagent.dto.TagentVo">
+        SELECT DISTINCT t.id,
+                        t.ip,
+                        t.port,
+                        t.name,
+                        t.runner_id as runnerId
+        FROM tagent t
+                 LEFT JOIN tagent_ip ti ON t.`id` = ti.`tagent_id`
+        WHERE t.port = #{port}
+          AND (t.ip = #{ip}
+            or ti.ip = #{ip})
     </select>
 
     <insert id="insertTagent" parameterType="neatlogic.framework.tagent.dto.TagentVo" >
@@ -558,6 +579,9 @@
         SET
         <if test="name !=null and name !='' ">
             `name` = #{name},
+        </if>
+        <if test="ip !=null and ip !='' ">
+            `ip` = #{ip},
         </if>
         <if test="version !=null and version !='' ">
             `version` = #{version},

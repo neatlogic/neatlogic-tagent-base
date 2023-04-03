@@ -33,6 +33,8 @@ public interface TagentMapper {
 
     TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
+    List<TagentVo> getTagentByIpOrTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
     TagentVo getTagentById(Long id);
 
     List<TagentVo> getTagentByAccountId(Long accountId);
@@ -45,11 +47,13 @@ public interface TagentMapper {
 
     List<TagentVo> getTagentListByRunnerGroupIdList(List<Long> runnerGroupIdList);
 
-    List<TagentVo> getTagentListByIpList(@Param("ipList") List<String> ipList);
+    List<TagentVo> getTagentListByIpListAndPortAndTagentId(@Param("ipList") List<String> ipList, @Param("port") Integer port, @Param("tagentId") Long tagentId);
 
     List<TagentOSVo> getTagentOSTypeList();
 
     List<String> getTagentOsBitList();
+
+    List<String> getTagentIpListByTagentId(Long id);
 
     TagentVersionVo getTagentVersionById(Long id);
 
