@@ -6,6 +6,6 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 public class TagentActionFailedException extends ApiRuntimeException {
 
     public TagentActionFailedException(RunnerVo runnerVo, String message) {
-        super(runnerVo.getName() + "(" + runnerVo.getHost() + ")执行异常，" + message);
+        super("exception.tagent.tagentactionfailedexception", runnerVo.getName(), runnerVo.getHost(), message);
     }
 }

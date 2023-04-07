@@ -24,6 +24,6 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 
 public class TagentStatusIsSuccessException extends ApiRuntimeException {
     public TagentStatusIsSuccessException() {
-        super("注册失败，已存在活动的tagent，可能是ip冲突造成");
+        super("exception.tagent.tagentstatusissuccessexception");
     }
 }

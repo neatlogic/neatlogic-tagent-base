@@ -15,6 +15,7 @@
  */
 package neatlogic.framework.tagent.exception;
 
+import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.tagent.dto.TagentVo;
 
 import java.util.List;
@@ -25,9 +26,9 @@ import java.util.stream.Collectors;
  * @date 2022/11/25 17:36
  */
 
-public class TagentIpListContainOtherTagentMainIpException extends RuntimeException {
+public class TagentIpListContainOtherTagentMainIpException extends ApiRuntimeException {
 
     public TagentIpListContainOtherTagentMainIpException(TagentVo registeringTagent, List<TagentVo> registeredTagentList) {
-        super("正在注册的tagent（ip：“" + registeringTagent.getIp() + "”，port：“" + registeringTagent.getPort() + "”）的包含ip列表（ipString：“" + registeringTagent.getIpString() + "”）包含了下列已经注册了的tagent的主ip：" + registeredTagentList.stream().map(a -> a.getIp() + ":" + a.getPort() + "(" + a.getName() + ")").collect(Collectors.joining(",")) + "。请修改包含ip列表（ipString）后再重新注册");
+        super("exception.tagent.tagentiplistcontainothertagentmainipexception", registeringTagent.getIp(), registeringTagent.getPort(), registeringTagent.getIpString(), registeredTagentList.stream().map(a -> a.getIp() + ":" + a.getPort() + "(" + a.getName() + ")").collect(Collectors.joining(",")));
     }
 }

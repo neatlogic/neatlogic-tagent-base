@@ -5,6 +5,6 @@ import neatlogic.framework.tagent.dto.TagentVo;
 
 public class TagentHasBeenConnectedException extends ApiRuntimeException {
     public TagentHasBeenConnectedException(TagentVo vo) {
-        super("tagent:"+vo.getName()+"处于连接状态，请先断开连接");
+        super("exception.tagent.tagenthasbeenconnectedexception", vo.getName());
     }
 }
