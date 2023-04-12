@@ -8,6 +8,6 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
  */
 public class TagentIdIsRepeatException extends ApiRuntimeException {
     public TagentIdIsRepeatException(Long id, String ip, Integer port) {
-        super("已存在id:“" + id + "”相同的tagent（" + "ip:“" + ip + "”,port:“" + port + "”）");
+        super("exception.tagent.tagentidisrepeatexception", id, ip, port);
     }
 }
