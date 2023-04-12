@@ -543,7 +543,7 @@
     <select id="getAccountByTagentId" resultType="neatlogic.framework.tagent.dto.TagentAccountVo">
         SELECT a.`id`,
                a.`name`,
-               a.`password`,
+               a.`password` as passwordCipher,
                a.protocol_id as protocolId,
                crap.port     as protocolPort,
                t.ip
@@ -560,7 +560,7 @@
                cra.`protocol_id` as protocolId,
                crai.`ip`         as ip,
                crap.`port`       as protocolPort
-        from tagent_ip crai
+        from tagent_account_ip crai
                  JOIN `tagent_account` cra ON crai.`account_id` = cra.`id`
                  LEFT JOIN `cmdb_resourcecenter_account_protocol` crap ON crap.`id` = cra.`protocol_id`
         WHERE crai.ip = #{ip}
@@ -777,6 +777,21 @@
         delete
         from tagent_account
         where id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAccountIpByAccountId">
+        delete
+        from tagent_account_ip
+        where account_id = #{id}
+    </delete>
+
+    <delete id="deleteAccountIpListByAccountIdList">
+        delete
+        from tagent_account_ip
+        where account_id in
         <foreach collection="list" item="id" separator="," open="(" close=")">
             #{id}
         </foreach>

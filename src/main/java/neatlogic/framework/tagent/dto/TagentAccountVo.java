@@ -61,6 +61,14 @@ public class TagentAccountVo extends BaseEditorVo {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TagentAccountVo accountVo = (TagentAccountVo) o;
+        return Objects.equals(getPasswordPlain(), accountVo.getPasswordPlain()) && Objects.equals(protocolId, accountVo.protocolId) && Objects.equals(protocolPort, accountVo.protocolPort) && Objects.equals(ip, accountVo.ip);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(passwordPlain, protocolId, protocolPort, ip);
     }

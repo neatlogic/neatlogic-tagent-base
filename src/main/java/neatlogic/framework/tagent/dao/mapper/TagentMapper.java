@@ -68,6 +68,16 @@ public interface TagentMapper {
 
     Long getTagentIdByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
+    List<String> getAccountIpByIpListAndPort(@Param("ipList") List<String> ipList, @Param("port") Integer port);
+
+    TagentAccountVo getAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    TagentAccountVo getAccountByTagentId(Long id);
+
+    TagentAccountVo getResourceAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    TagentAccountVo getAccountById(Long id);
+
     void insertOs(TagentOSVo tagentOSVo);
 
     void insertOsBit(String osbit);
@@ -84,11 +94,15 @@ public interface TagentMapper {
 
     void insertTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
 
+    void insertAccountIp(AccountIpVo accountIpVo);
+
     void updateTagentAuditDetailStateAndResultById(@Param("id") Long id, @Param("status") String status, @Param("result") String result);
 
     int updateTagentById(TagentVo tagentVo);
 
     void updateTagentStatusAndDisConnectReasonById(@Param("status") String status, @Param("disConnectReason") String disConnectReason, @Param("id") Long id);
+
+    void updateAccount(TagentAccountVo accountVo);
 
     void deleteTagentById(Long id);
 
@@ -100,19 +114,10 @@ public interface TagentMapper {
 
     void deleteAccountById(Long id);
 
-    TagentAccountVo getAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
-
-    void updateAccount(TagentAccountVo accountVo);
-
-    TagentAccountVo getAccountByTagentId(Long id);
-
-    TagentAccountVo getResourceAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
-
-    TagentAccountVo getAccountById(Long id);
-
     void deleteAccountListByIdList(List<Long> idList);
 
-    List<String> getAccountIpByIpListAndPort(@Param("ipList") List<String> ipList, @Param("port") Integer port);
+    void deleteAccountIpByAccountId(Long accountId);
 
-    void insertAccountIp(AccountIpVo accountIpVo);
+    void deleteAccountIpListByAccountIdList(List<Long> deletedAccountIdList);
+
 }

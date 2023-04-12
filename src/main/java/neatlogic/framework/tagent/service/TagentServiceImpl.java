@@ -188,6 +188,7 @@ public class TagentServiceImpl implements TagentService {
                         if (oldIpAccountVo != null) {
                             Long accountId = oldIpAccountVo.getId();
                             tagentMapper.deleteAccountById(accountId);
+                            tagentMapper.deleteAccountIpByAccountId(accountId);
 //                            resourceAccountCrossoverMapper.deleteAccountById(accountId);
 //                            resourceAccountCrossoverMapper.deleteResourceAccountByAccountId(accountId);
 //                            resourceAccountCrossoverMapper.deleteAccountTagByAccountId(accountId);
@@ -333,6 +334,7 @@ public class TagentServiceImpl implements TagentService {
                 if (oldAccountVo != null) {
                     Long accountId = oldAccountVo.getId();
                     tagentMapper.deleteAccountById(accountId);
+                    tagentMapper.deleteAccountIpByAccountId(accountId);
 //                    resourceAccountCrossoverMapper.deleteAccountById(accountId);
 //                    resourceAccountCrossoverMapper.deleteResourceAccountByAccountId(accountId);
 //                    resourceAccountCrossoverMapper.deleteAccountTagByAccountId(accountId);
