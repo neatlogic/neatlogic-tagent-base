@@ -137,8 +137,8 @@ public class TagentServiceImpl implements TagentService {
         List<String> insertTagentIpList = new ArrayList<>();
 
 //        List<AccountVo> insertAccountList = new ArrayList<>();
-        List<TagentAccountVo> insertAccountList = new ArrayList<>();
 //        List<AccountVo> updateAccountList = new ArrayList<>();
+        List<TagentAccountVo> insertAccountList = new ArrayList<>();
         List<TagentAccountVo> updateAccountList = new ArrayList<>();
         if (tagent.getIsFirstCreate() != null && tagent.getIsFirstCreate() == 1) {
             //第一次注册tagent,主账号的ip、port肯定是不没有注册过的，因为一旦插入报错，证明前面ip逻辑的代码有问题
