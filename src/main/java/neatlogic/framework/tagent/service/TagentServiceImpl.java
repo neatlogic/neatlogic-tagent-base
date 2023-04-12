@@ -22,7 +22,6 @@ import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.IpVo;
 import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import neatlogic.framework.common.util.FileUtil;
@@ -137,11 +136,13 @@ public class TagentServiceImpl implements TagentService {
         List<String> newIpList = new ArrayList<>();
         List<String> insertTagentIpList = new ArrayList<>();
 
-        List<AccountVo> insertAccountList = new ArrayList<>();
-        List<AccountVo> updateAccountList = new ArrayList<>();
+//        List<AccountVo> insertAccountList = new ArrayList<>();
+        List<TagentAccountVo> insertAccountList = new ArrayList<>();
+//        List<AccountVo> updateAccountList = new ArrayList<>();
+        List<TagentAccountVo> updateAccountList = new ArrayList<>();
         if (tagent.getIsFirstCreate() != null && tagent.getIsFirstCreate() == 1) {
             //第一次注册tagent,主账号的ip、port肯定是不没有注册过的，因为一旦插入报错，证明前面ip逻辑的代码有问题
-            AccountVo accountVo = new AccountVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
+            TagentAccountVo accountVo = new TagentAccountVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
             insertAccountList.add(accountVo);
             //保存副ip账号逻辑
             saveTagentIpList(tagent, newIpList, insertTagentIpList, insertAccountList, updateAccountList, protocolVo);
@@ -152,8 +153,8 @@ public class TagentServiceImpl implements TagentService {
             //重新注册tagent
 
             TagentVo oldTagentVo = tagentMapper.getTagentById(tagent.getId());
-            AccountVo newTagentAccountVo = new AccountVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
-            AccountVo oldTagentAccount = resourceAccountCrossoverMapper.getAccountByTagentId(tagent.getId());
+            TagentAccountVo newTagentAccountVo = new TagentAccountVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
+            TagentAccountVo oldTagentAccount = tagentMapper.getAccountByTagentId(tagent.getId());
 
             /*主ip的账号逻辑
               根据tagentId找到的账号oldTagentAccount
@@ -174,7 +175,7 @@ public class TagentServiceImpl implements TagentService {
                 } else {
                     //情况2：使用副ip注册
 
-                    AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(tagent.getIp(), protocolVo.getPort());
+                    TagentAccountVo oldAccountVo = tagentMapper.getResourceAccountByIpAndPort(tagent.getIp(), protocolVo.getPort());
                     newTagentAccountVo.setId(oldAccountVo.getId());
                     if (!newTagentAccountVo.equals(oldAccountVo)) {
                         updateAccountList.add(newTagentAccountVo);
@@ -183,20 +184,21 @@ public class TagentServiceImpl implements TagentService {
                     //如果新包含ip不包含旧的主ip，这种情况确定要删除账号，直接删除原主ip账号信息、tagent_ip的记录
                     if (CollectionUtils.isEmpty(tagent.getIpList()) || !tagent.getIpList().contains(oldTagentAccount.getIp())) {
                         tagentMapper.deleteTagentIp(oldTagentVo.getId(), oldTagentVo.getIp());
-                        AccountVo oldIpAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(oldTagentVo.getIp(), tagent.getPort());
+                        TagentAccountVo oldIpAccountVo = tagentMapper.getResourceAccountByIpAndPort(oldTagentVo.getIp(), tagent.getPort());
                         if (oldIpAccountVo != null) {
                             Long accountId = oldIpAccountVo.getId();
-                            resourceAccountCrossoverMapper.deleteAccountById(accountId);
-                            resourceAccountCrossoverMapper.deleteResourceAccountByAccountId(accountId);
-                            resourceAccountCrossoverMapper.deleteAccountTagByAccountId(accountId);
-                            resourceAccountCrossoverMapper.deleteAccountIpByAccountId(accountId);
+                            tagentMapper.deleteAccountById(accountId);
+//                            resourceAccountCrossoverMapper.deleteAccountById(accountId);
+//                            resourceAccountCrossoverMapper.deleteResourceAccountByAccountId(accountId);
+//                            resourceAccountCrossoverMapper.deleteAccountTagByAccountId(accountId);
+//                            resourceAccountCrossoverMapper.deleteAccountIpByAccountId(accountId);
                         }
                     }
                 }
 
             } else {
                 //这情况是tagent表缺少accountId
-                AccountVo registeredTagentAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
+                TagentAccountVo registeredTagentAccountVo = tagentMapper.getResourceAccountByIpAndPort(tagent.getIp(), tagent.getPort());
                 if (registeredTagentAccountVo != null) {
                     newTagentAccountVo.setId(registeredTagentAccountVo.getId());
                     updateAccountList.add(newTagentAccountVo);
@@ -225,8 +227,8 @@ public class TagentServiceImpl implements TagentService {
      * @param updateAccountList  更新的账号列表
      * @param protocolVo         协议vo
      */
-    private void saveTagentIpList(TagentVo tagent, List<String> newIpList, List<String> insertTagentIpList, List<AccountVo> insertAccountList, List<AccountVo> updateAccountList, AccountProtocolVo protocolVo) {
-        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+    private void saveTagentIpList(TagentVo tagent, List<String> newIpList, List<String> insertTagentIpList, List<TagentAccountVo> insertAccountList, List<TagentAccountVo> updateAccountList, AccountProtocolVo protocolVo) {
+//        IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
 
         //如果包含ip列表包含了其他tagent的主ip，则注册失败
         if (CollectionUtils.isNotEmpty(tagent.getIpList())) {
@@ -248,8 +250,9 @@ public class TagentServiceImpl implements TagentService {
             oldIpList.addAll(insertTagentIpList);
 
             for (String ip : oldIpList) {
-                AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
-                AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(ip, protocolVo.getPort());
+                TagentAccountVo newAccountVo = new TagentAccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
+//                AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(ip, protocolVo.getPort());
+                TagentAccountVo oldAccountVo = tagentMapper.getAccountByIpAndPort(ip, protocolVo.getPort());
                 if (oldAccountVo != null) {
                     newAccountVo.setId(oldAccountVo.getId());
                 }
@@ -265,14 +268,14 @@ public class TagentServiceImpl implements TagentService {
             if (CollectionUtils.isNotEmpty(newIpList)) {
                 insertTagentIpList.addAll(newIpList);
                 //查找相同ip port的账号，不存在的才需要新增
-                List<String> sameIpList = resourceAccountCrossoverMapper.getAccountIpByIpListAndPort(newIpList, tagent.getPort());
+                List<String> sameIpList = tagentMapper.getAccountIpByIpListAndPort(newIpList, tagent.getPort());
                 if (CollectionUtils.isNotEmpty(sameIpList)) {
                     newIpList = newIpList.stream().filter(item -> !sameIpList.contains(item)).collect(toList());
                 }
                 for (String ip : newIpList) {
-                    AccountVo newAccountVo = new AccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
+                    TagentAccountVo newAccountVo = new TagentAccountVo(ip + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), ip, tagent.getCredential());
                     //避免重复插入已经插入的主ip账号
-                    if (!insertAccountList.stream().map(AccountVo::getIp).collect(Collectors.toList()).contains(ip)) {
+                    if (!insertAccountList.stream().map(TagentAccountVo::getIp).collect(Collectors.toList()).contains(ip)) {
                         insertAccountList.add(newAccountVo);
                     }
                 }
@@ -280,15 +283,17 @@ public class TagentServiceImpl implements TagentService {
         }
 
         if (CollectionUtils.isNotEmpty(insertAccountList)) {
-            for (AccountVo accountVo : insertAccountList) {
-                resourceAccountCrossoverMapper.insertAccount(accountVo);
-                resourceAccountCrossoverMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
+            for (TagentAccountVo accountVo : insertAccountList) {
+//                resourceAccountCrossoverMapper.insertAccount(accountVo);
+                tagentMapper.insertAccount(accountVo);
+                tagentMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
             }
         }
         if (CollectionUtils.isNotEmpty(updateAccountList)) {
-            for (AccountVo accountVo : updateAccountList) {
+            for (TagentAccountVo accountVo : updateAccountList) {
                 accountVo.setName(null);
-                resourceAccountCrossoverMapper.updateAccount(accountVo);
+//                resourceAccountCrossoverMapper.updateAccount(accountVo);
+                tagentMapper.updateAccount(accountVo);
             }
         }
 
@@ -314,7 +319,7 @@ public class TagentServiceImpl implements TagentService {
 
             //找出其他tagent的相同的ip列表，这些ip的账号仍需保留使用
             List<String> sameIpList = tagentMapper.getTagentIpListByIpList(deleteTagentIpList);
-            IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+//            IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
             //清除不存在的ip对应的账号
             for (String ip : deleteTagentIpList) {
                 //存在情况：之前注册的ipList含有tagent的主ip，现在注册的ipList不含tagent的主ip，加此判断，防止误删
@@ -324,13 +329,14 @@ public class TagentServiceImpl implements TagentService {
                 if (CollectionUtils.isNotEmpty(sameIpList) && sameIpList.contains(ip)) {
                     continue;
                 }
-                AccountVo oldAccountVo = resourceAccountCrossoverMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
+                TagentAccountVo oldAccountVo = tagentMapper.getResourceAccountByIpAndPort(ip, tagent.getPort());
                 if (oldAccountVo != null) {
                     Long accountId = oldAccountVo.getId();
-                    resourceAccountCrossoverMapper.deleteAccountById(accountId);
-                    resourceAccountCrossoverMapper.deleteResourceAccountByAccountId(accountId);
-                    resourceAccountCrossoverMapper.deleteAccountTagByAccountId(accountId);
-                    resourceAccountCrossoverMapper.deleteAccountIpByAccountId(accountId);
+                    tagentMapper.deleteAccountById(accountId);
+//                    resourceAccountCrossoverMapper.deleteAccountById(accountId);
+//                    resourceAccountCrossoverMapper.deleteResourceAccountByAccountId(accountId);
+//                    resourceAccountCrossoverMapper.deleteAccountTagByAccountId(accountId);
+//                    resourceAccountCrossoverMapper.deleteAccountIpByAccountId(accountId);
                 }
             }
         }
@@ -535,8 +541,8 @@ public class TagentServiceImpl implements TagentService {
             params.put("credential", tagentVo.getCredential());
             params.put("fileName", fileVo.getName());
             params.put("ignoreFile", versionVo.getIgnoreFile());
-            IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
-            AccountVo accountVo = resourceAccountCrossoverMapper.getAccountById(tagentVo.getAccountId());
+//            IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
+            TagentAccountVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
             if (accountVo == null) {
                 throw new ResourceCenterAccountNotFoundException();
             }

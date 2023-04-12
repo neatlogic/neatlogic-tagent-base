@@ -1,5 +1,6 @@
 package neatlogic.framework.tagent.dao.mapper;
 
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.tagent.dto.*;
 import org.apache.ibatis.annotations.Param;
@@ -73,6 +74,8 @@ public interface TagentMapper {
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
 
+    void insertAccount(TagentAccountVo newAccountVo);
+
     void replaceTagentPkgFile(TagentVersionVo versionVo);
 
     void insertUpgradeAudit(TagentUpgradeAuditVo audit);
@@ -95,4 +98,21 @@ public interface TagentMapper {
 
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
 
+    void deleteAccountById(Long id);
+
+    TagentAccountVo getAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    void updateAccount(TagentAccountVo accountVo);
+
+    TagentAccountVo getAccountByTagentId(Long id);
+
+    TagentAccountVo getResourceAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    TagentAccountVo getAccountById(Long id);
+
+    void deleteAccountListByIdList(List<Long> idList);
+
+    List<String> getAccountIpByIpListAndPort(@Param("ipList") List<String> ipList, @Param("port") Integer port);
+
+    void insertAccountIp(AccountIpVo accountIpVo);
 }
