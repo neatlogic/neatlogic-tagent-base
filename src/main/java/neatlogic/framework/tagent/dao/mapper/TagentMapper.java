@@ -1,5 +1,6 @@
 package neatlogic.framework.tagent.dao.mapper;
 
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.tagent.dto.*;
@@ -70,13 +71,15 @@ public interface TagentMapper {
 
     List<String> getAccountIpByIpListAndPort(@Param("ipList") List<String> ipList, @Param("port") Integer port);
 
-    TagentAccountVo getAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+    AccountBaseVo getAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
-    TagentAccountVo getAccountByTagentId(Long id);
+    AccountBaseVo getAccountByTagentId(Long id);
 
-    TagentAccountVo getResourceAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+    AccountBaseVo getResourceAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
-    TagentAccountVo getAccountById(Long id);
+    AccountBaseVo getAccountById(Long id);
+
+    List<AccountBaseVo> getAccountListByIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
 
     void insertOs(TagentOSVo tagentOSVo);
 
@@ -84,7 +87,7 @@ public interface TagentMapper {
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
 
-    void insertAccount(TagentAccountVo newAccountVo);
+    void insertAccount(AccountBaseVo newAccountVo);
 
     void replaceTagentPkgFile(TagentVersionVo versionVo);
 
@@ -102,7 +105,7 @@ public interface TagentMapper {
 
     void updateTagentStatusAndDisConnectReasonById(@Param("status") String status, @Param("disConnectReason") String disConnectReason, @Param("id") Long id);
 
-    void updateAccount(TagentAccountVo accountVo);
+    void updateAccount(AccountBaseVo accountVo);
 
     void deleteTagentById(Long id);
 

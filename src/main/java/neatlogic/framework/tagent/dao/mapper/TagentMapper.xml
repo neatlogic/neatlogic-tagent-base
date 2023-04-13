@@ -526,7 +526,7 @@
             or ti.ip = #{ip})
     </select>
     
-    <select id="getAccountByIpAndPort" resultType="neatlogic.framework.tagent.dto.TagentAccountVo">
+    <select id="getAccountByIpAndPort" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
         SELECT ta.id,
                ta.`name`,
                ta.`password`    as passwordCipher,
@@ -540,7 +540,7 @@
           AND tap.port = #{port}
     </select>
 
-    <select id="getAccountByTagentId" resultType="neatlogic.framework.tagent.dto.TagentAccountVo">
+    <select id="getAccountByTagentId" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
         SELECT a.`id`,
                a.`name`,
                a.`password` as passwordCipher,
@@ -553,7 +553,7 @@
         WHERE t.id = #{id}
     </select>
 
-    <select id="getResourceAccountByIpAndPort" resultType="neatlogic.framework.tagent.dto.TagentAccountVo">
+    <select id="getResourceAccountByIpAndPort" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
         SELECT cra.id,
                cra.`name`,
                cra.`password`    as passwordCipher,
@@ -567,7 +567,7 @@
           AND crap.port = #{port}
     </select>
 
-    <select id="getAccountById" resultType="neatlogic.framework.tagent.dto.TagentAccountVo">
+    <select id="getAccountById" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
         select a.`id`,
                a.`name`,
                a.`password`   as passwordCipher,
@@ -593,6 +593,28 @@
             #{ip}
         </foreach>
         and crap.`port` = #{port}
+    </select>
+    <select id="getAccountListByIpListAndProtocolId"
+            resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        SELECT a.`id`,
+        a.`name`,
+        a.`protocol_id` AS protocolId,
+        a.`password` as passwordCipher,
+        crap.`name` as protocol,
+        crap.`port` as protocolPort,
+        a.`fcu`,
+        a.`fcd`,
+        a.`lcu`,
+        crai.`ip`,
+        a.`lcd`
+        FROM `tagent_account` a
+        left join `cmdb_resourcecenter_account_protocol` crap on a.protocol_id = crap.id
+        left join `tagent_account_ip` crai on a.id = crai.`account_id`
+        WHERE crai.`ip` IN
+        <foreach collection="ipList" item="ip" open="(" close=")" separator=",">
+            #{ip}
+        </foreach>
+        and a.`protocol_id` = #{protocolId}
     </select>
 
     <insert id="insertTagent" parameterType="neatlogic.framework.tagent.dto.TagentVo" >
