@@ -1,5 +1,7 @@
 package neatlogic.framework.tagent.dao.mapper;
 
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
+import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.tagent.dto.*;
 import org.apache.ibatis.annotations.Param;
@@ -67,11 +69,25 @@ public interface TagentMapper {
 
     Long getTagentIdByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
+    List<String> getAccountIpByIpListAndPort(@Param("ipList") List<String> ipList, @Param("port") Integer port);
+
+    AccountBaseVo getAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    AccountBaseVo getAccountByTagentId(Long id);
+
+    AccountBaseVo getResourceAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    AccountBaseVo getAccountById(Long id);
+
+    List<AccountBaseVo> getAccountListByIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
+
     void insertOs(TagentOSVo tagentOSVo);
 
     void insertOsBit(String osbit);
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
+
+    void insertAccount(AccountBaseVo newAccountVo);
 
     void replaceTagentPkgFile(TagentVersionVo versionVo);
 
@@ -81,11 +97,15 @@ public interface TagentMapper {
 
     void insertTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
 
+    void insertAccountIp(AccountIpVo accountIpVo);
+
     void updateTagentAuditDetailStateAndResultById(@Param("id") Long id, @Param("status") String status, @Param("result") String result);
 
     int updateTagentById(TagentVo tagentVo);
 
     void updateTagentStatusAndDisConnectReasonById(@Param("status") String status, @Param("disConnectReason") String disConnectReason, @Param("id") Long id);
+
+    void updateAccount(AccountBaseVo accountVo);
 
     void deleteTagentById(Long id);
 
@@ -94,5 +114,13 @@ public interface TagentMapper {
     void deleteTagentVersionById(Long id);
 
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
+
+    void deleteAccountById(Long id);
+
+    void deleteAccountListByIdList(List<Long> idList);
+
+    void deleteAccountIpByAccountId(Long accountId);
+
+    void deleteAccountIpListByAccountIdList(List<Long> deletedAccountIdList);
 
 }

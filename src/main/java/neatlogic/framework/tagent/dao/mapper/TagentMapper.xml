@@ -407,7 +407,7 @@
                t.`port`
         FROM tagent t
                  LEFT JOIN tagent_ip ti ON ti.tagent_id = t.id
-                 LEFT JOIN cmdb_resourcecenter_account_ip a ON a.ip = ti.ip
+                 LEFT JOIN tagent_account_ip a ON a.ip = ti.ip
         WHERE a.account_id = #{value}
     </select>
 
@@ -524,6 +524,97 @@
         WHERE t.port = #{port}
           AND (t.ip = #{ip}
             or ti.ip = #{ip})
+    </select>
+    
+    <select id="getAccountByIpAndPort" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        SELECT ta.id,
+               ta.`name`,
+               ta.`password`    as passwordCipher,
+               ta.`protocol_id` as protocolId,
+               tai.`ip`         as ip,
+               tap.`port`       as protocolPort
+        from tagent_account_ip tai
+                 JOIN `tagent_account` ta ON tai.`account_id` = ta.`id`
+                 LEFT JOIN `cmdb_resourcecenter_account_protocol` tap ON tap.`id` = ta.`protocol_id`
+        WHERE tai.ip = #{ip}
+          AND tap.port = #{port}
+    </select>
+
+    <select id="getAccountByTagentId" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        SELECT a.`id`,
+               a.`name`,
+               a.`password` as passwordCipher,
+               a.protocol_id as protocolId,
+               crap.port     as protocolPort,
+               t.ip
+        FROM `tagent_account` a
+                 JOIN `tagent` t on t.account_id = a.id
+                 LEFT JOIN `cmdb_resourcecenter_account_protocol` crap on a.protocol_id = crap.id
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="getResourceAccountByIpAndPort" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        SELECT cra.id,
+               cra.`name`,
+               cra.`password`    as passwordCipher,
+               cra.`protocol_id` as protocolId,
+               crai.`ip`         as ip,
+               crap.`port`       as protocolPort
+        from tagent_account_ip crai
+                 JOIN `tagent_account` cra ON crai.`account_id` = cra.`id`
+                 LEFT JOIN `cmdb_resourcecenter_account_protocol` crap ON crap.`id` = cra.`protocol_id`
+        WHERE crai.ip = #{ip}
+          AND crap.port = #{port}
+    </select>
+
+    <select id="getAccountById" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        select a.`id`,
+               a.`name`,
+               a.`password`   as passwordCipher,
+               b.name         as protocol,
+               b.id           as protocolId,
+               b.`port`       as protocolPort,
+               a.`fcu`,
+               a.`fcd`,
+               a.`lcu`,
+               a.`lcd`
+        from `tagent_account` a
+                 JOIN `cmdb_resourcecenter_account_protocol` b ON a.`protocol_id` = b.`id`
+        where a.`id` = #{value}
+    </select>
+
+    <select id="getAccountIpByIpListAndPort" resultType="java.lang.String">
+        select crai.ip
+        from `tagent_account` cra
+        LEFT JOIN `tagent_account_ip` crai on crai.account_id = cra.id
+        LEFT JOIN `cmdb_resourcecenter_account_protocol` crap on cra.protocol_id = crap.id
+        where crai.ip in
+        <foreach collection="ipList" item="ip" open="(" close=")" separator=",">
+            #{ip}
+        </foreach>
+        and crap.`port` = #{port}
+    </select>
+    <select id="getAccountListByIpListAndProtocolId"
+            resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        SELECT a.`id`,
+        a.`name`,
+        a.`protocol_id` AS protocolId,
+        a.`password` as passwordCipher,
+        crap.`name` as protocol,
+        crap.`port` as protocolPort,
+        a.`fcu`,
+        a.`fcd`,
+        a.`lcu`,
+        crai.`ip`,
+        a.`lcd`
+        FROM `tagent_account` a
+        left join `cmdb_resourcecenter_account_protocol` crap on a.protocol_id = crap.id
+        left join `tagent_account_ip` crai on a.id = crai.`account_id`
+        WHERE crai.`ip` IN
+        <foreach collection="ipList" item="ip" open="(" close=")" separator=",">
+            #{ip}
+        </foreach>
+        and a.`protocol_id` = #{protocolId}
     </select>
 
     <insert id="insertTagent" parameterType="neatlogic.framework.tagent.dto.TagentVo" >
@@ -651,6 +742,20 @@
 
     </update>
 
+    <update id="updateAccount">
+        update `tagent_account` a set
+        <if test="name != null">
+            a.`name` = #{name},
+        </if>
+        <if test="passwordCipher != null">
+            a.`password` = #{passwordCipher},
+        </if>
+        a.protocol_id = #{protocolId},
+        a.`lcu` = #{lcu},
+        a.`lcd` = now(3)
+        where a.`id` = #{id}
+    </update>
+
     <insert id="insertTagentAuditDetail" parameterType="neatlogic.framework.tagent.dto.TagentUpgradeAuditVo">
         insert
         into tagent_upgrade_detail(`id`, `audit_id`, `ip`, `port`, `source_version`, `target_version`, `result`,
@@ -684,6 +789,36 @@
         AND ip = #{ip}
     </delete>
 
+    <delete id="deleteAccountById">
+        delete
+        from tagent_account
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteAccountListByIdList">
+        delete
+        from tagent_account
+        where id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteAccountIpByAccountId">
+        delete
+        from tagent_account_ip
+        where account_id = #{id}
+    </delete>
+
+    <delete id="deleteAccountIpListByAccountIdList">
+        delete
+        from tagent_account_ip
+        where account_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
     <insert id="insertTagentIp">
         INSERT INTO tagent_ip (`tagent_id`,`ip`)
         VALUES
@@ -700,6 +835,41 @@
     <insert id="insertUpgradeAudit" parameterType="neatlogic.framework.tagent.dto.TagentUpgradeAuditVo">
         insert into tagent_upgrade_audit(`id`, `fcu`, `count`, `fcd`, `network`)
         values (#{id}, #{fcu}, #{count}, NOW(3), #{network})
+    </insert>
+    
+    <insert id="insertAccount">
+        insert ignore into `tagent_account` (
+        `id`,
+        `name`,
+        <if test="passwordCipher != null">
+            `password`,
+        </if>
+        `protocol_id` ,
+        `lcu`,
+        `lcd`,
+        `fcu`,
+        `fcd`
+        )
+        values (
+        #{id},
+        #{name},
+        <if test="passwordCipher != null">
+            #{passwordCipher},
+        </if>
+        #{protocolId},
+        #{lcu},
+        now(3),
+        #{fcu},
+        now(3)
+        )
+    </insert>
+
+    <insert id="insertAccountIp">
+        INSERT
+        IGNORE
+        INTO `tagent_account_ip` (`account_id`, `ip`)
+        VALUES (#{accountId},
+        #{ip})
     </insert>
 
     <resultMap id="TagentMap" type="neatlogic.framework.tagent.dto.TagentVo">
