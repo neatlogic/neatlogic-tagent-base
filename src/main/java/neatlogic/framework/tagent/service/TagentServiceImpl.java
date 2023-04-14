@@ -309,7 +309,7 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
             if (CollectionUtils.isNotEmpty(successInsertIpList)) {
                 List<String> firstInsertAccountIpList = insertAccountIpList;
-                // 情况1：!finalInsertAccountIpList.contains(e)属于包含账号复用的情况
+                // 情况1：!firstInsertAccountIpList.contains(e)属于包含账号复用的情况
                 // 情况2：successInsertIpList.contains(e)属于避免注册并发重复插入的情况
                 insertTagentIpList = insertTagentIpList.stream().filter(e -> !firstInsertAccountIpList.contains(e) || successInsertIpList.contains(e)).collect(toList());
                 if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
