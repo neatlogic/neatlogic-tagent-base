@@ -291,7 +291,6 @@ public class TagentServiceImpl implements TagentService {
                 tagentMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
             }
         }
-
         if (CollectionUtils.isNotEmpty(updateAccountList)) {
             for (AccountBaseVo accountVo : updateAccountList) {
                 accountVo.setName(null);
