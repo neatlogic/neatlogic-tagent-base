@@ -287,6 +287,7 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(insertAccountList)) {
             for (AccountBaseVo accountVo : insertAccountList) {
 //                resourceAccountCrossoverMapper.insertAccount(accountVo);
+                //这一sql报name的唯一索引的错，可能是由注册并发导致的，接口断点不放开也会构成并发
                 tagentMapper.insertAccount(accountVo);
                 tagentMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
             }
