@@ -838,7 +838,7 @@
     </insert>
     
     <insert id="insertAccount">
-        insert ignore into `tagent_account` (
+        insert into `tagent_account` (
         `id`,
         `name`,
         <if test="passwordCipher != null">
