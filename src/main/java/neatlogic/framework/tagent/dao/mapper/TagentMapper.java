@@ -87,7 +87,7 @@ public interface TagentMapper {
 
     void insertTagentIp(@Param("tagentId") Long tagentId, @Param("ipList") List<String> ipList);
 
-    void insertAccount(AccountBaseVo newAccountVo);
+    int insertAccount(AccountBaseVo newAccountVo);
 
     void replaceTagentPkgFile(TagentVersionVo versionVo);
 

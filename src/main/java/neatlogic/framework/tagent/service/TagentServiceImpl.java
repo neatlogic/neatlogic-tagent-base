@@ -284,12 +284,18 @@ public class TagentServiceImpl implements TagentService {
             }
         }
 
+        List<String> successInsertIpList = new ArrayList<>();
+        List<String> insertAccountIpList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(insertAccountList)) {
             for (AccountBaseVo accountVo : insertAccountList) {
 //                resourceAccountCrossoverMapper.insertAccount(accountVo);
-                tagentMapper.insertAccount(accountVo);
-                tagentMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
+                //insert ignore 返回0表示ignore，返回1表示insert,返回2表示update
+                if (tagentMapper.insertAccount(accountVo) == 1) {
+                    tagentMapper.insertAccountIp(new AccountIpVo(accountVo.getId(), accountVo.getIp()));
+                    successInsertIpList.add(accountVo.getIp());
+                }
             }
+            insertAccountIpList = insertAccountList.stream().map(AccountBaseVo::getIp).collect(toList());
         }
         if (CollectionUtils.isNotEmpty(updateAccountList)) {
             for (AccountBaseVo accountVo : updateAccountList) {
@@ -301,7 +307,15 @@ public class TagentServiceImpl implements TagentService {
 
         //新增tagentIp
         if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
-            tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+            if (CollectionUtils.isNotEmpty(successInsertIpList)) {
+                List<String> firstInsertAccountIpList = insertAccountIpList;
+                // 情况1：!finalInsertAccountIpList.contains(e)属于包含账号复用的情况
+                // 情况2：successInsertIpList.contains(e)属于避免注册并发重复插入的情况
+                insertTagentIpList = insertTagentIpList.stream().filter(e -> !firstInsertAccountIpList.contains(e) || successInsertIpList.contains(e)).collect(toList());
+                if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
+                    tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+                }
+            }
         }
     }
 
