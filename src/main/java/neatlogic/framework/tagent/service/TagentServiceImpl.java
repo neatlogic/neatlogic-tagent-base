@@ -24,7 +24,6 @@ import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountProtocolVo;
 import neatlogic.framework.cmdb.dto.resourcecenter.IpVo;
-import neatlogic.framework.cmdb.exception.resourcecenter.ResourceCenterAccountNotFoundException;
 import neatlogic.framework.common.util.FileUtil;
 import neatlogic.framework.common.util.IpUtil;
 import neatlogic.framework.common.util.PageUtil;
@@ -548,7 +547,7 @@ public class TagentServiceImpl implements TagentService {
 //            IResourceAccountCrossoverMapper resourceAccountCrossoverMapper = CrossoverServiceFactory.getApi(IResourceAccountCrossoverMapper.class);
             AccountBaseVo accountVo = tagentMapper.getAccountById(tagentVo.getAccountId());
             if (accountVo == null) {
-                throw new ResourceCenterAccountNotFoundException();
+                throw new TagentAccountNotFoundException(tagentVo.getAccountId());
             }
             params.put("credential", accountVo.getPasswordCipher());
             RestVo restVo = new RestVo.Builder(runnerVo.getUrl() + "public/api/binary/tagent/upgrade", AuthenticateType.BASIC.getValue()).setFormData(params).setFileVoList(fileVoList).setContentType(RestUtil.MULTI_FORM_DATA).build();
