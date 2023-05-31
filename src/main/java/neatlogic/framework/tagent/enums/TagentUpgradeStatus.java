@@ -8,9 +8,9 @@ import neatlogic.framework.util.I18nUtils;
 import java.util.List;
 
 public enum TagentUpgradeStatus implements IEnum {
-    SUCCEED("succeed", "enum.tagent.tagentupgradestatus.succeed"),
-    FAILED("failed", "enum.tagent.tagentupgradestatus.failed"),
-    WORKING("working", "enum.tagent.tagentupgradestatus.working");
+    SUCCEED("succeed", "common.success"),
+    FAILED("failed", "common.fail"),
+    WORKING("working", "common.ongoing");
     private final String value;
     private final String text;
 
