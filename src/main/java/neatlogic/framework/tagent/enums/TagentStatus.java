@@ -8,8 +8,8 @@ import neatlogic.framework.util.I18nUtils;
 import java.util.List;
 
 public enum TagentStatus implements IEnum {
-    CONNECTED("connected", "enum.tagent.tagentstatus.connected"),
-    DISCONNECTED("disconnected", "enum.tagent.tagentstatus.disconnected");
+    CONNECTED("connected", "已连接"),
+    DISCONNECTED("disconnected", "未连接");
     private final String value;
     private final String text;
 

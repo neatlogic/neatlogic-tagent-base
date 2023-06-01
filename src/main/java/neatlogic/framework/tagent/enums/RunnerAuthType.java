@@ -8,8 +8,8 @@ import neatlogic.framework.util.I18nUtils;
 import java.util.List;
 
 public enum RunnerAuthType implements IEnum {
-    BASIC("basic", "enum.tagent.runnerauthtype.basic"),
-    HMAC("hmac", "enum.tagent.runnerauthtype.hmac");
+    BASIC("basic", "basic"),
+    HMAC("hmac", "hmac");
     private final String value;
     private final String text;
 

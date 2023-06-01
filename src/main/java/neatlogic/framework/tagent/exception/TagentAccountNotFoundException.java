@@ -25,6 +25,6 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 public class TagentAccountNotFoundException extends ApiRuntimeException {
 
     public TagentAccountNotFoundException(Long id) {
-        super("exception.tagent.tagentaccountnotfoundexception", id.toString());
+        super("tagent账号id(“{1}”)不存在", id.toString());
     }
 }

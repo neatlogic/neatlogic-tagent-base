@@ -10,7 +10,7 @@ import java.util.List;
 public enum TagentCPUType implements IEnum {
     X86_64("X86_64", "enum.tagent.tagentcputype.X86_64"),
     X86("X86", "enum.tagent.tagentcputype.X86"),
-    DEFAULT("default", "enum.tagent.tagentcputype.default");
+    DEFAULT("default", "default");
     private final String value;
     private final String text;
 

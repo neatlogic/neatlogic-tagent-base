@@ -29,6 +29,6 @@ import java.util.stream.Collectors;
 public class TagentIpListContainOtherTagentMainIpException extends ApiRuntimeException {
 
     public TagentIpListContainOtherTagentMainIpException(TagentVo registeringTagent, List<TagentVo> registeredTagentList) {
-        super("exception.tagent.tagentiplistcontainothertagentmainipexception", registeringTagent.getIp(), registeringTagent.getPort(), registeringTagent.getIpString(), registeredTagentList.stream().map(a -> a.getIp() + ":" + a.getPort() + "(" + a.getName() + ")").collect(Collectors.joining(",")));
+        super("正在注册的tagent（ip：“{0}”，port：“{1}”）的包含ip列表（ipString：“{2}”）包含了下列已经注册了的tagent的主ip：{3}。请修改包含ip列表（ipString）后再重新注册", registeringTagent.getIp(), registeringTagent.getPort(), registeringTagent.getIpString(), registeredTagentList.stream().map(a -> a.getIp() + ":" + a.getPort() + "(" + a.getName() + ")").collect(Collectors.joining(",")));
     }
 }

@@ -7,6 +7,6 @@ public class TagentRunnerConnectRefusedException extends ApiRuntimeException {
     private static final long serialVersionUID = 1958411996207578533L;
 
     public TagentRunnerConnectRefusedException(String url, String message) {
-        super("exception.tagent.tagentrunnerconnectrefusedexception", url, message);
+        super("Runner url： “{0}” {1}", url, message);
     }
 }

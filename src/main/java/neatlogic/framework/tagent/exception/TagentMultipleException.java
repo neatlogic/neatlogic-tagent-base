@@ -28,6 +28,6 @@ import java.util.stream.Collectors;
 
 public class TagentMultipleException extends ApiRuntimeException {
     public TagentMultipleException(String insertTagentIp, Integer insertTagentPort, List<TagentVo> tagentVoList) {
-        super("exception.tagent.tagentmultipleexception", insertTagentIp, insertTagentPort, tagentVoList.stream().map(a -> a.getIp() + ":" + a.getPort() + "(" + a.getName() + ")").collect(Collectors.joining(",")));
+        super("注册失败，通过输入ip({0})和输入port({1})找到多个tagent：{2}", insertTagentIp, insertTagentPort, tagentVoList.stream().map(a -> a.getIp() + ":" + a.getPort() + "(" + a.getName() + ")").collect(Collectors.joining(",")));
     }
 }

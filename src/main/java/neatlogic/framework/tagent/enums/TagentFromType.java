@@ -8,7 +8,7 @@ import neatlogic.framework.util.I18nUtils;
  * @date 2022/3/10 12:11 下午
  */
 public enum TagentFromType implements IFromType {
-    TAGENT_ACCOUNT("tagentaccount","enum.tagent.tagentfromtype.tagent_account");
+    TAGENT_ACCOUNT("tagentaccount","tagent帐号");
 
     private String value;
     private String text;

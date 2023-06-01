@@ -10,6 +10,6 @@ import com.alibaba.fastjson.JSONObject;
 public class TagentIpIsEmptyException extends ApiRuntimeException {
     public TagentIpIsEmptyException(JSONObject jsonObject) {
 
-        super("exception.tagent.tagentipisemptyexception", jsonObject.toString());
+        super("当前注册的tagent的ip为空，注册信息有:{0}", jsonObject.toString());
     }
 }

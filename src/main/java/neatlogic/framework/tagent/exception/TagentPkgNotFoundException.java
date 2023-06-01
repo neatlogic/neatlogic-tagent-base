@@ -4,10 +4,10 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 
 public class TagentPkgNotFoundException extends ApiRuntimeException {
     public TagentPkgNotFoundException(Long fileId) {
-        super("exception.tagent.tagentpkgnotfoundexception.a", fileId);
+        super("tagent安装包：{0}不存在", fileId);
     }
 
     public TagentPkgNotFoundException() {
-        super("exception.tagent.tagentpkgnotfoundexception.b");
+        super("没有找到安装包文件");
     }
 }

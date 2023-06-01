@@ -9,6 +9,6 @@ import com.alibaba.fastjson.JSONObject;
  */
 public class TagentPortIsEmptyException extends ApiRuntimeException {
     public TagentPortIsEmptyException(JSONObject jsonObject) {
-        super("exception.tagent.tagentportisemptyexception", jsonObject.toString());
+        super("当前注册的tagent的端口（port）为空，注册信息有:{0}", jsonObject.toString());
     }
 }

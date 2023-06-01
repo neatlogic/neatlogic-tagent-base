@@ -24,6 +24,6 @@ import neatlogic.framework.exception.core.ApiRuntimeException;
 
 public class TagentStatusIsSuccessException extends ApiRuntimeException {
     public TagentStatusIsSuccessException() {
-        super("exception.tagent.tagentstatusissuccessexception");
+        super("Registration failed, active agent already exists, possibly due to IP conflict");
     }
 }

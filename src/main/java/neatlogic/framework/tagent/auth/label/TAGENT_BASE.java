@@ -10,12 +10,12 @@ public class TAGENT_BASE extends AuthBase {
 
 	@Override
 	public String getAuthDisplayName() {
-		return "auth.framework.tagentbase.name";
+		return "Tagent基础权限";
 	}
 
 	@Override
 	public String getAuthIntroduction() {
-		return "auth.framework.tagentbase.introduction";
+		return "查看tagent";
 	}
 
 	@Override

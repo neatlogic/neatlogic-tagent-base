@@ -5,6 +5,6 @@ import neatlogic.framework.tagent.dto.TagentVo;
 
 public class TagentIpNotFoundException extends ApiRuntimeException {
     public TagentIpNotFoundException(TagentVo tagent) {
-        super("exception.tagent.tagentipnotfoundexception", tagent.getName(), tagent.getIp());
+        super("tagent:“{0}”的IP:“{1}”找不到", tagent.getName(), tagent.getIp());
     }
 }
