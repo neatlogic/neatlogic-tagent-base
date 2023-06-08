@@ -1,7 +1,7 @@
 package neatlogic.framework.tagent.enums;
 
 import neatlogic.framework.dependency.core.IFromType;
-import neatlogic.framework.util.I18nUtils;
+import neatlogic.framework.util.$;
 
 /**
  * @author longrf
@@ -35,6 +35,6 @@ public enum TagentFromType implements IFromType {
      */
     @Override
     public String getText() {
-        return I18nUtils.getMessage(text);
+        return $.t(text);
     }
 }
