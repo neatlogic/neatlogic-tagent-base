@@ -65,7 +65,7 @@ public class TagentVo extends BaseEditorVo {
     private String osbit;
     @EntityField(name = "密码", type = ApiParamType.STRING)
     private String credential;
-    @EntityField(name = "帐号id", type = ApiParamType.LONG)
+    @EntityField(name = "账号id", type = ApiParamType.LONG)
     private Long accountId;
     @EntityField(name = "runner id", type = ApiParamType.LONG)
     private Long runnerId;
