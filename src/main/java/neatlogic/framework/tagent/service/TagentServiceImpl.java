@@ -51,8 +51,6 @@ import neatlogic.framework.tagent.exception.*;
 import neatlogic.framework.tagent.tagenthandler.core.ITagentHandler;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerFactory;
 import neatlogic.framework.util.RestUtil;
-import neatlogic.module.framework.file.handler.LocalFileSystemHandler;
-import neatlogic.module.framework.file.handler.MinioFileSystemHandler;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -474,16 +472,10 @@ public class TagentServiceImpl implements TagentService {
         if (fileTypeHandler.needSave()) {
             //始终只存最新的一份数据
             FileVo oldFileVo = fileMapper.getFileByNameAndUniqueKey(fileVo.getName(), null);
-            String filePath;
             if (oldFileVo != null) {
                 fileVo.setId(oldFileVo.getId());
             }
-            try {
-                filePath = FileUtil.saveData(MinioFileSystemHandler.NAME, TenantContext.get().getTenantUuid(), inputStream, fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-            } catch (Exception ex) {
-                // 如果minio出现异常，则上传到本地
-                filePath = FileUtil.saveData(LocalFileSystemHandler.NAME, TenantContext.get().getTenantUuid(), inputStream, fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
-            }
+            String filePath = FileUtil.saveData(TenantContext.get().getTenantUuid(), inputStream, fileVo.getId().toString(), fileVo.getContentType(), fileVo.getType());
             fileVo.setPath(filePath);
             if (oldFileVo == null) {
                 fileMapper.insertFile(fileVo);
