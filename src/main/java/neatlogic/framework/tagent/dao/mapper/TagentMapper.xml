@@ -606,7 +606,9 @@
         a.`fcd`,
         a.`lcu`,
         crai.`ip`,
-        a.`lcd`
+        a.`lcd`,
+        crap.`name` as protocol,
+        crap.`port` as protocolPort
         FROM `tagent_account` a
         left join `cmdb_resourcecenter_account_protocol` crap on a.protocol_id = crap.id
         left join `tagent_account_ip` crai on a.id = crai.`account_id`
