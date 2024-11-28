@@ -133,8 +133,6 @@ public class TagentServiceImpl implements TagentService {
         List<String> newIpList = new ArrayList<>();
         List<String> insertTagentIpList = new ArrayList<>();
 
-//        List<AccountVo> insertAccountList = new ArrayList<>();
-//        List<AccountVo> updateAccountList = new ArrayList<>();
         List<AccountBaseVo> insertAccountList = new ArrayList<>();
         List<AccountBaseVo> updateAccountList = new ArrayList<>();
         if (tagent.getIsFirstCreate() != null && tagent.getIsFirstCreate() == 1) {
@@ -186,10 +184,6 @@ public class TagentServiceImpl implements TagentService {
                             Long accountId = oldIpAccountVo.getId();
                             tagentMapper.deleteAccountById(accountId);
                             tagentMapper.deleteAccountIpByAccountId(accountId);
-//                            resourceAccountCrossoverMapper.deleteAccountById(accountId);
-//                            resourceAccountCrossoverMapper.deleteResourceAccountByAccountId(accountId);
-//                            resourceAccountCrossoverMapper.deleteAccountTagByAccountId(accountId);
-//                            resourceAccountCrossoverMapper.deleteAccountIpByAccountId(accountId);
                         }
                     }
                 }
@@ -322,10 +316,7 @@ public class TagentServiceImpl implements TagentService {
             //清除不存在的ip对应的账号
             for (String ip : deleteTagentIpList) {
                 //存在情况：之前注册的ipList含有tagent的主ip，现在注册的ipList不含tagent的主ip，加此判断，防止误删
-                if (StringUtils.equals(ip, tagent.getIp())) {
-                    continue;
-                }
-                if (CollectionUtils.isNotEmpty(sameIpList) && sameIpList.contains(ip)) {
+                if (StringUtils.equals(ip, tagent.getIp()) || CollectionUtils.isNotEmpty(sameIpList) && sameIpList.contains(ip)) {
                     continue;
                 }
                 AccountBaseVo oldAccountVo = tagentMapper.getTagentAccountByIpAndPort(ip, tagent.getPort());
