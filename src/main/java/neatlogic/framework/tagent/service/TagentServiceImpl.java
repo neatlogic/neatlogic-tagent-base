@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 package neatlogic.framework.tagent.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.client.model.UpdateOptions;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
@@ -34,6 +35,7 @@ import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import neatlogic.framework.exception.file.FileTypeHandlerNotFoundException;
 import neatlogic.framework.exception.runner.RunnerIdNotFoundException;
+import neatlogic.framework.exception.runner.RunnerNotFoundByTagentRunnerIdException;
 import neatlogic.framework.exception.runner.RunnerUrlIsNullException;
 import neatlogic.framework.file.core.FileStorageMediumFactory;
 import neatlogic.framework.file.core.FileTypeHandlerFactory;
@@ -52,6 +54,8 @@ import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerFactory;
 import neatlogic.framework.util.RestUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -70,6 +74,8 @@ import static java.util.stream.Collectors.toList;
  **/
 @Service
 public class TagentServiceImpl implements TagentService {
+    @Resource
+    private MongoTemplate mongoTemplate;
 
     @Resource
     TagentMapper tagentMapper;
@@ -81,7 +87,7 @@ public class TagentServiceImpl implements TagentService {
     FileMapper fileMapper;
 
     @Override
-    public int updateTagentById(TagentVo tagent) {
+    public void updateTagentById(TagentVo tagent) {
         TagentVo tagentVo = tagentMapper.getTagentById(tagent.getId());
         if (tagentVo != null) {
             //保存tagent ostype
@@ -101,7 +107,68 @@ public class TagentServiceImpl implements TagentService {
                 tagentMapper.insertOsBit(tagent.getOsbit());
             }
         }
-        return tagentMapper.updateTagentById(tagent);
+        //return tagentMapper.updateTagentById(tagent);
+        updateTagentMGById(tagent);
+    }
+
+    /**
+     * 更新tagent状态等心跳信息
+     *
+     * @param tagentVo tagent对象
+     */
+    private void updateTagentMGById(TagentVo tagentVo) {
+        Document whereDoc = new Document();
+        Document updateDoc = new Document();
+        Document setDocument = new Document();
+        whereDoc.put("id", tagentVo.getId());
+        updateDoc.put("ip", tagentVo.getIp());
+        updateDoc.put("version", tagentVo.getVersion());
+        updateDoc.put("runner_id", tagentVo.getRunnerId());
+        updateDoc.put("runner_port", tagentVo.getRunnerPort());
+        updateDoc.put("runner_group_id", tagentVo.getRunnerGroupId());
+        updateDoc.put("os_id", tagentVo.getOsId());
+        updateDoc.put("status", tagentVo.getStatus());
+        updateDoc.put("pcpu", tagentVo.getPcpu());
+        updateDoc.put("mem", tagentVo.getMem());
+        updateDoc.put("disconnect_reason", tagentVo.getDisConnectReason());
+        updateDoc.put("lcd", new Date());
+        setDocument.put("$set", updateDoc);
+        // 配置 upsert 为 true
+        UpdateOptions options = new UpdateOptions().upsert(true);
+        mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument, options);
+    }
+
+    /**
+     * 根据tagentId 获取tagent心跳信息
+     * @param id tagentId
+     * @return tagent对象
+     */
+    @Override
+    public TagentVo getTagentMGById(long id) {
+        Document whereDoc = new Document();
+        whereDoc.put("id", id);
+        TagentVo tagentVo = null;
+        Document tagentDoc = mongoTemplate.getCollection("_tagent_info").find(whereDoc).first();
+        if (tagentDoc != null) {
+            tagentVo = mapToTagentVo(tagentDoc);
+        }
+        return tagentVo;
+    }
+    private TagentVo mapToTagentVo(Document doc) {
+        TagentVo vo = new TagentVo();
+        vo.setId(doc.getLong("id"));
+        vo.setIp(doc.getString("ip"));
+        vo.setVersion(doc.getString("version"));
+        vo.setRunnerId(doc.getLong("runner_id"));
+        vo.setRunnerPort(doc.getString("runner_port"));
+        vo.setRunnerGroupId(doc.getLong("runner_group_id"));
+        vo.setOsId(doc.getLong("os_id"));
+        vo.setStatus(doc.getString("status"));
+        vo.setPcpu(doc.getString("pcpu"));
+        vo.setMem(doc.getString("mem"));
+        vo.setDisConnectReason(doc.getString("disconnect_reason"));
+        vo.setLcd(doc.getDate("lcd"));
+        return vo;
     }
 
     /**
@@ -389,11 +456,51 @@ public class TagentServiceImpl implements TagentService {
         return returnTagentVoList;
     }
 
+    /**
+     * 根据tagentId列表获取runnerIdList
+     * @param tagentIdList tagentId列表
+     * @return runnerIdSet
+     */
+    private Set<Long> getRunnerIdListByTagentIds(List<Long> tagentIdList) {
+        Document query = new Document("id", new Document("$in", tagentIdList));
+        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
+                .find(query)
+                .projection(new Document("runner_id", 1).append("_id", 0)) // 只返回 runner_id 字段
+                .into(new ArrayList<>());
+
+        Set<Long> runnerIdList = new HashSet<>();
+        for (Document doc : documents) {
+            Object runnerId = doc.get("runner_id");
+            if (runnerId instanceof Number) { // 确保是数字类型
+                runnerIdList.add(((Number) runnerId).longValue());
+            }
+        }
+        return runnerIdList;
+    }
+
+    /**
+     * 根据tagentId列表获取runnerIdList
+     * @param tagentIdList tagentId列表
+     * @return runnerIdSet
+     */
+    @Override
+    public List<TagentVo> getTagentListMGByTagentIds(List<Long> tagentIdList) {
+        Document query = new Document("id", new Document("$in", tagentIdList));
+        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
+                .find(query)
+                .into(new ArrayList<>());
+        List<TagentVo> tagentVoList = new ArrayList<>();
+        for (Document doc : documents) {
+            tagentVoList.add(mapToTagentVo(doc));
+        }
+        return tagentVoList;
+    }
+
     @Override
     public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList, TagentMessageVo tagentMessageVo) throws Exception {
         JSONObject returnObj = new JSONObject();
         String space = "     ";
-        Set<Long> runnerIdSet = tagentList.stream().map(TagentVo::getRunnerId).collect(Collectors.toSet());
+        Set<Long> runnerIdSet = getRunnerIdListByTagentIds(tagentList.stream().map(TagentVo::getId).collect(toList()));
         List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdSet(runnerIdSet);
         //文件内容
         String fileDataString = "user：" + UserContext.get().getUserName() + space + "time：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + space + "tagentCount：" + tagentList.size() + "\n\n";
@@ -511,10 +618,13 @@ public class TagentServiceImpl implements TagentService {
             if (!fileStorageHandler.isExit(fileVo.getPath())) {
                 throw new TagentPkgNotFoundException();
             }
-
-            RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
+            TagentVo tagentMG = getTagentMGById(tagentVo.getId());
+            if (tagentMG == null || tagentMG.getRunnerId() == null) {
+                throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId());
+            }
+            RunnerVo runnerVo = runnerMapper.getRunnerById(tagentMG.getRunnerId());
             if (runnerVo == null) {
-                throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
+                throw new RunnerIdNotFoundException(tagentMG.getRunnerId());
             }
             List<FileVo> fileVoList = new ArrayList<>();
             fileVoList.add(fileVo);
@@ -593,15 +703,20 @@ public class TagentServiceImpl implements TagentService {
         if (tagentVo == null) {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
-        RunnerVo runnerVo = runnerMapper.getRunnerById(tagentVo.getRunnerId());
+        TagentVo tagentMG = getTagentMGById(tagentVo.getId());
+        if(tagentMG == null || tagentMG.getRunnerId() == null){
+            throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId());
+        }
+        RunnerVo runnerVo = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         if (runnerVo == null) {
-            throw new RunnerIdNotFoundException(tagentVo.getRunnerId());
+            throw new RunnerIdNotFoundException(tagentMG.getRunnerId());
         }
         if (StringUtils.isBlank(runnerVo.getUrl())) {
             throw new RunnerUrlIsNullException(runnerVo.getId());
         }
         return tagentHandler.execTagentCmd(message, tagentVo, runnerVo);
     }
+
 
     /**
      * 根据os类型和CPU架构

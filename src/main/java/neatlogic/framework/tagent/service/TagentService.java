@@ -35,7 +35,7 @@ public interface TagentService {
      * @param tagentVo
      * @return
      */
-    int updateTagentById(TagentVo tagentVo);
+    void updateTagentById(TagentVo tagentVo);
 
     /**
      * 保存tagent和相关账号
@@ -110,5 +110,20 @@ public interface TagentService {
      * @throws Exception e
      */
     JSONObject batchExecTagentChannelAction(String action, TagentSearchVo tagentSearchVo, TagentMessageVo tagentMessageVo) throws Exception;
+
+
+    /**
+     * 根据tagentId 获取tagent心跳信息
+     * @param id tagentId
+     * @return tagent对象
+     */
+    TagentVo getTagentMGById(long id);
+
+    /**
+     * 根据tagentId列表获取runnerIdList
+     * @param tagentIdList tagentId列表
+     * @return runnerIdSet
+     */
+    List<TagentVo> getTagentListMGByTagentIds(List<Long> tagentIdList);
 
 }
