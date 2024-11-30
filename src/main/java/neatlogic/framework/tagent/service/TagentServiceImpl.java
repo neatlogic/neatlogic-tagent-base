@@ -35,7 +35,7 @@ import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import neatlogic.framework.exception.file.FileTypeHandlerNotFoundException;
 import neatlogic.framework.exception.runner.RunnerIdNotFoundException;
-import neatlogic.framework.exception.runner.RunnerNotFoundByTagentRunnerIdException;
+import neatlogic.framework.exception.runner.RunnerNotFoundByTagentIdException;
 import neatlogic.framework.exception.runner.RunnerUrlIsNullException;
 import neatlogic.framework.file.core.FileStorageMediumFactory;
 import neatlogic.framework.file.core.FileTypeHandlerFactory;
@@ -125,6 +125,7 @@ public class TagentServiceImpl implements TagentService {
         updateDoc.put("version", tagentVo.getVersion());
         updateDoc.put("runner_id", tagentVo.getRunnerId());
         updateDoc.put("runner_port", tagentVo.getRunnerPort());
+        updateDoc.put("runner_ip", tagentVo.getRunnerIp());
         updateDoc.put("runner_group_id", tagentVo.getRunnerGroupId());
         updateDoc.put("os_id", tagentVo.getOsId());
         updateDoc.put("status", tagentVo.getStatus());
@@ -140,6 +141,7 @@ public class TagentServiceImpl implements TagentService {
 
     /**
      * 根据tagentId 获取tagent心跳信息
+     *
      * @param id tagentId
      * @return tagent对象
      */
@@ -154,12 +156,14 @@ public class TagentServiceImpl implements TagentService {
         }
         return tagentVo;
     }
+
     private TagentVo mapToTagentVo(Document doc) {
         TagentVo vo = new TagentVo();
         vo.setId(doc.getLong("id"));
         vo.setIp(doc.getString("ip"));
         vo.setVersion(doc.getString("version"));
         vo.setRunnerId(doc.getLong("runner_id"));
+        vo.setRunnerIp(doc.getString("runner_ip"));
         vo.setRunnerPort(doc.getString("runner_port"));
         vo.setRunnerGroupId(doc.getLong("runner_group_id"));
         vo.setOsId(doc.getLong("os_id"));
@@ -458,6 +462,7 @@ public class TagentServiceImpl implements TagentService {
 
     /**
      * 根据tagentId列表获取runnerIdList
+     *
      * @param tagentIdList tagentId列表
      * @return runnerIdSet
      */
@@ -480,6 +485,7 @@ public class TagentServiceImpl implements TagentService {
 
     /**
      * 根据tagentId列表获取runnerIdList
+     *
      * @param tagentIdList tagentId列表
      * @return runnerIdSet
      */
@@ -620,7 +626,7 @@ public class TagentServiceImpl implements TagentService {
             }
             TagentVo tagentMG = getTagentMGById(tagentVo.getId());
             if (tagentMG == null || tagentMG.getRunnerId() == null) {
-                throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId());
+                throw new RunnerNotFoundByTagentIdException(tagentVo.getId(), tagentVo.getIp());
             }
             RunnerVo runnerVo = runnerMapper.getRunnerById(tagentMG.getRunnerId());
             if (runnerVo == null) {
@@ -704,8 +710,8 @@ public class TagentServiceImpl implements TagentService {
             throw new TagentIdNotFoundException(message.getTagentId());
         }
         TagentVo tagentMG = getTagentMGById(tagentVo.getId());
-        if(tagentMG == null || tagentMG.getRunnerId() == null){
-            throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId());
+        if (tagentMG == null || tagentMG.getRunnerId() == null) {
+            throw new RunnerNotFoundByTagentIdException(tagentVo.getId(), tagentVo.getIp());
         }
         RunnerVo runnerVo = runnerMapper.getRunnerById(tagentMG.getRunnerId());
         if (runnerVo == null) {

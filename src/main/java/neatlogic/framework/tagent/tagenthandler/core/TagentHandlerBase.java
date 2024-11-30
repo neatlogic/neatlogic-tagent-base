@@ -12,7 +12,7 @@ public abstract class TagentHandlerBase implements ITagentHandler {
     @Override
     public JSONObject execTagentCmd(TagentMessageVo message,TagentVo tagentVo,RunnerVo runnerVo) throws Exception {
         if(runnerVo == null){
-            throw new RunnerNotFoundByTagentRunnerIdException(message.getRunnerId());
+            throw new RunnerNotFoundByTagentRunnerIdException(tagentVo.getId(),tagentVo.getIp(),message.getRunnerId());
         }
         return myExecTagentCmd(message, tagentVo, runnerVo);
     }
