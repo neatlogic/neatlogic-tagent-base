@@ -40,9 +40,6 @@
             <if test="version !=null and version !='' ">
                 AND t.`version` = #{version}
             </if>
-            <if test="status !=null and status !='' ">
-                AND t.`status` = #{status}
-            </if>
             <if test="runnerGroupId !=null ">
                 AND t.`runner_group_id` = #{runnerGroupId}
             </if>
@@ -87,9 +84,6 @@
             <if test="version !=null and version !='' ">
                 AND t.`version` = #{version}
             </if>
-            <if test="status !=null and status !='' ">
-                AND t.`status` = #{status}
-            </if>
             <if test="runnerGroupId !=null ">
                 AND t.`runner_group_id` = #{runnerGroupId}
             </if>
@@ -113,13 +107,7 @@
                ft.`os_version`                            AS osVersion,
                ft.`osbit`                                 AS osbit,
                ft.`account_id`                            AS accountId,
-               ft.`status`,
-               ft.`pcpu`,
-               ft.`mem`,
                ft.`user`                                  AS user,
-               ft.`runner_id`                             AS runnerId,
-               ft.`runner_ip`                             AS runnerIp,
-               ft.`runner_port`                           AS runnerPort,
                ft.`runner_group_id`                       AS runnerGroupId,
                DATE_FORMAT(ft.`fcd`, '%Y-%m-%d %H:%i:%s') AS fcd,
                DATE_FORMAT(ft.`lcd`, '%Y-%m-%d %H:%i:%s') AS lcd,
@@ -220,13 +208,7 @@
                t.os_version                            AS osVersion,
                t.osbit                                 AS osbit,
                t.account_id                            AS accountId,
-               t.status,
-               t.pcpu,
-               t.mem,
                t.user                                  AS user,
-               t.runner_id                             AS runnerId,
-               t.runner_ip                             AS runnerIp,
-               t.runner_port                           AS runnerPort,
                t.runner_group_id                       AS runnerGroupId,
                DATE_FORMAT(t.fcd, '%Y-%m-%d %H:%i:%s') AS fcd,
                DATE_FORMAT(t.lcd, '%Y-%m-%d %H:%i:%s') AS lcd,
@@ -343,13 +325,7 @@
                ft.`os_version`                            AS osVersion,
                ft.`osbit`                                 AS osbit,
                ft.`account_id`                            AS accountId,
-               ft.`status`,
-               ft.`pcpu`,
-               ft.`mem`,
                ft.`user`                                  AS user,
-               ft.`runner_id`                             AS runnerId,
-               ft.`runner_ip`                             AS runnerIp,
-               ft.`runner_port`                           AS runnerPort,
                ft.`runner_group_id`                       AS runnerGroupId,
                DATE_FORMAT(ft.`fcd`, '%Y-%m-%d %H:%i:%s') AS fcd,
                DATE_FORMAT(ft.`lcd`, '%Y-%m-%d %H:%i:%s') AS lcd
@@ -368,13 +344,7 @@
                ft.`os_version`                            AS osVersion,
                ft.`osbit`                                 AS osbit,
                ft.`account_id`                            AS accountId,
-               ft.`status`,
-               ft.`pcpu`,
-               ft.`mem`,
                ft.`user`                                  AS user,
-               ft.`runner_id`                             AS runnerId,
-               ft.`runner_ip`                             AS runnerIp,
-               ft.`runner_port`                           AS runnerPort,
                ft.`runner_group_id`                       AS runnerGroupId,
                DATE_FORMAT(ft.`fcd`, '%Y-%m-%d %H:%i:%s') AS fcd,
                DATE_FORMAT(ft.`lcd`, '%Y-%m-%d %H:%i:%s') AS lcd
@@ -434,13 +404,7 @@
         t.os_version AS osVersion,
         t.osbit AS osbit,
         t.account_id AS accountId,
-        t.status,
-        t.pcpu,
-        t.mem,
         t.user AS user,
-        t.runner_id AS runnerId,
-        t.runner_ip AS runnerIp,
-        t.runner_port AS runnerPort,
         t.runner_group_id AS runnerGroupId,
         t.fcd AS fcd,
         t.lcd AS lcd
@@ -481,13 +445,7 @@
         t.os_version AS osVersion,
         t.osbit AS osbit,
         t.account_id AS accountId,
-        t.status,
-        t.pcpu,
-        t.mem,
         t.user AS user,
-        t.runner_id AS runnerId,
-        t.runner_ip AS runnerIp,
-        t.runner_port AS runnerPort,
         t.runner_group_id AS runnerGroupId,
         t.fcd AS fcd,
         t.lcd AS lcd
@@ -833,18 +791,12 @@
         <result column="osVersion" property="osVersion"/>
         <result column="osbit" property="osbit"/>
         <result column="accountId" property="accountId"/>
-        <result column="runnerId" property="runnerId"/>
         <result column="disConnectReason" property="disConnectReason"/>
         <result column="runnerName" property="runnerName"/>
         <result column="runnerGroupId" property="runnerGroupId"/>
-        <result column="runnerIp" property="runnerIp"/>
-        <result column="runnerPort" property="runnerPort"/>
         <result column="user" property="user"/>
         <result column="osName" property="osName"/>
         <result column="runnerGroupName" property="runnerGroupName"/>
-        <result column="pcpu" property="pcpu"/>
-        <result column="mem" property="mem"/>
-        <result column="status" property="status"/>
         <result column="fcd" property="fcd"/>
         <result column="lcd" property="lcd"/>
         <collection property="ipList" ofType="string" javaType="list">
