@@ -95,11 +95,14 @@ public class TagentServiceImpl implements TagentService {
                 TagentOSVo os = tagentMapper.getOsByName(tagent.getOsType().toLowerCase());
                 if (os != null) {
                     tagent.setOsId(os.getId());
+                    tagent.setOsName(os.getName());
                 } else {
                     TagentOSVo newOS = new TagentOSVo(tagent.getOsType());
                     tagentMapper.insertOs(newOS);
                     tagent.setOsId(newOS.getId());
+                    tagent.setOsName(newOS.getName());
                 }
+                tagentMapper.updateTagentById(tagent);
             }
 
             //保存tagent osbit
@@ -116,24 +119,76 @@ public class TagentServiceImpl implements TagentService {
      *
      * @param tagentVo tagent对象
      */
-    private void updateTagentMGById(TagentVo tagentVo) {
+    @Override
+    public void updateTagentMGById(TagentVo tagentVo) {
         Document whereDoc = new Document();
-        Document updateDoc = new Document();
+        Document doc = new Document();
         Document setDocument = new Document();
         whereDoc.put("id", tagentVo.getId());
-        updateDoc.put("ip", tagentVo.getIp());
-        updateDoc.put("version", tagentVo.getVersion());
-        updateDoc.put("runner_id", tagentVo.getRunnerId());
-        updateDoc.put("runner_port", tagentVo.getRunnerPort());
-        updateDoc.put("runner_ip", tagentVo.getRunnerIp());
-        updateDoc.put("runner_group_id", tagentVo.getRunnerGroupId());
-        updateDoc.put("os_id", tagentVo.getOsId());
-        updateDoc.put("status", tagentVo.getStatus());
-        updateDoc.put("pcpu", tagentVo.getPcpu());
-        updateDoc.put("mem", tagentVo.getMem());
-        updateDoc.put("disconnect_reason", tagentVo.getDisConnectReason());
-        updateDoc.put("lcd", new Date());
-        setDocument.put("$set", updateDoc);
+        if (StringUtils.isNotBlank(tagentVo.getIp())) {
+            doc.put("ip", tagentVo.getIp());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getVersion())) {
+            doc.put("version", tagentVo.getVersion());
+        }
+        if (tagentVo.getRunnerId() != null) {
+            doc.put("runner_id", tagentVo.getRunnerId());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getRunnerPort())) {
+            doc.put("runner_port", tagentVo.getRunnerPort());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getRunnerIp())) {
+            doc.put("runner_ip", tagentVo.getRunnerIp());
+        }
+        if (tagentVo.getRunnerGroupId() != null) {
+            doc.put("runner_group_id", tagentVo.getRunnerGroupId());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getStatus())) {
+            doc.put("status", tagentVo.getStatus());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getPcpu())) {
+            doc.put("pcpu", tagentVo.getPcpu());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getMem())) {
+            doc.put("mem", tagentVo.getMem());
+        }
+        doc.put("lcd", new Date());
+        //origin
+        if (tagentVo.getPort() != null) {
+            doc.put("port", tagentVo.getPort());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getName())) {
+            doc.put("name", tagentVo.getName());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getOsType())) {
+            doc.put("os_type", tagentVo.getOsType());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getOsName())) {
+            doc.put("os_name", tagentVo.getOsName());
+        }
+        if (tagentVo.getOsId() != null) {
+            doc.put("os_id", tagentVo.getOsId());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getOsVersion())) {
+            doc.put("os_version", tagentVo.getOsVersion());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
+            doc.put("osbit", tagentVo.getOsbit());
+        }
+        if (tagentVo.getAccountId() != null) {
+            doc.put("account_id", tagentVo.getAccountId());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getUser())) {
+            doc.put("user", tagentVo.getUser());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getRunnerGroupName())) {
+            doc.put("runner_group_name", tagentVo.getRunnerGroupName());
+        }
+        if (StringUtils.isNotBlank(tagentVo.getDisConnectReason())) {
+            doc.put("disconnect_reason", tagentVo.getDisConnectReason());
+        }
+
+        setDocument.put("$set", doc);
         // 配置 upsert 为 true
         UpdateOptions options = new UpdateOptions().upsert(true);
         mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument, options);
@@ -160,19 +215,131 @@ public class TagentServiceImpl implements TagentService {
     private TagentVo mapToTagentVo(Document doc) {
         TagentVo vo = new TagentVo();
         vo.setId(doc.getLong("id"));
+        vo.setName(doc.getString("name"));
         vo.setIp(doc.getString("ip"));
+        vo.setPort(doc.getInteger("port"));
         vo.setVersion(doc.getString("version"));
         vo.setRunnerId(doc.getLong("runner_id"));
         vo.setRunnerIp(doc.getString("runner_ip"));
         vo.setRunnerPort(doc.getString("runner_port"));
         vo.setRunnerGroupId(doc.getLong("runner_group_id"));
-        vo.setOsId(doc.getLong("os_id"));
         vo.setStatus(doc.getString("status"));
         vo.setPcpu(doc.getString("pcpu"));
         vo.setMem(doc.getString("mem"));
-        vo.setDisConnectReason(doc.getString("disconnect_reason"));
         vo.setLcd(doc.getDate("lcd"));
+        vo.setOsType(doc.getString("os_type"));
+        vo.setOsName(doc.getString("os_name"));
+        vo.setOsId(doc.getLong("os_id"));
+        vo.setOsVersion(doc.getString("os_version"));
+        vo.setOsbit(doc.getString("osbit"));
+        vo.setAccountId(doc.getLong("account_id"));
+        vo.setUser(doc.getString("user"));
+        vo.setRunnerGroupName(doc.getString("runner_group_name"));
         return vo;
+    }
+
+    @Override
+    public void deleteTagentMGById(long id) {
+        Document whereDoc = new Document();
+        whereDoc.put("id", id);
+        mongoTemplate.getCollection("_tagent_info").findOneAndDelete(whereDoc);
+    }
+
+    /**
+     * 根据tagentId列表获取runnerIdList
+     *
+     * @param tagentIdList tagentId列表
+     * @return runnerIdSet
+     */
+    private Set<Long> getRunnerIdListByTagentMGIdList(List<Long> tagentIdList) {
+        Document query = new Document("id", new Document("$in", tagentIdList));
+        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
+                .find(query)
+                .projection(new Document("runner_id", 1).append("_id", 0)) // 只返回 runner_id 字段
+                .into(new ArrayList<>());
+
+        Set<Long> runnerIdList = new HashSet<>();
+        for (Document doc : documents) {
+            Object runnerId = doc.get("runner_id");
+            if (runnerId instanceof Number) { // 确保是数字类型
+                runnerIdList.add(((Number) runnerId).longValue());
+            }
+        }
+        return runnerIdList;
+    }
+
+    /**
+     * 根据tagentId列表获取runnerIdList
+     *
+     * @param tagentVo tagent 对象
+     * @return runnerIdSet
+     */
+    @Override
+    public List<TagentVo> searchTagentListMG(TagentVo tagentVo) {
+        Document query = new Document();
+        tagentMGCondition(query, tagentVo);
+        Document projection = new Document("id", 1)
+                .append("ip", 1)
+                .append("name", 1)
+                .append("port", 1)
+                .append("version", 1)
+                .append("runner_id", 1)
+                .append("runner_ip", 1)
+                .append("runner_port", 1)
+                .append("runner_group_id", 1)
+                .append("status", 1)
+                .append("pcpu", 1)
+                .append("mem", 1)
+                .append("lcd", 1)
+                .append("os_type", 1)
+                .append("os_name", 1)
+                .append("os_id", 1)
+                .append("os_version", 1)
+                .append("osbit", 1)
+                .append("account_id", 1)
+                .append("user", 1)
+                .append("runner_group_name", 1);
+        int skip = (tagentVo.getCurrentPage() - 1) * tagentVo.getPageSize();
+        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
+                .find(query)
+                .projection(projection)
+                .skip(skip)
+                .limit(tagentVo.getPageSize())
+                .into(new ArrayList<>());
+        List<TagentVo> tagentVoList = new ArrayList<>();
+        for (Document doc : documents) {
+            tagentVoList.add(mapToTagentVo(doc));
+        }
+        return tagentVoList;
+    }
+
+    private void tagentMGCondition(Document query, TagentVo tagentVo) {
+        if (StringUtils.isNotBlank(tagentVo.getStatus())) {
+            query.append("status", new Document("$eq", tagentVo.getStatus()));
+        }
+        if (StringUtils.isNotBlank(tagentVo.getVersion())) {
+            query.append("version", new Document("$eq", tagentVo.getVersion()));
+        }
+        if (StringUtils.isNotBlank(tagentVo.getOsType())) {
+            query.append("os_type", new Document("$eq", tagentVo.getOsType()));
+        }
+        if (tagentVo.getRunnerGroupId() != null) {
+            query.append("runner_group_id", new Document("$eq", tagentVo.getRunnerGroupId()));
+        }
+        if (StringUtils.isNotBlank(tagentVo.getKeyword())) {
+            query.append("$or", Arrays.asList(
+                    new Document("ip", new Document("$regex", ".*" + tagentVo.getKeyword() + ".*")),
+                    new Document("name", new Document("$regex", ".*" + tagentVo.getKeyword() + ".*")),
+                    new Document("os_version", new Document("$regex", ".*" + tagentVo.getKeyword() + ".*"))
+            ));
+        }
+    }
+
+    @Override
+    public Long getTagentListMGCount(TagentVo tagentVo) {
+        Document query = new Document();
+        tagentMGCondition(query, tagentVo);
+        return mongoTemplate.getCollection("_tagent_info").countDocuments(query);
     }
 
     /**
@@ -215,6 +382,8 @@ public class TagentServiceImpl implements TagentService {
 
             tagent.setAccountId(accountVo.getId());
             tagentMapper.insertTagent(tagent);
+            //存mongodb
+            updateTagentMGById(tagent);
         } else {
             //重新注册tagent
 
@@ -460,53 +629,12 @@ public class TagentServiceImpl implements TagentService {
         return returnTagentVoList;
     }
 
-    /**
-     * 根据tagentId列表获取runnerIdList
-     *
-     * @param tagentIdList tagentId列表
-     * @return runnerIdSet
-     */
-    private Set<Long> getRunnerIdListByTagentIds(List<Long> tagentIdList) {
-        Document query = new Document("id", new Document("$in", tagentIdList));
-        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
-                .find(query)
-                .projection(new Document("runner_id", 1).append("_id", 0)) // 只返回 runner_id 字段
-                .into(new ArrayList<>());
-
-        Set<Long> runnerIdList = new HashSet<>();
-        for (Document doc : documents) {
-            Object runnerId = doc.get("runner_id");
-            if (runnerId instanceof Number) { // 确保是数字类型
-                runnerIdList.add(((Number) runnerId).longValue());
-            }
-        }
-        return runnerIdList;
-    }
-
-    /**
-     * 根据tagentId列表获取runnerIdList
-     *
-     * @param tagentIdList tagentId列表
-     * @return runnerIdSet
-     */
-    @Override
-    public List<TagentVo> getTagentListMGByTagentIds(List<Long> tagentIdList) {
-        Document query = new Document("id", new Document("$in", tagentIdList));
-        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
-                .find(query)
-                .into(new ArrayList<>());
-        List<TagentVo> tagentVoList = new ArrayList<>();
-        for (Document doc : documents) {
-            tagentVoList.add(mapToTagentVo(doc));
-        }
-        return tagentVoList;
-    }
 
     @Override
     public JSONObject batchExecTagentChannelAction(String action, List<TagentVo> tagentList, TagentMessageVo tagentMessageVo) throws Exception {
         JSONObject returnObj = new JSONObject();
         String space = "     ";
-        Set<Long> runnerIdSet = getRunnerIdListByTagentIds(tagentList.stream().map(TagentVo::getId).collect(toList()));
+        Set<Long> runnerIdSet = getRunnerIdListByTagentMGIdList(tagentList.stream().map(TagentVo::getId).collect(toList()));
         List<RunnerVo> runnerList = runnerMapper.getRunnerListByIdSet(runnerIdSet);
         //文件内容
         String fileDataString = "user：" + UserContext.get().getUserName() + space + "time：" + new SimpleDateFormat("yyyy-dd-MM HH:mm:ss").format(new Date()) + space + "tagentCount：" + tagentList.size() + "\n\n";

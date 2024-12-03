@@ -114,16 +114,40 @@ public interface TagentService {
 
     /**
      * 根据tagentId 获取tagent心跳信息
+     *
      * @param id tagentId
      * @return tagent对象
      */
     TagentVo getTagentMGById(long id);
 
     /**
-     * 根据tagentId列表获取runnerIdList
-     * @param tagentIdList tagentId列表
+     * 根据条件列表获取runnerIdList
+     *
+     * @param tagentVo 条件入参
      * @return runnerIdSet
      */
-    List<TagentVo> getTagentListMGByTagentIds(List<Long> tagentIdList);
+    List<TagentVo> searchTagentListMG(TagentVo tagentVo);
+
+    /**
+     * 根据id删除tagent
+     *
+     * @param id id
+     */
+    void deleteTagentMGById(long id);
+
+    /**
+     * 跟新tagent所有字段
+     *
+     * @param tagentVo tagent对象
+     */
+    void updateTagentMGById(TagentVo tagentVo);
+
+
+    /**
+     * 根据条件列表获取满足条件的runner数量
+     * @param tagentVo 条件入参
+     * @return 数量
+     */
+    Long getTagentListMGCount(TagentVo tagentVo);
 
 }

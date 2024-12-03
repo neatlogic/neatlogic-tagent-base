@@ -103,8 +103,6 @@ public interface TagentMapper {
 
     int updateTagentById(TagentVo tagentVo);
 
-    void updateTagentStatusAndDisConnectReasonById(@Param("status") String status, @Param("disConnectReason") String disConnectReason, @Param("id") Long id);
-
     void updateAccount(AccountBaseVo accountVo);
 
     void deleteTagentById(Long id);
