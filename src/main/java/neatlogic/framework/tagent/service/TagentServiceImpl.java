@@ -47,6 +47,7 @@ import neatlogic.framework.integration.authentication.enums.AuthenticateType;
 import neatlogic.framework.tagent.dao.mapper.TagentMapper;
 import neatlogic.framework.tagent.dto.*;
 import neatlogic.framework.tagent.enums.TagentAction;
+import neatlogic.framework.tagent.enums.TagentStatus;
 import neatlogic.framework.tagent.enums.TagentUpgradeStatus;
 import neatlogic.framework.tagent.exception.*;
 import neatlogic.framework.tagent.tagenthandler.core.ITagentHandler;
@@ -314,8 +315,13 @@ public class TagentServiceImpl implements TagentService {
     }
 
     private void tagentMGCondition(Document query, TagentVo tagentVo) {
-        if (StringUtils.isNotBlank(tagentVo.getStatus())) {
+        if (Objects.equals(tagentVo.getStatus(), TagentStatus.CONNECTED.getValue())) {
             query.append("status", new Document("$eq", tagentVo.getStatus()));
+        } else if (Objects.equals(tagentVo.getStatus(), TagentStatus.DISCONNECTED.getValue())) {
+            query.append("$or", Arrays.asList(
+                    new Document("status", new Document("$eq", tagentVo.getStatus())), // status 等于目标值
+                    new Document("status", new Document("$exists", false))             // status 字段不存在
+            ));
         }
         if (StringUtils.isNotBlank(tagentVo.getVersion())) {
             query.append("version", new Document("$eq", tagentVo.getVersion()));
