@@ -182,9 +182,6 @@ public class TagentServiceImpl implements TagentService {
         if (StringUtils.isNotBlank(tagentVo.getUser())) {
             doc.put("user", tagentVo.getUser());
         }
-        if (StringUtils.isNotBlank(tagentVo.getRunnerGroupName())) {
-            doc.put("runner_group_name", tagentVo.getRunnerGroupName());
-        }
         if (StringUtils.isNotBlank(tagentVo.getDisConnectReason())) {
             doc.put("disconnect_reason", tagentVo.getDisConnectReason());
         }
@@ -235,7 +232,6 @@ public class TagentServiceImpl implements TagentService {
         vo.setOsbit(doc.getString("osbit"));
         vo.setAccountId(doc.getLong("account_id"));
         vo.setUser(doc.getString("user"));
-        vo.setRunnerGroupName(doc.getString("runner_group_name"));
         return vo;
     }
 
@@ -298,8 +294,7 @@ public class TagentServiceImpl implements TagentService {
                 .append("os_version", 1)
                 .append("osbit", 1)
                 .append("account_id", 1)
-                .append("user", 1)
-                .append("runner_group_name", 1);
+                .append("user", 1);
         int skip = (tagentVo.getCurrentPage() - 1) * tagentVo.getPageSize();
         List<Document> documents = mongoTemplate.getCollection("_tagent_info")
                 .find(query)
@@ -326,8 +321,8 @@ public class TagentServiceImpl implements TagentService {
         if (StringUtils.isNotBlank(tagentVo.getVersion())) {
             query.append("version", new Document("$eq", tagentVo.getVersion()));
         }
-        if (StringUtils.isNotBlank(tagentVo.getOsType())) {
-            query.append("os_type", new Document("$eq", tagentVo.getOsType()));
+        if (tagentVo.getOsId() != null) {
+            query.append("os_id", new Document("$eq", tagentVo.getOsId()));
         }
         if (tagentVo.getRunnerGroupId() != null) {
             query.append("runner_group_id", new Document("$eq", tagentVo.getRunnerGroupId()));
