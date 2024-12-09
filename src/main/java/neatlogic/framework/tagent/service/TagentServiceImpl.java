@@ -17,6 +17,7 @@ package neatlogic.framework.tagent.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.client.model.UpdateOptions;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
@@ -115,7 +116,7 @@ public class TagentServiceImpl implements TagentService {
             }
         }
         //return tagentMapper.updateTagentById(tagent);
-        updateTagentMGById(tagent);
+        updateTagentMGById(tagent, false);
     }
 
     /**
@@ -124,7 +125,7 @@ public class TagentServiceImpl implements TagentService {
      * @param tagentVo tagent对象
      */
     @Override
-    public void updateTagentMGById(TagentVo tagentVo) {
+    public void updateTagentMGById(TagentVo tagentVo, boolean isNeedInsert) {
         Document whereDoc = new Document();
         Document doc = new Document();
         Document setDocument = new Document();
@@ -190,11 +191,17 @@ public class TagentServiceImpl implements TagentService {
         }
 
         setDocument.put("$set", doc);
-        // 配置 upsert 为 true
-        //UpdateOptions options = new UpdateOptions().upsert(true);
         logger.debug("====TagentUpdateInfo-thread-whereDoc:" + JSON.toJSONString(whereDoc));
         logger.debug("====TagentUpdateInfo-thread-setDocument:" + JSON.toJSONString(setDocument));
-        mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+        // 配置 upsert 为 true
+        if (isNeedInsert) {
+            UpdateOptions options = new UpdateOptions().upsert(true);
+            mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument, options);
+        } else {
+            mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+        }
+
+
         logger.debug("====TagentUpdateInfo-thread-updated:" + JSON.toJSONString(setDocument));
     }
 
@@ -390,7 +397,7 @@ public class TagentServiceImpl implements TagentService {
             tagent.setAccountId(accountVo.getId());
             tagentMapper.insertTagent(tagent);
             //存mongodb
-            updateTagentMGById(tagent);
+            updateTagentMGById(tagent, true);
         } else {
             //重新注册tagent
 

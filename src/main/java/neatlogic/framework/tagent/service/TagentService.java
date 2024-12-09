@@ -140,7 +140,7 @@ public interface TagentService {
      *
      * @param tagentVo tagent对象
      */
-    void updateTagentMGById(TagentVo tagentVo);
+    void updateTagentMGById(TagentVo tagentVo, boolean isNeedInsert);
 
 
     /**
