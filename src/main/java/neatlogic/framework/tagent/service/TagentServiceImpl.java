@@ -15,8 +15,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.framework.tagent.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.mongodb.client.model.UpdateOptions;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
@@ -56,6 +56,8 @@ import neatlogic.framework.util.RestUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
@@ -75,6 +77,7 @@ import static java.util.stream.Collectors.toList;
  **/
 @Service
 public class TagentServiceImpl implements TagentService {
+    private final Logger logger = LoggerFactory.getLogger(TagentServiceImpl.class);
     @Resource
     private MongoTemplate mongoTemplate;
 
@@ -188,8 +191,11 @@ public class TagentServiceImpl implements TagentService {
 
         setDocument.put("$set", doc);
         // 配置 upsert 为 true
-        UpdateOptions options = new UpdateOptions().upsert(true);
-        mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument, options);
+        //UpdateOptions options = new UpdateOptions().upsert(true);
+        logger.debug("====TagentUpdateInfo-thread-whereDoc:" + JSON.toJSONString(whereDoc));
+        logger.debug("====TagentUpdateInfo-thread-setDocument:" + JSON.toJSONString(setDocument));
+        mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+        logger.debug("====TagentUpdateInfo-thread-updated:" + JSON.toJSONString(setDocument));
     }
 
     /**
