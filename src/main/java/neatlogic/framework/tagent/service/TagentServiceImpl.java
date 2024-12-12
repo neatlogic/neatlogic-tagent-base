@@ -60,6 +60,9 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -68,6 +71,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -245,6 +249,7 @@ public class TagentServiceImpl implements TagentService {
         vo.setOsbit(doc.getString("osbit"));
         vo.setAccountId(doc.getLong("account_id"));
         vo.setUser(doc.getString("user"));
+        vo.setIpList(doc.getList("ip_list", String.class));
         return vo;
     }
 
@@ -286,35 +291,18 @@ public class TagentServiceImpl implements TagentService {
      */
     @Override
     public List<TagentVo> searchTagentListMG(TagentVo tagentVo) {
-        Document query = new Document();
-        tagentMGCondition(query, tagentVo);
-        Document projection = new Document("id", 1)
-                .append("ip", 1)
-                .append("name", 1)
-                .append("port", 1)
-                .append("version", 1)
-                .append("runner_id", 1)
-                .append("runner_ip", 1)
-                .append("runner_port", 1)
-                .append("runner_group_id", 1)
-                .append("status", 1)
-                .append("pcpu", 1)
-                .append("mem", 1)
-                .append("lcd", 1)
-                .append("os_type", 1)
-                .append("os_name", 1)
-                .append("os_id", 1)
-                .append("os_version", 1)
-                .append("osbit", 1)
-                .append("account_id", 1)
-                .append("user", 1);
+        Criteria criteria = tagentMGCondition(tagentVo);
+        Query query = new Query(criteria);
         int skip = (tagentVo.getCurrentPage() - 1) * tagentVo.getPageSize();
-        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
-                .find(query)
-                .projection(projection)
-                .skip(skip)
-                .limit(tagentVo.getPageSize())
-                .into(new ArrayList<>());
+        query.fields()
+                .include("id").include("ip").include("name").include("port")
+                .include("version").include("runner_id").include("runner_ip")
+                .include("runner_port").include("runner_group_id").include("status")
+                .include("pcpu").include("mem").include("lcd").include("os_type")
+                .include("os_name").include("os_id").include("os_version")
+                .include("osbit").include("account_id").include("ip_list").include("user");
+        query.skip(skip).limit(tagentVo.getPageSize());
+        List<Document> documents = mongoTemplate.find(query, Document.class, "_tagent_info");
         List<TagentVo> tagentVoList = new ArrayList<>();
         for (Document doc : documents) {
             tagentVoList.add(mapToTagentVo(doc));
@@ -322,38 +310,64 @@ public class TagentServiceImpl implements TagentService {
         return tagentVoList;
     }
 
-    private void tagentMGCondition(Document query, TagentVo tagentVo) {
+    private Criteria tagentMGCondition(TagentVo tagentVo) {
+        List<Criteria> andCriteriaList = new ArrayList<>();
+
+        // Status 条件
         if (Objects.equals(tagentVo.getStatus(), TagentStatus.CONNECTED.getValue())) {
-            query.append("status", new Document("$eq", tagentVo.getStatus()));
+            andCriteriaList.add(Criteria.where("status").is(tagentVo.getStatus()));
         } else if (Objects.equals(tagentVo.getStatus(), TagentStatus.DISCONNECTED.getValue())) {
-            query.append("$or", Arrays.asList(
-                    new Document("status", new Document("$eq", tagentVo.getStatus())), // status 等于目标值
-                    new Document("status", new Document("$exists", false))             // status 字段不存在
+            andCriteriaList.add(new Criteria().orOperator(
+                    Criteria.where("status").is(tagentVo.getStatus()),
+                    Criteria.where("status").exists(false)
             ));
         }
+
+        // Version 条件
         if (StringUtils.isNotBlank(tagentVo.getVersion())) {
-            query.append("version", new Document("$eq", tagentVo.getVersion()));
+            andCriteriaList.add(Criteria.where("version").is(tagentVo.getVersion()));
         }
+
+        // OsId 条件
         if (tagentVo.getOsId() != null) {
-            query.append("os_id", new Document("$eq", tagentVo.getOsId()));
+            andCriteriaList.add(Criteria.where("os_id").is(tagentVo.getOsId()));
         }
+
+        //runnerGroup
         if (tagentVo.getRunnerGroupId() != null) {
-            query.append("runner_group_id", new Document("$eq", tagentVo.getRunnerGroupId()));
+            andCriteriaList.add(Criteria.where("runner_group_id").is(tagentVo.getRunnerGroupId()));
         }
+
+        // Keyword 条件
         if (StringUtils.isNotBlank(tagentVo.getKeyword())) {
-            query.append("$or", Arrays.asList(
-                    new Document("ip", new Document("$regex", ".*" + tagentVo.getKeyword() + ".*")),
-                    new Document("name", new Document("$regex", ".*" + tagentVo.getKeyword() + ".*")),
-                    new Document("os_version", new Document("$regex", ".*" + tagentVo.getKeyword() + ".*"))
+            String keyword = Pattern.quote(tagentVo.getKeyword()); // 防止特殊字符干扰正则
+            andCriteriaList.add(new Criteria().orOperator(
+                    Criteria.where("ip").regex(".*" + keyword + ".*"),
+                    Criteria.where("name").regex(".*" + keyword + ".*"),
+                    Criteria.where("os_version").regex(".*" + keyword + ".*"),
+                    Criteria.where("ip_list").elemMatch(Criteria.where("$regex").is(keyword))
             ));
         }
+        Criteria criteria = new Criteria();
+        // 将所有条件合并为一个 $and
+        if (CollectionUtils.isNotEmpty(andCriteriaList)) {
+            criteria.andOperator(andCriteriaList.toArray(new Criteria[0]));
+        }
+        return criteria;
+    }
+
+    @Override
+    public void updateIpListMG(Long tagentId, List<String> newIpList) {
+        Query query = new Query(Criteria.where("id").is(tagentId)); // 根据条件查找
+        Update update = new Update().set("ip_list", newIpList); // 更新 ip_list 字段
+        mongoTemplate.updateFirst(query, update, "_tagent_info");
     }
 
     @Override
     public Long getTagentListMGCount(TagentVo tagentVo) {
-        Document query = new Document();
-        tagentMGCondition(query, tagentVo);
-        return mongoTemplate.getCollection("_tagent_info").countDocuments(query);
+        Criteria criteria = tagentMGCondition(tagentVo);
+        Query query = new Query(criteria);
+        return mongoTemplate.count(query, "_tagent_info");
     }
 
     /**
@@ -391,13 +405,12 @@ public class TagentServiceImpl implements TagentService {
             //第一次注册tagent,主账号的ip、port肯定是不没有注册过的，因为一旦插入报错，证明前面ip逻辑的代码有问题
             AccountBaseVo accountVo = new AccountBaseVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
             insertAccountList.add(accountVo);
-            //保存副ip账号逻辑
-            saveTagentIpList(tagent, newIpList, insertTagentIpList, insertAccountList, updateAccountList, protocolVo);
-
             tagent.setAccountId(accountVo.getId());
             tagentMapper.insertTagent(tagent);
             //存mongodb
             updateTagentMGById(tagent, true);
+            //保存副ip账号逻辑
+            saveTagentIpList(tagent, newIpList, insertTagentIpList, insertAccountList, updateAccountList, protocolVo);
         } else {
             //重新注册tagent
 
@@ -547,6 +560,7 @@ public class TagentServiceImpl implements TagentService {
         //新增tagentIp
         if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
             tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
+            updateIpListMG(tagent.getId(), newIpList);
         }
     }
 

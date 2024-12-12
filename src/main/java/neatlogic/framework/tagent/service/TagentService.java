@@ -150,4 +150,11 @@ public interface TagentService {
      */
     Long getTagentListMGCount(TagentVo tagentVo);
 
+    /**
+     * 更新tagent 包含ip列表
+     * @param tagentId tagent id
+     * @param newIpList 新的包含ip
+     */
+    void updateIpListMG(Long tagentId, List<String> newIpList);
+
 }
