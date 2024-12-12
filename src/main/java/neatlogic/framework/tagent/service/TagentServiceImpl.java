@@ -193,7 +193,9 @@ public class TagentServiceImpl implements TagentService {
         if (StringUtils.isNotBlank(tagentVo.getDisConnectReason())) {
             doc.put("disconnect_reason", tagentVo.getDisConnectReason());
         }
-
+        if (CollectionUtils.isNotEmpty(tagentVo.getIpList())) {
+            doc.put("ip_list", tagentVo.getIpList());
+        }
         setDocument.put("$set", doc);
         logger.debug("====TagentUpdateInfo-thread-whereDoc:" + JSON.toJSONString(whereDoc));
         logger.debug("====TagentUpdateInfo-thread-setDocument:" + JSON.toJSONString(setDocument));
