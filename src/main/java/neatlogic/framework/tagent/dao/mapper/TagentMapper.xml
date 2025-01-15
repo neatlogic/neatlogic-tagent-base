@@ -570,6 +570,31 @@
         and a.`protocol_id` = #{protocolId}
     </select>
 
+    <select id="getAccountListByMainIpListAndProtocolId"
+            resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        SELECT a.`id`,
+        a.`name`,
+        a.`protocol_id` AS protocolId,
+        a.`password` as passwordCipher,
+        crap.`name` as protocol,
+        crap.`port` as protocolPort,
+        a.`fcu`,
+        a.`fcd`,
+        a.`lcu`,
+        t.`ip`,
+        a.`lcd`,
+        crap.`name` as protocol,
+        crap.`port` as protocolPort
+        FROM `tagent` t
+        left join `tagent_account` a on t.account_id = a.id
+        left join `cmdb_resourcecenter_account_protocol` crap on a.protocol_id = crap.id
+        WHERE t.`ip` IN
+        <foreach collection="ipList" item="ip" open="(" close=")" separator=",">
+            #{ip}
+        </foreach>
+        and a.`protocol_id` = #{protocolId}
+    </select>
+
     <insert id="insertTagent" parameterType="neatlogic.framework.tagent.dto.TagentVo" >
         INSERT INTO tagent (`id`,
         `ip`,

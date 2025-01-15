@@ -81,6 +81,8 @@ public interface TagentMapper {
 
     List<AccountBaseVo> getAccountListByIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
 
+    List<AccountBaseVo> getAccountListByMainIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
+
     void insertOs(TagentOSVo tagentOSVo);
 
     void insertOsBit(String osbit);
