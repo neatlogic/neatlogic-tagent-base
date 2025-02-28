@@ -344,9 +344,9 @@ public class TagentServiceImpl implements TagentService {
         if (StringUtils.isNotBlank(tagentVo.getKeyword())) {
             String keyword = Pattern.quote(tagentVo.getKeyword()); // 防止特殊字符干扰正则
             andCriteriaList.add(new Criteria().orOperator(
-                    Criteria.where("ip").regex(".*" + keyword + ".*"),
-                    Criteria.where("name").regex(".*" + keyword + ".*"),
-                    Criteria.where("os_version").regex(".*" + keyword + ".*"),
+                    Criteria.where("ip").regex(".*" + keyword + ".*", "i"),
+                    Criteria.where("name").regex(".*" + keyword + ".*", "i"),
+                    Criteria.where("os_version").regex(".*" + keyword + ".*", "i"),
                     Criteria.where("ip_list").elemMatch(Criteria.where("$regex").is(keyword))
             ));
         }
