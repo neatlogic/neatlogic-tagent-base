@@ -17,7 +17,9 @@ package neatlogic.framework.tagent.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.model.UpdateOptions;
+import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
 import neatlogic.framework.cmdb.crossover.IResourceAccountCrossoverMapper;
@@ -199,14 +201,15 @@ public class TagentServiceImpl implements TagentService {
         setDocument.put("$set", doc);
         logger.debug("====TagentUpdateInfo-thread-whereDoc:" + JSON.toJSONString(whereDoc));
         logger.debug("====TagentUpdateInfo-thread-setDocument:" + JSON.toJSONString(setDocument));
+        //System.out.println(session.hasActiveTransaction());
+        ClientSession session = MongodbSessionContext.get().getSession();
         // 配置 upsert 为 true
         if (isNeedInsert) {
             UpdateOptions options = new UpdateOptions().upsert(true);
-            mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument, options);
+            mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument, options);
         } else {
-            mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+            mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument);
         }
-
 
         logger.debug("====TagentUpdateInfo-thread-updated:" + JSON.toJSONString(setDocument));
     }
