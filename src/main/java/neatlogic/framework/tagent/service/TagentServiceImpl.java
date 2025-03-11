@@ -202,13 +202,24 @@ public class TagentServiceImpl implements TagentService {
         logger.debug("====TagentUpdateInfo-thread-whereDoc:" + JSON.toJSONString(whereDoc));
         logger.debug("====TagentUpdateInfo-thread-setDocument:" + JSON.toJSONString(setDocument));
         //System.out.println(session.hasActiveTransaction());
-        ClientSession session = MongodbSessionContext.get().getSession();
+        ClientSession session = null;
+        if( MongodbSessionContext.get() != null){
+            session = MongodbSessionContext.get().getSession();
+        }
         // 配置 upsert 为 true
         if (isNeedInsert) {
             UpdateOptions options = new UpdateOptions().upsert(true);
-            mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument, options);
+            if (session != null) {
+                mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument, options);
+            } else {
+                mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument, options);
+            }
         } else {
-            mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument);
+            if (session != null) {
+                mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument);
+            } else {
+                mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+            }
         }
 
         logger.debug("====TagentUpdateInfo-thread-updated:" + JSON.toJSONString(setDocument));
