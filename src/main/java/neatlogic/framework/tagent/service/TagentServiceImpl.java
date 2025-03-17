@@ -18,7 +18,8 @@ package neatlogic.framework.tagent.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.mongodb.client.ClientSession;
-import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.InsertOneResult;
+import com.mongodb.client.result.UpdateResult;
 import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
 import neatlogic.framework.asynchronization.threadlocal.TenantContext;
 import neatlogic.framework.asynchronization.threadlocal.UserContext;
@@ -199,30 +200,72 @@ public class TagentServiceImpl implements TagentService {
             doc.put("ip_list", tagentVo.getIpList());
         }
         setDocument.put("$set", doc);
-        logger.debug("====TagentUpdateInfo-thread-whereDoc:" + JSON.toJSONString(whereDoc));
-        logger.debug("====TagentUpdateInfo-thread-setDocument:" + JSON.toJSONString(setDocument));
+        String whereDocStr = StringUtils.EMPTY;
+        String setDocumentStr = StringUtils.EMPTY;
+        String docDocumentStr = StringUtils.EMPTY;
+        if (logger.isDebugEnabled()) {
+            whereDocStr = JSON.toJSONString(whereDoc);
+            setDocumentStr = JSON.toJSONString(setDocument);
+        }
+        logger.debug("====TagentUpdateInfo-thread-updated start! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
         //System.out.println(session.hasActiveTransaction());
         ClientSession session = null;
-        if( MongodbSessionContext.get() != null){
+        if (MongodbSessionContext.get() != null) {
             session = MongodbSessionContext.get().getSession();
         }
         // 配置 upsert 为 true
         if (isNeedInsert) {
-            UpdateOptions options = new UpdateOptions().upsert(true);
+            Criteria criteria = new Criteria();
+            criteria.andOperator(Criteria.where("id").is(tagentVo.getId()));
+            Query query = new Query(criteria);
+            JSONObject oldData = mongoTemplate.findOne(query, JSONObject.class, "_tagent_info");
+            //如果tagent不存在才insert
+            if (oldData != null) {
+                isNeedInsert = false;
+            }
+        }
+        if (isNeedInsert) {
+            InsertOneResult result;
+            doc.put("id", tagentVo.getId());
+            doc.put("fcd", new Date());
+            if (logger.isDebugEnabled()) {
+                docDocumentStr = JSON.toJSONString(doc);
+            }
             if (session != null) {
-                mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument, options);
+                result = mongoTemplate.getCollection("_tagent_info").insertOne(session, doc);
             } else {
-                mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument, options);
+                result = mongoTemplate.getCollection("_tagent_info").insertOne(doc);
+            }
+            // 判断更新结果
+            if (result.getInsertedId() != null) {
+                // 更新成功
+                logger.debug("====TagentUpdateInfo-thread-updated insert with session succeed! where:{}, updateDocument:{}", whereDocStr, docDocumentStr);
+            } else {
+                // 更新失败
+                whereDocStr = JSON.toJSONString(whereDoc);
+                setDocumentStr = JSON.toJSONString(setDocument);
+                logger.error("====TagentUpdateInfo-thread-updated insert without session failed! where:{}. updateDocument:{}", whereDocStr, docDocumentStr);
             }
         } else {
+            UpdateResult result;
             if (session != null) {
-                mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument);
+                result = mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument);
             } else {
-                mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+                result = mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+            }
+            // 判断更新结果
+            if (result.getMatchedCount() > 0 && result.getModifiedCount() > 0) {
+                // 更新成功
+                logger.debug("====TagentUpdateInfo-thread-updated succeed! where:{}, updateDocument:{}", whereDocStr, setDocumentStr);
+            } else {
+                // 更新失败
+                whereDocStr = JSON.toJSONString(whereDoc);
+                setDocumentStr = JSON.toJSONString(setDocument);
+                logger.error("====TagentUpdateInfo-thread-updated failed! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
             }
         }
 
-        logger.debug("====TagentUpdateInfo-thread-updated:" + JSON.toJSONString(setDocument));
+        logger.debug("====TagentUpdateInfo-thread-updated done! where:{}. updateDocument:{},docDocumentStr:{}", whereDocStr, setDocumentStr, docDocumentStr);
     }
 
     /**
