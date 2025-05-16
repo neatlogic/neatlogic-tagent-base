@@ -1,9 +1,11 @@
 package neatlogic.framework.tagent.dao.mapper;
 
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
-import neatlogic.framework.cmdb.dto.resourcecenter.AccountIpVo;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
-import neatlogic.framework.tagent.dto.*;
+import neatlogic.framework.tagent.dto.TagentOSVo;
+import neatlogic.framework.tagent.dto.TagentUpgradeAuditVo;
+import neatlogic.framework.tagent.dto.TagentVersionVo;
+import neatlogic.framework.tagent.dto.TagentVo;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -37,13 +39,13 @@ public interface TagentMapper {
 
     List<TagentVo> getTagentByIpOrTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
+    List<TagentVo> getTagentByIncludeIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
     TagentVo getTagentById(Long id);
 
     List<TagentVo> getTagentByAccountId(Long accountId);
 
     List<TagentVo> getTagentByIpList(@Param("ipList") List<String> ipList);
-
-    List<TagentVo> getTagentListByAccountId(Long accountId);
 
     List<TagentVo> getTagentListByAccountIdList(List<Long> accountIdList);
 
@@ -69,17 +71,11 @@ public interface TagentMapper {
 
     Long getTagentIdByTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
-    List<String> getAccountIpByIpListAndPort(@Param("ipList") List<String> ipList, @Param("port") Integer port);
-
-    AccountBaseVo getAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
-
     AccountBaseVo getAccountByTagentId(Long id);
-
-    AccountBaseVo getTagentAccountByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
     AccountBaseVo getAccountById(Long id);
 
-    List<AccountBaseVo> getAccountListByIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
+    List<AccountBaseVo> getAccountListByIncludeIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
 
     List<AccountBaseVo> getAccountListByMainIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
 
@@ -99,8 +95,6 @@ public interface TagentMapper {
 
     void insertTagentAuditDetail(TagentUpgradeAuditVo tagentAudit);
 
-    void insertAccountIp(AccountIpVo accountIpVo);
-
     void updateTagentAuditDetailStateAndResultById(@Param("id") Long id, @Param("status") String status, @Param("result") String result);
 
     int updateTagentById(TagentVo tagentVo);
@@ -118,9 +112,5 @@ public interface TagentMapper {
     void deleteAccountById(Long id);
 
     void deleteAccountListByIdList(List<Long> idList);
-
-    void deleteAccountIpByAccountId(Long accountId);
-
-    void deleteAccountIpListByAccountIdList(List<Long> deletedAccountIdList);
 
 }
