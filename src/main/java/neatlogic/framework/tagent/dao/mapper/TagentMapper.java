@@ -43,6 +43,8 @@ public interface TagentMapper {
 
     TagentVo getTagentById(Long id);
 
+    TagentVo getTagentDetailById(Long id);
+
     List<TagentVo> getTagentByAccountId(Long accountId);
 
     List<TagentVo> getTagentByIpList(@Param("ipList") List<String> ipList);
