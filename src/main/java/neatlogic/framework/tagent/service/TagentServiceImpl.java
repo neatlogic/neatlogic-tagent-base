@@ -341,6 +341,33 @@ public class TagentServiceImpl implements TagentService {
     }
 
     /**
+     * 根据tagentId列表获取tagentId->runnerId的Map
+     *
+     * @param tagentIdList tagentId列表
+     * @return runnerIdSet
+     */
+    private Map<Long, Long> getRunnerIdMapByTagentMGIdList(List<Long> tagentIdList) {
+        Document query = new Document("id", new Document("$in", tagentIdList));
+        List<Document> documents = mongoTemplate.getCollection("_tagent_info")
+                .find(query)
+                .projection(new Document("id", 1).append("runner_id", 1).append("_id", 0)) // 保留 id 和 runner_id 字段
+                .into(new ArrayList<>());
+
+        Map<Long, Long> resultMap = new HashMap<>();
+        for (Document doc : documents) {
+            Object idObj = doc.get("id");
+            Object runnerIdObj = doc.get("runner_id");
+            if (idObj instanceof Number && runnerIdObj instanceof Number) {
+                Long id = ((Number) idObj).longValue();
+                Long runnerId = ((Number) runnerIdObj).longValue();
+                resultMap.put(id, runnerId);
+            }
+        }
+        return resultMap;
+    }
+
+
+    /**
      * 根据tagentId列表获取runnerIdList
      *
      * @param tagentVo tagent 对象
@@ -425,9 +452,9 @@ public class TagentServiceImpl implements TagentService {
         doc.put("ip_list", newIpList);
         Document setDocument = new Document();
         setDocument.put("$set", doc);
-        if(session != null) {
+        if (session != null) {
             mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument);
-        }else{
+        } else {
             mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
         }
     }
@@ -584,6 +611,10 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(tagentSearchVo.getRunnerGroupIdList())) {
             List<TagentVo> tagentVoList = tagentMapper.getTagentListByRunnerGroupIdList(tagentSearchVo.getRunnerGroupIdList());
             if (CollectionUtils.isNotEmpty(tagentVoList)) {
+                Map<Long, Long> tagentIdRunnerIdMap = getRunnerIdMapByTagentMGIdList(tagentVoList.stream().map(TagentVo::getId).collect(toList()));
+                for (TagentVo tagentVo : tagentVoList) {
+                    tagentVo.setRunnerId(tagentIdRunnerIdMap.get(tagentVo.getId()));
+                }
                 tagentIdSet.addAll(tagentVoList.stream().map(TagentVo::getId).collect(Collectors.toList()));
                 returnTagentVoList.addAll(tagentVoList);
             }
