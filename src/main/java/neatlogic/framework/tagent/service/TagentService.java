@@ -131,7 +131,7 @@ public interface TagentService {
      *
      * @param tagentVo tagent对象
      */
-    void updateTagentMGById(TagentVo tagentVo, boolean isNeedInsert);
+    void updateTagentMGByIpAndPort(TagentVo tagentVo, boolean isNeedInsert);
 
 
     /**

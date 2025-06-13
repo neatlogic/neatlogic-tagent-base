@@ -121,7 +121,7 @@ public class TagentServiceImpl implements TagentService {
             }
         }
         //return tagentMapper.updateTagentById(tagent);
-        updateTagentMGById(tagent, false);
+        updateTagentMGByIpAndPort(tagent, false);
     }
 
     /**
@@ -130,11 +130,13 @@ public class TagentServiceImpl implements TagentService {
      * @param tagentVo tagent对象
      */
     @Override
-    public void updateTagentMGById(TagentVo tagentVo, boolean isNeedInsert) {
+    public void updateTagentMGByIpAndPort(TagentVo tagentVo, boolean isNeedInsert) {
         Document whereDoc = new Document();
         Document doc = new Document();
         Document setDocument = new Document();
-        whereDoc.put("id", tagentVo.getId());
+        whereDoc.put("ip", tagentVo.getIp());
+        whereDoc.put("port", tagentVo.getPort());
+        doc.put("id", tagentVo.getId());
         if (StringUtils.isNotBlank(tagentVo.getIp())) {
             doc.put("ip", tagentVo.getIp());
         }
@@ -214,7 +216,10 @@ public class TagentServiceImpl implements TagentService {
         // 配置 upsert 为 true
         if (isNeedInsert) {
             Criteria criteria = new Criteria();
-            criteria.andOperator(Criteria.where("id").is(tagentVo.getId()));
+            criteria.andOperator(
+                    Criteria.where("ip").is(tagentVo.getIp()),
+                    Criteria.where("port").is(tagentVo.getPort())
+            );
             Query query = new Query(criteria);
             JSONObject oldData = mongoTemplate.findOne(query, JSONObject.class, "_tagent_info");
             //如果tagent不存在才insert
@@ -224,7 +229,6 @@ public class TagentServiceImpl implements TagentService {
         }
         if (isNeedInsert) {
             InsertOneResult result;
-            doc.put("id", tagentVo.getId());
             doc.put("fcd", new Date());
             if (logger.isDebugEnabled()) {
                 docDocumentStr = JSON.toJSONString(doc);
@@ -499,7 +503,7 @@ public class TagentServiceImpl implements TagentService {
             tagentMapper.insertTagent(tagent);
             tagentMapper.insertAccount(accountVo);
             //存mongodb
-            updateTagentMGById(tagent, true);
+            updateTagentMGByIpAndPort(tagent, true);
             //保存副ip
             saveTagentIpList(tagent);
 
