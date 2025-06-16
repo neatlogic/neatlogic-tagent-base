@@ -583,7 +583,8 @@
     </select>
 
     <insert id="insertTagent" parameterType="neatlogic.framework.tagent.dto.TagentVo" >
-        INSERT INTO tagent (`id`,
+        INSERT INTO tagent (
+        `id`,
         `ip`,
         `port`,
         `name`,
@@ -594,11 +595,12 @@
         `osbit`,
         `account_id`,
         `runner_group_id`,
-        <if test="isFirstCreate !=null and isFirstCreate == 1 ">
+        <if test="isFirstCreate != null and isFirstCreate == 1">
             `fcd`,
         </if>
-        `user`)
-        VALUES (#{id},
+        `user`
+        ) VALUES (
+        #{id},
         #{ip},
         #{port},
         #{name},
@@ -609,10 +611,21 @@
         #{osbit},
         #{accountId},
         #{runnerGroupId},
-        <if test="isFirstCreate !=null and isFirstCreate == 1 ">
+        <if test="isFirstCreate != null and isFirstCreate == 1">
             NOW(3),
         </if>
-        #{user})
+        #{user}
+        )
+        ON DUPLICATE KEY UPDATE
+        `name` = VALUES(`name`),
+        `version` = VALUES(`version`),
+        `os_id` = VALUES(`os_id`),
+        `os_type` = VALUES(`os_type`),
+        `os_version` = VALUES(`os_version`),
+        `osbit` = VALUES(`osbit`),
+        `account_id` = VALUES(`account_id`),
+        `runner_group_id` = VALUES(`runner_group_id`),
+        `user` = VALUES(`user`);
     </insert>
 
     <update id="updateTagentById" parameterType="neatlogic.framework.tagent.dto.TagentVo">
@@ -767,6 +780,14 @@
         #{fcu},
         now(3)
         )
+        ON DUPLICATE KEY UPDATE
+        `name` = VALUES(`name`),
+        <if test="passwordCipher != null">
+            `password` = VALUES(`password`),
+        </if>
+        `protocol_id` = VALUES(`protocol_id`),
+        `lcu` = VALUES(`lcu`),
+        `lcd` = NOW(3);
     </insert>
 
     <resultMap id="TagentMap" type="neatlogic.framework.tagent.dto.TagentVo">
