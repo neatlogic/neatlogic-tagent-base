@@ -72,15 +72,6 @@ public interface TagentService {
      */
     JSONObject execTagentCmd(TagentMessageVo message, String action) throws Exception;
 
-
-    /**
-     * 删除tagent 包含ip（ipList）
-     *
-     * @param deleteTagentIpList 需要删除的tagent ipList
-     * @param tagent             tagentVo
-     */
-    void deleteTagentIpList(List<String> deleteTagentIpList, TagentVo tagent);
-
     /**
      * 通过ip：port、网段掩码、执行器组 过滤tagent
      *
@@ -140,7 +131,7 @@ public interface TagentService {
      *
      * @param tagentVo tagent对象
      */
-    void updateTagentMGById(TagentVo tagentVo, boolean isNeedInsert);
+    void updateTagentMGByIpAndPort(TagentVo tagentVo, boolean isNeedInsert);
 
 
     /**
