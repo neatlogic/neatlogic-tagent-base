@@ -33,6 +33,8 @@ public interface TagentMapper {
 
     Long getAccountIdById(Long id);
 
+    List<Long> getAccountIdListByIdList(List<Long> idList);
+
     TagentOSVo getOsByName(String name);
 
     TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
@@ -105,13 +107,19 @@ public interface TagentMapper {
 
     void deleteTagentById(Long id);
 
+    void deleteTagentByIdList(List<Long> idList);
+
     int deleteAllIpByTagentId(Long id);
+
+    int deleteAllIpByTagentIdList(List<Long> tagentIdList);
 
     void deleteTagentVersionById(Long id);
 
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
 
     void deleteAccountById(Long id);
+
+    void deleteAccountByIdList(List<Long> idList);
 
     void deleteAccountListByIdList(List<Long> idList);
 

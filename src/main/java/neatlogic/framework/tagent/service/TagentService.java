@@ -112,6 +112,14 @@ public interface TagentService {
     TagentVo getTagentMGById(long id);
 
     /**
+     * 根据tagentId列表批量获取tagent心跳信息
+     *
+     * @param idList tagentId列表
+     * @return tagent对象
+     */
+    List<TagentVo> getTagentMGListByIdList(List<Long> idList);
+
+    /**
      * 根据条件列表获取runnerIdList
      *
      * @param tagentVo 条件入参
@@ -125,6 +133,21 @@ public interface TagentService {
      * @param id id
      */
     void deleteTagentMGById(long id);
+
+    /**
+     * 根据id列表删除tagent在mongodb中的数据
+     *
+     * @param idList id列表
+     */
+    void deleteTagentMGByIdList(List<Long> idList);
+
+    /**
+     * 根据id列表删除tagent在mysql中的数据
+     *
+     * @param idList id列表
+     * @param accountIdList 账号id列表
+     */
+    void deleteTagentByIdList(List<Long> idList, List<Long> accountIdList);
 
     /**
      * 跟新tagent所有字段

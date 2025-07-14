@@ -65,6 +65,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
@@ -288,6 +289,21 @@ public class TagentServiceImpl implements TagentService {
         return tagentVo;
     }
 
+    @Override
+    public List<TagentVo> getTagentMGListByIdList(List<Long> idList) {
+        List<TagentVo> tagentList = new ArrayList<>();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").in(idList));
+        List<Document> documentList = mongoTemplate.find(query, Document.class, "_tagent_info");
+        if (CollectionUtils.isNotEmpty(documentList)) {
+            for (Document doc : documentList) {
+                TagentVo tagentVo = mapToTagentVo(doc);
+                tagentList.add(tagentVo);
+            }
+        }
+        return tagentList;
+    }
+
     private TagentVo mapToTagentVo(Document doc) {
         TagentVo vo = new TagentVo();
         vo.setId(doc.getLong("id"));
@@ -319,6 +335,21 @@ public class TagentServiceImpl implements TagentService {
         Document whereDoc = new Document();
         whereDoc.put("id", id);
         mongoTemplate.getCollection("_tagent_info").findOneAndDelete(whereDoc);
+    }
+
+    @Override
+    public void deleteTagentMGByIdList(List<Long> idList) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").in(idList));
+        mongoTemplate.remove(query, "_tagent_info");
+    }
+
+    @Override
+    @Transactional
+    public void deleteTagentByIdList(List<Long> idList, List<Long> accountIdList) {
+        tagentMapper.deleteTagentByIdList(idList);
+        tagentMapper.deleteAllIpByTagentIdList(idList);
+        tagentMapper.deleteAccountByIdList(accountIdList);
     }
 
     /**
