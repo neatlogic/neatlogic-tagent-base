@@ -817,14 +817,6 @@
         #{fcu},
         now(3)
         )
-        ON DUPLICATE KEY UPDATE
-        `name` = VALUES(`name`),
-        <if test="passwordCipher != null">
-            `password` = VALUES(`password`),
-        </if>
-        `protocol_id` = VALUES(`protocol_id`),
-        `lcu` = VALUES(`lcu`),
-        `lcd` = NOW(3);
     </insert>
 
     <resultMap id="TagentMap" type="neatlogic.framework.tagent.dto.TagentVo">
