@@ -550,7 +550,8 @@ public class TagentServiceImpl implements TagentService {
             } else {
                 tagentMapper.insertAccount(newTagentAccountVo);
             }
-
+            //存mongodb
+            updateTagentMGByIpAndPort(tagent, false);
             //保存副ip
             saveTagentIpList(tagent);
 
