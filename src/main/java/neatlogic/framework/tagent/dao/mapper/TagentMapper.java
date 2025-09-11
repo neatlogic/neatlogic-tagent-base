@@ -43,6 +43,8 @@ public interface TagentMapper {
 
     List<TagentVo> getTagentByIncludeIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
+    TagentVo getTagentByIdLock(Long id);
+
     TagentVo getTagentById(Long id);
 
     TagentVo getTagentDetailById(Long id);

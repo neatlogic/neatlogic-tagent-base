@@ -95,7 +95,11 @@
             </if>
         </where>
     </select>
-
+    <select id="getTagentByIdLock" resultType="neatlogic.framework.tagent.dto.TagentVo" useCache="false">
+        SELECT ft.`id`
+        FROM tagent ft
+        WHERE ft.id = #{value} for update
+    </select>
     <select id="getTagentById" resultType="neatlogic.framework.tagent.dto.TagentVo" useCache="false">
         SELECT ft.`id`,
                ft.`ip`,
@@ -793,7 +797,7 @@
     </insert>
     
     <insert id="insertAccount">
-        insert into `tagent_account` (
+        insert ignore into `tagent_account` (
         `id`,
         `name`,
         <if test="passwordCipher != null">
