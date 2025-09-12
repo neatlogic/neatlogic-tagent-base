@@ -81,6 +81,8 @@ public interface TagentMapper {
 
     AccountBaseVo getAccountById(Long id);
 
+    AccountBaseVo getAccountByName(String name);
+
     List<AccountBaseVo> getAccountListByIncludeIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
 
     List<AccountBaseVo> getAccountListByMainIpListAndProtocolId(@Param("ipList") List<String> ipList, @Param("protocolId") Long protocolId);
@@ -105,7 +107,13 @@ public interface TagentMapper {
 
     int updateTagentById(TagentVo tagentVo);
 
-    void updateAccount(AccountBaseVo accountVo);
+    int updateTagentIpById(@Param("id") Long id, @Param("ip") String ip);
+
+    void updateAccountNameById(AccountBaseVo accountVo);
+
+    void updateAccountById(AccountBaseVo accountVo);
+
+    void updateAccountByName(AccountBaseVo accountVo);
 
     void deleteTagentById(Long id);
 
@@ -120,6 +128,8 @@ public interface TagentMapper {
     void deleteTagentIp(@Param("tagentId") Long tagentId, @Param("ip") String ip);
 
     void deleteAccountById(Long id);
+
+    void deleteAccountByName(String name);
 
     void deleteAccountByIdList(List<Long> idList);
 

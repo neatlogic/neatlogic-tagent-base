@@ -39,7 +39,6 @@ import neatlogic.framework.dto.RestVo;
 import neatlogic.framework.dto.runner.NetworkVo;
 import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
-import neatlogic.framework.exception.core.ApiRuntimeException;
 import neatlogic.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import neatlogic.framework.exception.file.FileTypeHandlerNotFoundException;
 import neatlogic.framework.exception.runner.RunnerIdNotFoundException;
@@ -60,7 +59,6 @@ import neatlogic.framework.tagent.enums.TagentUpgradeStatus;
 import neatlogic.framework.tagent.exception.*;
 import neatlogic.framework.tagent.tagenthandler.core.ITagentHandler;
 import neatlogic.framework.tagent.tagenthandler.core.TagentHandlerFactory;
-import neatlogic.framework.transaction.util.TransactionUtil;
 import neatlogic.framework.util.RestUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -71,7 +69,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -229,7 +226,7 @@ public class TagentServiceImpl implements TagentService {
             whereDocStr = JSON.toJSONString(whereDoc);
             setDocumentStr = JSON.toJSONString(setDocument);
         }
-        logger.debug("====TagentUpdateInfo-thread-updated start! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
+        logger.debug("====updateTagentMGById-thread-updated start! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
         if (isNeedInsert) {
             Criteria criteria = new Criteria();
             criteria.andOperator(Criteria.where("id").is(tagentVo.getId()));
@@ -252,12 +249,12 @@ public class TagentServiceImpl implements TagentService {
                 // 判断更新结果
                 if (result.getInsertedId() != null) {
                     // 更新成功
-                    logger.debug("====TagentUpdateInfo-thread-updated insert with session succeed! where:{}, updateDocument:{}", whereDocStr, docDocumentStr);
+                    logger.debug("====updateTagentMGById-thread-updated insert with session succeed! where:{}, updateDocument:{}", whereDocStr, docDocumentStr);
                 } else {
                     // 更新失败
                     whereDocStr = JSON.toJSONString(whereDoc);
                     setDocumentStr = JSON.toJSONString(setDocument);
-                    logger.error("====TagentUpdateInfo-thread-updated insert without session failed! where:{}. updateDocument:{}", whereDocStr, docDocumentStr);
+                    logger.error("====updateTagentMGById-thread-updated insert without session failed! where:{}. updateDocument:{}", whereDocStr, docDocumentStr);
                 }
             } catch (MongoWriteException e) {
                 if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
@@ -277,12 +274,12 @@ public class TagentServiceImpl implements TagentService {
                         // 判断更新结果
                         if (updateResult.getMatchedCount() > 0 && updateResult.getModifiedCount() > 0) {
                             // 更新成功
-                            logger.debug("====TagentUpdateInfo-thread-updated succeed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                            logger.debug("====updateTagentMGById-thread-updated succeed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
                         } else {
                             // 更新失败
                             whereDocStr = JSON.toJSONString(whereDoc);
                             setDocumentStr = JSON.toJSONString(setDocument);
-                            logger.error("====TagentUpdateInfo-thread-updated failed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                            logger.error("====updateTagentMGById-thread-updated failed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
                         }
                     }
                 } else {
@@ -295,16 +292,16 @@ public class TagentServiceImpl implements TagentService {
             // 判断更新结果
             if (result.getMatchedCount() > 0 && result.getModifiedCount() > 0) {
                 // 更新成功
-                logger.debug("====TagentUpdateInfo-thread-updated succeed! where:{}, updateDocument:{}", whereDocStr, setDocumentStr);
+                logger.debug("====updateTagentMGById-thread-updated succeed! where:{}, updateDocument:{}", whereDocStr, setDocumentStr);
             } else {
                 // 更新失败
                 whereDocStr = JSON.toJSONString(whereDoc);
                 setDocumentStr = JSON.toJSONString(setDocument);
-                logger.error("====TagentUpdateInfo-thread-updated failed! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
+                logger.error("====updateTagentMGById-thread-updated failed! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
             }
         }
 
-        logger.debug("====TagentUpdateInfo-thread-updated done! where:{}. updateDocument:{},docDocumentStr:{}", whereDocStr, setDocumentStr, docDocumentStr);
+        logger.debug("====updateTagentMGById-thread-updated done! where:{}. updateDocument:{},docDocumentStr:{}", whereDocStr, setDocumentStr, docDocumentStr);
     }
 
     /**
@@ -584,14 +581,22 @@ public class TagentServiceImpl implements TagentService {
         }
 
         if (tagent.getIsFirstCreate() != null && tagent.getIsFirstCreate() == 1) {
-            //第一次注册tagent,主账号的ip、port肯定是不没有注册过的，因为一旦插入报错，证明前面ip逻辑的代码有问题
-            AccountBaseVo accountVo = new AccountBaseVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
-            tagent.setAccountId(accountVo.getId());
+            AccountBaseVo newTagentAccountVo = new AccountBaseVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
+            //通过name复用账号
+            AccountBaseVo oldTagentAccount = tagentMapper.getAccountByName(tagent.getIp() + "_" + tagent.getPort() + "_tagent");
+            if (oldTagentAccount != null) {
+                newTagentAccountVo.setId(oldTagentAccount.getId());
+                if (!oldTagentAccount.equals(newTagentAccountVo)) {
+                    tagentMapper.updateAccountByName(newTagentAccountVo);
+                }
+            } else {
+                tagentMapper.insertAccount(newTagentAccountVo);
+            }
+            tagent.setAccountId(newTagentAccountVo.getId());
             tagentMapper.insertTagent(tagent);
             //防止并发ID得用数据库里面的
             TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
             tagent.setId(tagentVo.getId());
-            tagentMapper.insertAccount(accountVo);
             //存mongodb
             updateTagentMGByIdWithLock(tagent, true);
             //保存副ip
@@ -601,18 +606,27 @@ public class TagentServiceImpl implements TagentService {
             AccountBaseVo newTagentAccountVo = new AccountBaseVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
             AccountBaseVo oldTagentAccount = tagentMapper.getAccountByTagentId(tagent.getId());
             if (oldTagentAccount != null) {
+                //通过id复用账号
                 newTagentAccountVo.setId(oldTagentAccount.getId());
                 if (!oldTagentAccount.equals(newTagentAccountVo)) {
-                    tagentMapper.updateAccount(newTagentAccountVo);
+                    tagentMapper.updateAccountById(newTagentAccountVo);
                 }
             } else {
-                tagentMapper.insertAccount(newTagentAccountVo);
+                //通过name复用账号
+                oldTagentAccount = tagentMapper.getAccountByName(tagent.getIp() + "_" + tagent.getPort() + "_tagent");
+                if (oldTagentAccount != null) {
+                    newTagentAccountVo.setId(oldTagentAccount.getId());
+                    if (!oldTagentAccount.equals(newTagentAccountVo)) {
+                        tagentMapper.updateAccountByName(newTagentAccountVo);
+                    }
+                } else {
+                    tagentMapper.insertAccount(newTagentAccountVo);
+                }
             }
             //存mongodb
             updateTagentMGByIdWithLock(tagent, true);
             //保存副ip
             saveTagentIpList(tagent);
-
             tagent.setAccountId(newTagentAccountVo.getId());
             tagentMapper.updateTagentById(tagent);
         }
@@ -652,8 +666,8 @@ public class TagentServiceImpl implements TagentService {
         //新增tagentIp
         if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
             tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
-            updateIpListMG(tagent.getId(), newIpList);
         }
+        updateIpListMG(tagent.getId(), tagent.getIpList());
     }
 
     @Override
@@ -963,8 +977,9 @@ public class TagentServiceImpl implements TagentService {
     @Override
     public void rollbackMongodb(TagentVo tagentVo) {
         if (tagentVo != null) {
-            TagentVo tagentVoRollBack = tagentMapper.getTagentByIpAndPort(tagentVo.getIp(), tagentVo.getPort());
+            TagentVo tagentVoRollBack = tagentMapper.getTagentById(tagentVo.getId());
             if (tagentVoRollBack != null) {
+                tagentVoRollBack.setIpList(tagentMapper.getTagentIpListByTagentId(tagentVoRollBack.getId()));
                 updateTagentMGByIdWithLock(tagentVoRollBack, true);
             } else {
                 deleteTagentMGById(tagentVo.getId());
@@ -981,39 +996,25 @@ public class TagentServiceImpl implements TagentService {
     @Override
     public void saveTagent(TagentVo tagentVo, RunnerGroupVo runnerGroupVo) {
         tagentVo.setRunnerGroupId(runnerGroupVo.getId());
-        TransactionStatus tx =null;
-        try {
-             tx = TransactionUtil.openTx();
-            //保存tagent osType
-            if (StringUtils.isNotBlank(tagentVo.getOsType())) {
-                String osType = tagentVo.getOsType();
-                TagentOSVo os = tagentMapper.getOsByName(osType.toLowerCase());
-                if (os != null) {
-                    tagentVo.setOsId(os.getId());
-                    tagentVo.setOsName(os.getName());
-                } else {
-                    TagentOSVo newOS = new TagentOSVo(osType);
-                    tagentMapper.insertOs(newOS);
-                    tagentVo.setOsId(newOS.getId());
-                    tagentVo.setOsName(newOS.getName());
-                }
+        //保存tagent osType
+        if (StringUtils.isNotBlank(tagentVo.getOsType())) {
+            String osType = tagentVo.getOsType();
+            TagentOSVo os = tagentMapper.getOsByName(osType.toLowerCase());
+            if (os != null) {
+                tagentVo.setOsId(os.getId());
+                tagentVo.setOsName(os.getName());
+            } else {
+                TagentOSVo newOS = new TagentOSVo(osType);
+                tagentMapper.insertOs(newOS);
+                tagentVo.setOsId(newOS.getId());
+                tagentVo.setOsName(newOS.getName());
             }
-
-            //保存tagent osbit
-            if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
-                tagentMapper.insertOsBit(tagentVo.getOsbit());
-            }
-            saveTagentAndAccount(tagentVo);
-            TransactionUtil.commitTx(tx);
-        }catch (Exception ex) {
-            if (tx != null) {
-                TransactionUtil.rollbackTx(tx);
-            }
-            //手动回滚mongodb
-            rollbackMongodb(tagentVo);
-           // String errorMsg = String.format("TagentRegister failed! paramId:%d,insertTagentId:%d,finalTagentId:%d,ip:%s,port:%d,%s", tagentIdParam, insertTagentId, tagentVo != null ? tagentVo.getId() : null, tagentIpParam, tagentPortParam, ex.getMessage());
-            logger.error(ex.getMessage(), ex);
-            throw new ApiRuntimeException(ex.getMessage(), ex);
         }
+
+        //保存tagent osbit
+        if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
+            tagentMapper.insertOsBit(tagentVo.getOsbit());
+        }
+        saveTagentAndAccount(tagentVo);
     }
 }
