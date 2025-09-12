@@ -194,7 +194,7 @@ public interface TagentService {
      *
      * @param tagentVo tagent
      */
-    void rollbackMongodb(TagentVo tagentVo);
+    void rollbackTagentMG(TagentVo tagentVo);
 
 
     void saveTagent(TagentVo tagentVo, RunnerGroupVo runnerGroupVo);

@@ -975,7 +975,7 @@ public class TagentServiceImpl implements TagentService {
     }
 
     @Override
-    public void rollbackMongodb(TagentVo tagentVo) {
+    public void rollbackTagentMG(TagentVo tagentVo) {
         if (tagentVo != null) {
             TagentVo tagentVoRollBack = tagentMapper.getTagentById(tagentVo.getId());
             if (tagentVoRollBack != null) {
