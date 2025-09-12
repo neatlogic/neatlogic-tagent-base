@@ -21,6 +21,7 @@ import com.mongodb.ErrorCategory;
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
 import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
@@ -257,51 +258,66 @@ public class TagentServiceImpl implements TagentService {
                     logger.error("====updateTagentMGById-thread-updated insert without session failed! where:{}. updateDocument:{}", whereDocStr, docDocumentStr);
                 }
             } catch (MongoWriteException e) {
-                if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
-                    // 处理 (ip, port) 冲突
-                    Document conflict = mongoTemplate.getCollection("_tagent_info").find(
-                            Filters.and(Filters.eq("ip", doc.getString("ip")), Filters.eq("port", doc.getInteger("port")))
-                    ).first();
-
-                    if (conflict != null) {
-                        UpdateResult updateResult;
-                        doc.remove("_id");
-                        updateResult = mongoTemplate.getCollection("_tagent_info").updateOne(
-                                Filters.eq("id", conflict.getLong("id")),
-                                new Document("$set", doc)
-                        );
-
-                        // 判断更新结果
-                        if (updateResult.getMatchedCount() > 0 && updateResult.getModifiedCount() > 0) {
-                            // 更新成功
-                            logger.debug("====updateTagentMGById-thread-updated succeed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
-                        } else {
-                            // 更新失败
-                            whereDocStr = JSON.toJSONString(whereDoc);
-                            setDocumentStr = JSON.toJSONString(setDocument);
-                            logger.error("====updateTagentMGById-thread-updated failed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
-                        }
-                    }
-                } else {
-                    throw e;
-                }
+                handleDuplicateIpPort(e, doc, docDocumentStr);
             }
         } else {
             UpdateResult result;
-            result = mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
-            // 判断更新结果
-            if (result.getMatchedCount() > 0 && result.getModifiedCount() > 0) {
-                // 更新成功
-                logger.debug("====updateTagentMGById-thread-updated succeed! where:{}, updateDocument:{}", whereDocStr, setDocumentStr);
-            } else {
-                // 更新失败
-                whereDocStr = JSON.toJSONString(whereDoc);
-                setDocumentStr = JSON.toJSONString(setDocument);
-                logger.error("====updateTagentMGById-thread-updated failed! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
+            try {
+                result = mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
+                // 判断更新结果
+                if (result.getMatchedCount() > 0 && result.getModifiedCount() > 0) {
+                    // 更新成功
+                    logger.debug("====updateTagentMGById-thread-updated succeed! where:{}, updateDocument:{}", whereDocStr, setDocumentStr);
+                } else {
+                    // 更新失败
+                    whereDocStr = JSON.toJSONString(whereDoc);
+                    setDocumentStr = JSON.toJSONString(setDocument);
+                    logger.error("====updateTagentMGById-thread-updated failed! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
+                }
+            } catch (MongoWriteException e) {
+                handleDuplicateIpPort(e, doc, docDocumentStr);
             }
         }
 
         logger.debug("====updateTagentMGById-thread-updated done! where:{}. updateDocument:{},docDocumentStr:{}", whereDocStr, setDocumentStr, docDocumentStr);
+    }
+
+    /**
+     * 处理ip port 冲突
+     *
+     * @param e              冲突异常
+     * @param doc            更新文本对象
+     * @param docDocumentStr 更新文本String
+     */
+    private void handleDuplicateIpPort(MongoWriteException e, Document doc, String docDocumentStr) {
+        if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+            // 处理 (ip, port) 冲突
+            deleteTagentMGById(doc.getLong("id"));
+            Document conflict = mongoTemplate.getCollection("_tagent_info").find(
+                    Filters.and(Filters.eq("ip", doc.getString("ip")), Filters.eq("port", doc.getInteger("port")))
+            ).first();
+            if (conflict != null) {
+                logger.debug("====updateTagentMGById-thread-updated duplicate! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                UpdateResult updateResult;
+                doc.remove("_id");
+                updateResult = mongoTemplate.getCollection("_tagent_info").updateOne(
+                        Filters.eq("id", conflict.getLong("id")),
+                        new Document("$set", doc)
+                );
+
+                // 判断更新结果
+                if (updateResult.getMatchedCount() > 0 && updateResult.getModifiedCount() > 0) {
+                    // 更新成功
+                    logger.debug("====updateTagentMGById-thread-updated succeed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                } else {
+                    // 更新失败
+                    logger.error("====updateTagentMGById-thread-updated failed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                }
+            }
+
+        } else {
+            throw e;
+        }
     }
 
     /**
@@ -367,10 +383,8 @@ public class TagentServiceImpl implements TagentService {
     public void deleteTagentMGById(long id) {
         Document whereDoc = new Document();
         whereDoc.put("id", id);
-        Document deleted = mongoTemplate.getCollection("_tagent_info").findOneAndDelete(whereDoc);
-        if (deleted == null) {
-            logger.error("====Tagent mongodb delete failed! where:{}.", whereDoc);
-        }
+        DeleteResult result = mongoTemplate.getCollection("_tagent_info").deleteOne(whereDoc);
+        logger.debug("====Tagent mongodb delete {} succeed! where:{}.", result.getDeletedCount(), whereDoc);
     }
 
     @Override
@@ -378,16 +392,8 @@ public class TagentServiceImpl implements TagentService {
         Document whereDoc = new Document();
         whereDoc.put("ip", ip);
         whereDoc.put("port", port);
-
-        Document deleted = mongoTemplate
-                .getCollection("_tagent_info")
-                .findOneAndDelete(whereDoc);
-
-        if (deleted == null) {
-            logger.error("====Tagent mongodb delete failed! where:{}.", whereDoc.toJson());
-        } else {
-            logger.debug("====Tagent mongodb delete succeed! where:{}.", whereDoc.toJson());
-        }
+        DeleteResult result = mongoTemplate.getCollection("_tagent_info").deleteOne(whereDoc);
+        logger.debug("====Tagent mongodb delete {} succeed! where:{}.", result.getDeletedCount(), whereDoc);
     }
 
     @Override

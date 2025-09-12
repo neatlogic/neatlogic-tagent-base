@@ -39,6 +39,8 @@ public interface TagentMapper {
 
     TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
+    TagentVo getTagentByIpAndPortAndIdNot(@Param("ip") String ip, @Param("port") Integer port, @Param("id") Long id);
+
     List<TagentVo> getTagentByIpOrTagentIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
 
     List<TagentVo> getTagentByIncludeIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
