@@ -71,7 +71,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
@@ -134,12 +133,12 @@ public class TagentServiceImpl implements TagentService {
     @Override
     public void updateTagentMGByIdWithLock(TagentVo tagentVo, boolean isNeedInsert) {
         Long id = tagentVo.getId();
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            System.out.println("⚡ 当前在事务中！" + tagentVo.getId());
-            System.out.println("事务名称: " + TransactionSynchronizationManager.getCurrentTransactionName());
-            System.out.println("是否只读: " + TransactionSynchronizationManager.isCurrentTransactionReadOnly());
-            System.out.println("事务隔离级别: " + TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
-        }
+//        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+//            System.out.println("⚡ 当前在事务中！" + tagentVo.getId());
+//            System.out.println("事务名称: " + TransactionSynchronizationManager.getCurrentTransactionName());
+//            System.out.println("是否只读: " + TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+//            System.out.println("事务隔离级别: " + TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
+//        }
         //必须串行，否则会导致mongodb多个事务同时改同一个document导致恶性竞争报错WriteConflict error
         tagentMapper.getTagentByIdLock(id);
         updateTagentMGById(tagentVo, isNeedInsert);
