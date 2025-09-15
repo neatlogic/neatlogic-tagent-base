@@ -49,6 +49,12 @@
                 OR t.`os_version` LIKE CONCAT('%',#{keyword},'%')
                 OR ti.`ip` LIKE CONCAT('%',#{keyword},'%'))
             </if>
+            <if test="ipList != null and ipList.size > 0">
+                and
+                <foreach collection="ipList" item="ip" separator="OR" open="(" close=")">
+                    t.`ip` = #{ip}
+                </foreach>
+            </if>
         </where>
         ORDER BY t.`id` DESC
         <if test="needPage == true">
@@ -93,9 +99,19 @@
                 OR t.`os_version` LIKE CONCAT('%',#{keyword},'%')
                 OR ti.`ip` LIKE CONCAT('%',#{keyword},'%'))
             </if>
+            <if test="ipList != null and ipList.size > 0">
+                and
+                <foreach collection="ipList" item="ip" separator="OR" open="(" close=")">
+                    t.`ip` = #{ip}
+                </foreach>
+            </if>
         </where>
     </select>
-
+    <select id="getTagentByIdLock" resultType="neatlogic.framework.tagent.dto.TagentVo" useCache="false">
+        SELECT ft.`id`
+        FROM tagent ft
+        WHERE ft.id = #{value} for update
+    </select>
     <select id="getTagentById" resultType="neatlogic.framework.tagent.dto.TagentVo" useCache="false">
         SELECT ft.`id`,
                ft.`ip`,
@@ -262,6 +278,30 @@
                            ON t.`runner_group_id` = rg.`id`
         WHERE t.ip = #{ip}
           AND t.port = #{port}
+    </select>
+
+    <select id="getTagentByIpAndPortAndIdNot" parameterType="neatlogic.framework.tagent.dto.TagentVo"
+            resultType="neatlogic.framework.tagent.dto.TagentVo" useCache="false">
+        SELECT t.id,
+               t.ip,
+               t.port,
+               t.name                                  AS name,
+               t.version                               AS version,
+               t.os_type                               AS osType,
+               t.os_version                            AS osVersion,
+               t.osbit                                 AS osbit,
+               t.account_id                            AS accountId,
+               t.user                                  AS user,
+               t.runner_group_id                       AS runnerGroupId,
+               DATE_FORMAT(t.fcd, '%Y-%m-%d %H:%i:%s') AS fcd,
+               DATE_FORMAT(t.lcd, '%Y-%m-%d %H:%i:%s') AS lcd,
+               rg.`name`                               AS runnerGroupName
+        FROM tagent t
+                 LEFT JOIN runnergroup rg
+                           ON t.`runner_group_id` = rg.`id`
+        WHERE t.ip = #{ip}
+          AND t.port = #{port}
+        and t.id != #{id}
     </select>
 
     <select id="getTagentVersionById" resultType="neatlogic.framework.tagent.dto.TagentVersionVo">
@@ -551,6 +591,23 @@
                  JOIN `cmdb_resourcecenter_account_protocol` b ON a.`protocol_id` = b.`id`
         where a.`id` = #{value}
     </select>
+
+    <select id="getAccountByName" resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
+        select a.`id`,
+               a.`name`,
+               a.`password`   as passwordCipher,
+               b.name         as protocol,
+               b.id           as protocolId,
+               b.`port`       as protocolPort,
+               a.`fcu`,
+               a.`fcd`,
+               a.`lcu`,
+               a.`lcd`
+        from `tagent_account` a
+                 JOIN `cmdb_resourcecenter_account_protocol` b ON a.`protocol_id` = b.`id`
+        where a.`name` = #{value}
+    </select>
+
     <select id="getAccountListByIncludeIpListAndProtocolId"
             resultType="neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo">
         select
@@ -684,6 +741,9 @@
         WHERE
         `id` = #{id}
     </update>
+    <update id="updateTagentIpById" parameterType="neatlogic.framework.tagent.dto.TagentVo">
+        UPDATE tagent set `ip` = #{ip} WHERE `id` = #{id}
+    </update>
 
     <update id="updateTagentAuditDetailStateAndResultById">
         update tagent_upgrade_detail
@@ -693,7 +753,7 @@
 
     </update>
 
-    <update id="updateAccount">
+    <update id="updateAccountById">
         update `tagent_account` a set
         <if test="name != null">
             a.`name` = #{name},
@@ -705,6 +765,26 @@
         a.`lcu` = #{lcu},
         a.`lcd` = now(3)
         where a.`id` = #{id}
+    </update>
+
+    <update id="updateAccountNameById">
+        update `tagent_account` a
+        set a.`name` = #{name},
+            a.`lcu`  = #{lcu},
+            a.`lcd`  = now(3)
+        where a.`id` = #{id}
+    </update>
+
+    <update id="updateAccountByName">
+        update `tagent_account` a set
+        a.`id` = #{id},
+        <if test="passwordCipher != null">
+            a.`password` = #{passwordCipher},
+        </if>
+        a.protocol_id = #{protocolId},
+        a.`lcu` = #{lcu},
+        a.`lcd` = now(3)
+        where a.`name` = #{name}
     </update>
 
     <insert id="insertTagentAuditDetail" parameterType="neatlogic.framework.tagent.dto.TagentUpgradeAuditVo">
@@ -756,6 +836,12 @@
         where id = #{id}
     </delete>
 
+    <delete id="deleteAccountByName">
+        delete
+        from tagent_account
+        where `name` = #{name}
+    </delete>
+
     <delete id="deleteAccountByIdList" parameterType="java.lang.Long">
         delete
         from `tagent_account`
@@ -793,7 +879,7 @@
     </insert>
     
     <insert id="insertAccount">
-        insert into `tagent_account` (
+        insert ignore into `tagent_account` (
         `id`,
         `name`,
         <if test="passwordCipher != null">

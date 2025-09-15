@@ -17,7 +17,11 @@ package neatlogic.framework.tagent.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mongodb.ErrorCategory;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
 import neatlogic.framework.asynchronization.threadlocal.MongodbSessionContext;
@@ -34,6 +38,7 @@ import neatlogic.framework.crossover.CrossoverServiceFactory;
 import neatlogic.framework.dao.mapper.runner.RunnerMapper;
 import neatlogic.framework.dto.RestVo;
 import neatlogic.framework.dto.runner.NetworkVo;
+import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.dto.runner.RunnerVo;
 import neatlogic.framework.exception.file.FileStorageMediumHandlerNotFoundException;
 import neatlogic.framework.exception.file.FileTypeHandlerNotFoundException;
@@ -122,7 +127,21 @@ public class TagentServiceImpl implements TagentService {
             }
         }
         //return tagentMapper.updateTagentById(tagent);
-        updateTagentMGByIpAndPort(tagent, false);
+        updateTagentMGByIdWithLock(tagent, false);
+    }
+
+    @Override
+    public void updateTagentMGByIdWithLock(TagentVo tagentVo, boolean isNeedInsert) {
+        Long id = tagentVo.getId();
+//        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+//            System.out.println("⚡ 当前在事务中！" + tagentVo.getId());
+//            System.out.println("事务名称: " + TransactionSynchronizationManager.getCurrentTransactionName());
+//            System.out.println("是否只读: " + TransactionSynchronizationManager.isCurrentTransactionReadOnly());
+//            System.out.println("事务隔离级别: " + TransactionSynchronizationManager.getCurrentTransactionIsolationLevel());
+//        }
+        //必须串行，否则会导致mongodb多个事务同时改同一个document导致恶性竞争报错WriteConflict error
+        tagentMapper.getTagentByIdLock(id);
+        updateTagentMGById(tagentVo, isNeedInsert);
     }
 
     /**
@@ -131,12 +150,11 @@ public class TagentServiceImpl implements TagentService {
      * @param tagentVo tagent对象
      */
     @Override
-    public void updateTagentMGByIpAndPort(TagentVo tagentVo, boolean isNeedInsert) {
+    public void updateTagentMGById(TagentVo tagentVo, boolean isNeedInsert) {
         Document whereDoc = new Document();
         Document doc = new Document();
         Document setDocument = new Document();
-        whereDoc.put("ip", tagentVo.getIp());
-        whereDoc.put("port", tagentVo.getPort());
+        whereDoc.put("id", tagentVo.getId());
         doc.put("id", tagentVo.getId());
         if (StringUtils.isNotBlank(tagentVo.getIp())) {
             doc.put("ip", tagentVo.getIp());
@@ -208,19 +226,10 @@ public class TagentServiceImpl implements TagentService {
             whereDocStr = JSON.toJSONString(whereDoc);
             setDocumentStr = JSON.toJSONString(setDocument);
         }
-        logger.debug("====TagentUpdateInfo-thread-updated start! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
-        //System.out.println(session.hasActiveTransaction());
-        ClientSession session = null;
-        if (MongodbSessionContext.get() != null) {
-            session = MongodbSessionContext.get().getSession();
-        }
-        // 配置 upsert 为 true
+        logger.debug("====updateTagentMGById-thread-updated start! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
         if (isNeedInsert) {
             Criteria criteria = new Criteria();
-            criteria.andOperator(
-                    Criteria.where("ip").is(tagentVo.getIp()),
-                    Criteria.where("port").is(tagentVo.getPort())
-            );
+            criteria.andOperator(Criteria.where("id").is(tagentVo.getId()));
             Query query = new Query(criteria);
             JSONObject oldData = mongoTemplate.findOne(query, JSONObject.class, "_tagent_info");
             //如果tagent不存在才insert
@@ -230,45 +239,84 @@ public class TagentServiceImpl implements TagentService {
         }
         if (isNeedInsert) {
             InsertOneResult result;
+            doc.put("id", tagentVo.getId());
             doc.put("fcd", new Date());
             if (logger.isDebugEnabled()) {
                 docDocumentStr = JSON.toJSONString(doc);
             }
-            if (session != null) {
-                result = mongoTemplate.getCollection("_tagent_info").insertOne(session, doc);
-            } else {
+            try {
                 result = mongoTemplate.getCollection("_tagent_info").insertOne(doc);
-            }
-            // 判断更新结果
-            if (result.getInsertedId() != null) {
-                // 更新成功
-                logger.debug("====TagentUpdateInfo-thread-updated insert with session succeed! where:{}, updateDocument:{}", whereDocStr, docDocumentStr);
-            } else {
-                // 更新失败
-                whereDocStr = JSON.toJSONString(whereDoc);
-                setDocumentStr = JSON.toJSONString(setDocument);
-                logger.error("====TagentUpdateInfo-thread-updated insert without session failed! where:{}. updateDocument:{}", whereDocStr, docDocumentStr);
+                // 判断更新结果
+                if (result.getInsertedId() != null) {
+                    // 更新成功
+                    logger.debug("====updateTagentMGById-thread-updated insert with session succeed! where:{}, updateDocument:{}", whereDocStr, docDocumentStr);
+                } else {
+                    // 更新失败
+                    whereDocStr = JSON.toJSONString(whereDoc);
+                    setDocumentStr = JSON.toJSONString(setDocument);
+                    logger.error("====updateTagentMGById-thread-updated insert without session failed! where:{}. updateDocument:{}", whereDocStr, docDocumentStr);
+                }
+            } catch (MongoWriteException e) {
+                handleDuplicateIpPort(e, doc, docDocumentStr);
             }
         } else {
             UpdateResult result;
-            if (session != null) {
-                result = mongoTemplate.getCollection("_tagent_info").updateOne(session, whereDoc, setDocument);
-            } else {
+            try {
                 result = mongoTemplate.getCollection("_tagent_info").updateOne(whereDoc, setDocument);
-            }
-            // 判断更新结果
-            if (result.getMatchedCount() > 0 && result.getModifiedCount() > 0) {
-                // 更新成功
-                logger.debug("====TagentUpdateInfo-thread-updated succeed! where:{}, updateDocument:{}", whereDocStr, setDocumentStr);
-            } else {
-                // 更新失败
-                whereDocStr = JSON.toJSONString(whereDoc);
-                setDocumentStr = JSON.toJSONString(setDocument);
-                logger.error("====TagentUpdateInfo-thread-updated failed! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
+                // 判断更新结果
+                if (result.getMatchedCount() > 0 && result.getModifiedCount() > 0) {
+                    // 更新成功
+                    logger.debug("====updateTagentMGById-thread-updated succeed! where:{}, updateDocument:{}", whereDocStr, setDocumentStr);
+                } else {
+                    // 更新失败
+                    whereDocStr = JSON.toJSONString(whereDoc);
+                    setDocumentStr = JSON.toJSONString(setDocument);
+                    logger.error("====updateTagentMGById-thread-updated failed! where:{}. updateDocument:{}", whereDocStr, setDocumentStr);
+                }
+            } catch (MongoWriteException e) {
+                handleDuplicateIpPort(e, doc, docDocumentStr);
             }
         }
 
-        logger.debug("====TagentUpdateInfo-thread-updated done! where:{}. updateDocument:{},docDocumentStr:{}", whereDocStr, setDocumentStr, docDocumentStr);
+        logger.debug("====updateTagentMGById-thread-updated done! where:{}. updateDocument:{},docDocumentStr:{}", whereDocStr, setDocumentStr, docDocumentStr);
+    }
+
+    /**
+     * 处理ip port 冲突
+     *
+     * @param e              冲突异常
+     * @param doc            更新文本对象
+     * @param docDocumentStr 更新文本String
+     */
+    private void handleDuplicateIpPort(MongoWriteException e, Document doc, String docDocumentStr) {
+        if (e.getError().getCategory() == ErrorCategory.DUPLICATE_KEY) {
+            // 处理 (ip, port) 冲突
+            deleteTagentMGById(doc.getLong("id"));
+            Document conflict = mongoTemplate.getCollection("_tagent_info").find(
+                    Filters.and(Filters.eq("ip", doc.getString("ip")), Filters.eq("port", doc.getInteger("port")))
+            ).first();
+            if (conflict != null) {
+                logger.debug("====updateTagentMGById-thread-updated duplicate! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                UpdateResult updateResult;
+                doc.remove("_id");
+                updateResult = mongoTemplate.getCollection("_tagent_info").updateOne(
+                        Filters.eq("id", conflict.getLong("id")),
+                        new Document("$set", doc)
+                );
+
+                // 判断更新结果
+                if (updateResult.getMatchedCount() > 0 && updateResult.getModifiedCount() > 0) {
+                    // 更新成功
+                    logger.debug("====updateTagentMGById-thread-updated succeed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                } else {
+                    // 更新失败
+                    logger.error("====updateTagentMGById-thread-updated failed! where:{}.updateDocument:{}", conflict.getLong("id"), docDocumentStr);
+                }
+            }
+
+        } else {
+            throw e;
+        }
     }
 
     /**
@@ -334,7 +382,17 @@ public class TagentServiceImpl implements TagentService {
     public void deleteTagentMGById(long id) {
         Document whereDoc = new Document();
         whereDoc.put("id", id);
-        mongoTemplate.getCollection("_tagent_info").findOneAndDelete(whereDoc);
+        DeleteResult result = mongoTemplate.getCollection("_tagent_info").deleteOne(whereDoc);
+        logger.debug("====Tagent mongodb delete {} succeed! where:{}.", result.getDeletedCount(), whereDoc);
+    }
+
+    @Override
+    public void deleteTagentMGByIpPort(String ip, int port) {
+        Document whereDoc = new Document();
+        whereDoc.put("ip", ip);
+        whereDoc.put("port", port);
+        DeleteResult result = mongoTemplate.getCollection("_tagent_info").deleteOne(whereDoc);
+        logger.debug("====Tagent mongodb delete {} succeed! where:{}.", result.getDeletedCount(), whereDoc);
     }
 
     @Override
@@ -528,33 +586,52 @@ public class TagentServiceImpl implements TagentService {
         }
 
         if (tagent.getIsFirstCreate() != null && tagent.getIsFirstCreate() == 1) {
-            //第一次注册tagent,主账号的ip、port肯定是不没有注册过的，因为一旦插入报错，证明前面ip逻辑的代码有问题
-            AccountBaseVo accountVo = new AccountBaseVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
-            tagent.setAccountId(accountVo.getId());
+            AccountBaseVo newTagentAccountVo = new AccountBaseVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
+            //通过name复用账号
+            AccountBaseVo oldTagentAccount = tagentMapper.getAccountByName(tagent.getIp() + "_" + tagent.getPort() + "_tagent");
+            if (oldTagentAccount != null) {
+                newTagentAccountVo.setId(oldTagentAccount.getId());
+                if (!oldTagentAccount.equals(newTagentAccountVo)) {
+                    tagentMapper.updateAccountByName(newTagentAccountVo);
+                }
+            } else {
+                tagentMapper.insertAccount(newTagentAccountVo);
+            }
+            tagent.setAccountId(newTagentAccountVo.getId());
             tagentMapper.insertTagent(tagent);
-            tagentMapper.insertAccount(accountVo);
+            //防止并发ID得用数据库里面的
+            TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(tagent.getIp(), tagent.getPort());
+            tagent.setId(tagentVo.getId());
             //存mongodb
-            updateTagentMGByIpAndPort(tagent, true);
+            updateTagentMGByIdWithLock(tagent, true);
             //保存副ip
             saveTagentIpList(tagent);
-
         } else {
             //重新注册tagent
             AccountBaseVo newTagentAccountVo = new AccountBaseVo(tagent.getIp() + "_" + tagent.getPort() + "_tagent", protocolVo.getId(), protocolVo.getPort(), tagent.getIp(), tagent.getCredential());
             AccountBaseVo oldTagentAccount = tagentMapper.getAccountByTagentId(tagent.getId());
             if (oldTagentAccount != null) {
+                //通过id复用账号
                 newTagentAccountVo.setId(oldTagentAccount.getId());
                 if (!oldTagentAccount.equals(newTagentAccountVo)) {
-                    tagentMapper.updateAccount(newTagentAccountVo);
+                    tagentMapper.updateAccountById(newTagentAccountVo);
                 }
             } else {
-                tagentMapper.insertAccount(newTagentAccountVo);
+                //通过name复用账号
+                oldTagentAccount = tagentMapper.getAccountByName(tagent.getIp() + "_" + tagent.getPort() + "_tagent");
+                if (oldTagentAccount != null) {
+                    newTagentAccountVo.setId(oldTagentAccount.getId());
+                    if (!oldTagentAccount.equals(newTagentAccountVo)) {
+                        tagentMapper.updateAccountByName(newTagentAccountVo);
+                    }
+                } else {
+                    tagentMapper.insertAccount(newTagentAccountVo);
+                }
             }
             //存mongodb
-            updateTagentMGByIpAndPort(tagent, false);
+            updateTagentMGByIdWithLock(tagent, true);
             //保存副ip
             saveTagentIpList(tagent);
-
             tagent.setAccountId(newTagentAccountVo.getId());
             tagentMapper.updateTagentById(tagent);
         }
@@ -594,8 +671,8 @@ public class TagentServiceImpl implements TagentService {
         //新增tagentIp
         if (CollectionUtils.isNotEmpty(insertTagentIpList)) {
             tagentMapper.insertTagentIp(tagent.getId(), insertTagentIpList);
-            updateIpListMG(tagent.getId(), newIpList);
         }
+        updateIpListMG(tagent.getId(), tagent.getIpList());
     }
 
     @Override
@@ -900,5 +977,49 @@ public class TagentServiceImpl implements TagentService {
             osType = TagentVersionVo.TagentOsType.LINUX.getType();
         }
         return osType;
+    }
+
+    @Override
+    public void rollbackTagentMG(TagentVo tagentVo) {
+        if (tagentVo != null) {
+            TagentVo tagentVoRollBack = tagentMapper.getTagentById(tagentVo.getId());
+            if (tagentVoRollBack != null) {
+                tagentVoRollBack.setIpList(tagentMapper.getTagentIpListByTagentId(tagentVoRollBack.getId()));
+                updateTagentMGByIdWithLock(tagentVoRollBack, true);
+            } else {
+                deleteTagentMGById(tagentVo.getId());
+            }
+        }
+    }
+
+    /**
+     * 保存tagent
+     *
+     * @param tagentVo      入参
+     * @param runnerGroupVo runner组
+     */
+    @Override
+    public void saveTagent(TagentVo tagentVo, RunnerGroupVo runnerGroupVo) {
+        tagentVo.setRunnerGroupId(runnerGroupVo.getId());
+        //保存tagent osType
+        if (StringUtils.isNotBlank(tagentVo.getOsType())) {
+            String osType = tagentVo.getOsType();
+            TagentOSVo os = tagentMapper.getOsByName(osType.toLowerCase());
+            if (os != null) {
+                tagentVo.setOsId(os.getId());
+                tagentVo.setOsName(os.getName());
+            } else {
+                TagentOSVo newOS = new TagentOSVo(osType);
+                tagentMapper.insertOs(newOS);
+                tagentVo.setOsId(newOS.getId());
+                tagentVo.setOsName(newOS.getName());
+            }
+        }
+
+        //保存tagent osbit
+        if (StringUtils.isNotBlank(tagentVo.getOsbit())) {
+            tagentMapper.insertOsBit(tagentVo.getOsbit());
+        }
+        saveTagentAndAccount(tagentVo);
     }
 }

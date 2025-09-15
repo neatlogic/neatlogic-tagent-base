@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 package neatlogic.framework.tagent.service;
 
+import neatlogic.framework.dto.runner.RunnerGroupVo;
 import neatlogic.framework.tagent.dto.TagentMessageVo;
 import neatlogic.framework.tagent.dto.TagentSearchVo;
 import neatlogic.framework.tagent.dto.TagentVersionVo;
@@ -135,6 +136,14 @@ public interface TagentService {
     void deleteTagentMGById(long id);
 
     /**
+     * 根据ip port删除tagent
+     *
+     * @param ip   ip
+     * @param port port
+     */
+    void deleteTagentMGByIpPort(String ip, int port);
+
+    /**
      * 根据id列表删除tagent在mongodb中的数据
      *
      * @param idList id列表
@@ -144,7 +153,7 @@ public interface TagentService {
     /**
      * 根据id列表删除tagent在mysql中的数据
      *
-     * @param idList id列表
+     * @param idList        id列表
      * @param accountIdList 账号id列表
      */
     void deleteTagentByIdList(List<Long> idList, List<Long> accountIdList);
@@ -154,11 +163,19 @@ public interface TagentService {
      *
      * @param tagentVo tagent对象
      */
-    void updateTagentMGByIpAndPort(TagentVo tagentVo, boolean isNeedInsert);
+    void updateTagentMGById(TagentVo tagentVo, boolean isNeedInsert);
+
+    /**
+     * 跟新tagent所有字段
+     *
+     * @param tagentVo tagent对象
+     */
+    void updateTagentMGByIdWithLock(TagentVo tagentVo, boolean isNeedInsert);
 
 
     /**
      * 根据条件列表获取满足条件的runner数量
+     *
      * @param tagentVo 条件入参
      * @return 数量
      */
@@ -166,9 +183,20 @@ public interface TagentService {
 
     /**
      * 更新tagent 包含ip列表
-     * @param tagentId tagent id
+     *
+     * @param tagentId  tagent id
      * @param newIpList 新的包含ip
      */
     void updateIpListMG(Long tagentId, List<String> newIpList);
+
+    /**
+     * 回滚mongodb事务
+     *
+     * @param tagentVo tagent
+     */
+    void rollbackTagentMG(TagentVo tagentVo);
+
+
+    void saveTagent(TagentVo tagentVo, RunnerGroupVo runnerGroupVo);
 
 }
