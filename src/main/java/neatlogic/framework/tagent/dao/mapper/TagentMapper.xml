@@ -748,7 +748,7 @@
     <update id="updateTagentAuditDetailStateAndResultById">
         update tagent_upgrade_detail
         set `status`=#{status},
-            `result`=#{result}
+            `result`=#{result, typeHandler=CompressHandler}
         where id = #{id}
 
     </update>
@@ -797,7 +797,7 @@
                 #{port},
                 #{sourceVersion},
                 #{targetVersion},
-                #{result},
+                #{result, typeHandler=CompressHandler},
                 #{status})
     </insert>
 
