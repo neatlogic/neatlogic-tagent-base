@@ -334,6 +334,26 @@ public class TagentServiceImpl implements TagentService {
         return tagentVo;
     }
 
+    /**
+     * 根据ip port 获取tagent心跳信息
+     *
+     * @param ip tagentIp
+     * @param port tagentPort
+     * @return tagent对象
+     */
+    @Override
+    public TagentVo getTagentMGByIpAndPort(String ip, int port) {
+        Document whereDoc = new Document();
+        whereDoc.put("ip", ip);
+        whereDoc.put("port", port);
+        TagentVo tagentVo = null;
+        Document tagentDoc = mongoTemplate.getCollection("_tagent_info").find(whereDoc).first();
+        if (tagentDoc != null) {
+            tagentVo = mapToTagentVo(tagentDoc);
+        }
+        return tagentVo;
+    }
+
     @Override
     public List<TagentVo> getTagentMGListByIdList(List<Long> idList) {
         List<TagentVo> tagentList = new ArrayList<>();

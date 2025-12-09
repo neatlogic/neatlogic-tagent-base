@@ -110,6 +110,15 @@ public interface TagentService {
     TagentVo getTagentMGById(long id);
 
     /**
+     * 根据ip port 获取tagent心跳信息
+     *
+     * @param ip tagentIp
+     * @param port tagentPort
+     * @return tagent对象
+     */
+    TagentVo getTagentMGByIpAndPort(String ip, int port) ;
+
+    /**
      * 根据tagentId列表批量获取tagent心跳信息
      *
      * @param idList tagentId列表
