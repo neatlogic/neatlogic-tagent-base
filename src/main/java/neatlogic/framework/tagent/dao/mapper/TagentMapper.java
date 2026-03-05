@@ -1,6 +1,7 @@
 package neatlogic.framework.tagent.dao.mapper;
 
 import neatlogic.framework.cmdb.dto.resourcecenter.AccountBaseVo;
+import neatlogic.framework.cmdb.dto.resourcecenter.IpVo;
 import neatlogic.framework.dto.runner.GroupNetworkVo;
 import neatlogic.framework.tagent.dto.TagentOSVo;
 import neatlogic.framework.tagent.dto.TagentUpgradeAuditVo;
@@ -38,6 +39,8 @@ public interface TagentMapper {
     TagentOSVo getOsByName(String name);
 
     TagentVo getTagentByIpAndPort(@Param("ip") String ip, @Param("port") Integer port);
+
+    List<TagentVo> getTagentByIpAndPortList(@Param("ipPortList") List<IpVo> ipPortList);
 
     TagentVo getTagentByIpAndPortAndIdNot(@Param("ip") String ip, @Param("port") Integer port, @Param("id") Long id);
 
