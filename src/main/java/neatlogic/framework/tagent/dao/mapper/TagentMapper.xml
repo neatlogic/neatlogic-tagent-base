@@ -280,6 +280,30 @@
           AND t.port = #{port}
     </select>
 
+    <select id="getTagentByIpAndPortList" resultType="neatlogic.framework.tagent.dto.TagentVo" useCache="false">
+        SELECT t.id,
+               t.ip,
+               t.port,
+               t.name                                  AS name,
+               t.version                               AS version,
+               t.os_type                               AS osType,
+               t.os_version                            AS osVersion,
+               t.osbit                                 AS osbit,
+               t.account_id                            AS accountId,
+               t.user                                  AS user,
+               t.runner_group_id                       AS runnerGroupId,
+               DATE_FORMAT(t.fcd, '%Y-%m-%d %H:%i:%s') AS fcd,
+               DATE_FORMAT(t.lcd, '%Y-%m-%d %H:%i:%s') AS lcd,
+               rg.`name`                               AS runnerGroupName
+        FROM tagent t
+                 LEFT JOIN runnergroup rg
+                           ON t.`runner_group_id` = rg.`id`
+        WHERE
+        <foreach collection="ipPortList" item="item" separator=" OR " open="(" close=")">
+            (t.ip = #{item.ip} AND t.port = #{item.port})
+        </foreach>
+    </select>
+
     <select id="getTagentByIpAndPortAndIdNot" parameterType="neatlogic.framework.tagent.dto.TagentVo"
             resultType="neatlogic.framework.tagent.dto.TagentVo" useCache="false">
         SELECT t.id,
@@ -929,4 +953,3 @@
         </collection>
     </resultMap>
 </mapper>
-

@@ -454,28 +454,27 @@ public class TagentServiceImpl implements TagentService {
      * 根据tagentId列表获取tagentId->runnerId的Map
      *
      * @param tagentIdList tagentId列表
-     * @return runnerIdSet
+     * @return key=tagentId, value=runnerId
      */
     private Map<Long, Long> getRunnerIdMapByTagentMGIdList(List<Long> tagentIdList) {
+        Map<Long, Long> resultMap = new HashMap<>();
+        if (CollectionUtils.isEmpty(tagentIdList)) {
+            return resultMap;
+        }
         Document query = new Document("id", new Document("$in", tagentIdList));
         List<Document> documents = mongoTemplate.getCollection("_tagent_info")
                 .find(query)
-                .projection(new Document("id", 1).append("runner_id", 1).append("_id", 0)) // 保留 id 和 runner_id 字段
+                .projection(new Document("id", 1).append("runner_id", 1).append("_id", 0))
                 .into(new ArrayList<>());
-
-        Map<Long, Long> resultMap = new HashMap<>();
         for (Document doc : documents) {
             Object idObj = doc.get("id");
             Object runnerIdObj = doc.get("runner_id");
             if (idObj instanceof Number && runnerIdObj instanceof Number) {
-                Long id = ((Number) idObj).longValue();
-                Long runnerId = ((Number) runnerIdObj).longValue();
-                resultMap.put(id, runnerId);
+                resultMap.put(((Number) idObj).longValue(), ((Number) runnerIdObj).longValue());
             }
         }
         return resultMap;
     }
-
 
     /**
      * 根据tagentId列表获取runnerIdList
@@ -697,23 +696,32 @@ public class TagentServiceImpl implements TagentService {
 
         List<TagentVo> returnTagentVoList = new ArrayList<>();
 
-        if (CollectionUtils.isEmpty(tagentSearchVo.getIpPortList()) && CollectionUtils.isEmpty(tagentSearchVo.getNetworkVoList()) && CollectionUtils.isEmpty(tagentSearchVo.getRunnerGroupIdList())) {
+        boolean hasIpPort = CollectionUtils.isNotEmpty(tagentSearchVo.getIpPortList());
+        boolean hasNetwork = CollectionUtils.isNotEmpty(tagentSearchVo.getNetworkVoList());
+        boolean hasRunnerGroup = CollectionUtils.isNotEmpty(tagentSearchVo.getRunnerGroupIdList());
+        int selectedCount = (hasIpPort ? 1 : 0) + (hasNetwork ? 1 : 0) + (hasRunnerGroup ? 1 : 0);
+        if (selectedCount == 0) {
             throw new TagentBatchActionCheckLessTagentIpAndPortException();
         }
+        if (selectedCount > 1) {
+            throw new TagentBatchActionSelectTypeConflictException();
+        }
 
-        Set<Long> tagentIdSet = new HashSet<>();
         //ip：port
         if (CollectionUtils.isNotEmpty(tagentSearchVo.getIpPortList())) {
-            List<TagentVo> tagentVoList = new ArrayList<>();
+            List<IpVo> ipPortList = new ArrayList<>();
             for (IpVo ipVo : tagentSearchVo.getIpPortList()) {
-                TagentVo tagentVo = tagentMapper.getTagentByIpAndPort(ipVo.getIp(), ipVo.getPort());
-                if (tagentVo == null) {
+                if (ipVo == null || StringUtils.isBlank(ipVo.getIp()) || ipVo.getPort() == null) {
                     continue;
                 }
-                tagentVoList.add(tagentVo);
-                tagentIdSet.add(tagentVo.getId());
+                ipPortList.add(ipVo);
             }
-            returnTagentVoList.addAll(tagentVoList);
+            if (CollectionUtils.isNotEmpty(ipPortList)) {
+                List<TagentVo> tagentVoList = tagentMapper.getTagentByIpAndPortList(ipPortList);
+                if (CollectionUtils.isNotEmpty(tagentVoList)) {
+                    returnTagentVoList.addAll(tagentVoList);
+                }
+            }
         }
 
         //网段掩码
@@ -728,9 +736,8 @@ public class TagentServiceImpl implements TagentService {
                 searchTagentList = tagentMapper.searchTagent(tagentVo);
                 for (TagentVo tagent : searchTagentList) {
                     for (NetworkVo networkVo : tagentSearchVo.getNetworkVoList()) {
-                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask()) && !tagentIdSet.contains(tagent.getId())) {
+                        if (IpUtil.isBelongSegment(tagent.getIp(), networkVo.getNetworkIp(), networkVo.getMask())) {
                             returnTagentVoList.add(tagent);
-                            tagentIdSet.add(tagent.getId());
                         }
                     }
                 }
@@ -741,12 +748,16 @@ public class TagentServiceImpl implements TagentService {
         if (CollectionUtils.isNotEmpty(tagentSearchVo.getRunnerGroupIdList())) {
             List<TagentVo> tagentVoList = tagentMapper.getTagentListByRunnerGroupIdList(tagentSearchVo.getRunnerGroupIdList());
             if (CollectionUtils.isNotEmpty(tagentVoList)) {
-                Map<Long, Long> tagentIdRunnerIdMap = getRunnerIdMapByTagentMGIdList(tagentVoList.stream().map(TagentVo::getId).collect(toList()));
-                for (TagentVo tagentVo : tagentVoList) {
-                    tagentVo.setRunnerId(tagentIdRunnerIdMap.get(tagentVo.getId()));
-                }
-                tagentIdSet.addAll(tagentVoList.stream().map(TagentVo::getId).collect(Collectors.toList()));
                 returnTagentVoList.addAll(tagentVoList);
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(returnTagentVoList)) {
+            Map<Long, Long> runnerIdMap = getRunnerIdMapByTagentMGIdList(returnTagentVoList.stream().map(TagentVo::getId).collect(toList()));
+            for (TagentVo tagentVo : returnTagentVoList) {
+                if (runnerIdMap.containsKey(tagentVo.getId())) {
+                    tagentVo.setRunnerId(runnerIdMap.get(tagentVo.getId()));
+                }
             }
         }
         return returnTagentVoList;
