@@ -1,0 +1,35 @@
+{
+  "auth": {
+    "tagent_base": {
+      "description": "查看tagent",
+      "name": "Tagent基础权限"
+    },
+    "tagent_manage": {
+      "description": "管理tagent",
+      "name": "Tagent管理权限"
+    }
+  },
+  "nfte": {
+    "tagentaccountnotfoundexception": {
+      "tagentaccountnotfoundexception": {
+        "id": "根据tagent账号id(“{0}”)找不到tagent账号",
+        "ipport": "根据tagent的ip:{0},port:{1}找不到tagent账号"
+      }
+    },
+    "tagentbatchactionselecttypeconflictexception": {
+      "tagentbatchactionselecttypeconflictexception": "代理组、根据IP:PORT选择、根据网段选择，只能选择一种方式"
+    },
+    "tagentipconflictexception": {
+      "tagentipconflictexception": "tagent ip端口冲突，已存在tagent {0}:{1}"
+    },
+    "tagentnotfoundexception": {
+      "tagentnotfoundexception": {
+        "ipport": "通过ip:“{0}”和port:“{1}”找不到tagent，请重新注册",
+        "tagentidipport": "找不到tagent(id:“{0}”,ip:“{1}”,port:“{2}”)，请重新注册"
+      }
+    },
+    "tagentpkgversionanddefaultversionarenotfoundexception": {
+      "tagentpkgversionanddefaultversionarenotfoundexception": "版本为：{0}的安装包和对应版本的默认安装包都不存在,请检查对应的安装包版本、os版本和cpu架构"
+    }
+  }
+}

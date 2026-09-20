@@ -1,0 +1,35 @@
+{
+  "auth": {
+    "tagent_base": {
+      "description": "View Tagent agents.",
+      "name": "Tagent View Permission"
+    },
+    "tagent_manage": {
+      "description": "Manage Tagent agents.",
+      "name": "Tagent Management Permission"
+    }
+  },
+  "nfte": {
+    "tagentaccountnotfoundexception": {
+      "tagentaccountnotfoundexception": {
+        "id": "According to the agent account ID (\"{0}\"), the agent account cannot be found",
+        "ipport": "According to the IP: {0} and port: {1} of the agent, the agent account cannot be found"
+      }
+    },
+    "tagentbatchactionselecttypeconflictexception": {
+      "tagentbatchactionselecttypeconflictexception": "Only one selection mode is allowed: Runner Group, IP:PORT, or Network Segment."
+    },
+    "tagentipconflictexception": {
+      "tagentipconflictexception": "Tagent IP port conflict, there is already a tagent {0}:{1}"
+    },
+    "tagentnotfoundexception": {
+      "tagentnotfoundexception": {
+        "ipport": "Tagent cannot be found through IP: '{0}' and port: '{1}', please register again",
+        "tagentidipport": "Cannot find tagent (id: \"{0}\", ip: \"{1}\", port: \"{2}\"), please register again"
+      }
+    },
+    "tagentpkgversionanddefaultversionarenotfoundexception": {
+      "tagentpkgversionanddefaultversionarenotfoundexception": "The installation package with version {0} and the corresponding default installation package do not exist. Please check the version, OS version, and CPU architecture of the corresponding installation package"
+    }
+  }
+}
