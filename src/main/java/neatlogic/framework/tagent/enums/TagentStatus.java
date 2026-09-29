@@ -3,17 +3,17 @@ package neatlogic.framework.tagent.enums;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import neatlogic.framework.common.constvalue.IEnum;
-import neatlogic.framework.util.$;
+import neatlogic.framework.util.I18n;
 
 import java.util.List;
 
 public enum TagentStatus implements IEnum {
-    CONNECTED("connected", "已连接"),
-    DISCONNECTED("disconnected", "未连接");
+    CONNECTED("connected", new I18n("common.connected")),
+    DISCONNECTED("disconnected", new I18n("common.disconnected"));
     private final String value;
-    private final String text;
+    private final I18n text;
 
-    TagentStatus(String value, String text) {
+    TagentStatus(String value, I18n text) {
         this.value = value;
         this.text = text;
     }
@@ -23,7 +23,7 @@ public enum TagentStatus implements IEnum {
     }
 
     public String getText() {
-        return $.t(text);
+        return text.toString();
     }
 
     @Override
